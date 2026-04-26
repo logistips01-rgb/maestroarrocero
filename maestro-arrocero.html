@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Maestro Arrocero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+
+<!-- ============================================================
+  CSS — dividido en secciones con comentarios claros
+  Orden: Variables → Reset → Layout → Componentes → Pantallas
+============================================================ -->
+<style>
+
+/* ── 1. VARIABLES Y RESET ─────────────────────────────────── */
+:root {
+  --rice:       #C8864A;
+  --rice-dark:  #8B5A2B;
+  --rice-light: #F5E6D3;
+  --water:      #3A7CA5;
+  --water-light:#EAF4FB;
+  --saffron:    #E8A020;
+  --bg:         #FDFAF6;
+  --surface:    #FFF8F0;
+  --text:       #2A1F14;
+  --text-muted: #7A6555;
+  --border:     rgba(139,90,43,0.15);
+  --success:    #4A7C59;
+  --danger:     #b5372a;
+  --r:          12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── 2. NAVEGACIÓN ────────────────────────────────────────── */
+nav {
+  background: var(--text);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.25rem;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  letter-spacing: .03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-logo span { color: var(--saffron); }
+
+/* Barra de tabs inferior — estilo app nativa */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(42,31,20,.07);
+}
+.bottom-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 2px;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .6rem;
+  font-weight: 500;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-tab .bt-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform .15s;
+}
+.bottom-tab:hover  { color: var(--rice); }
+.bottom-tab.active { color: var(--rice); }
+.bottom-tab.active .bt-icon { transform: translateY(-2px); }
+
+/* ── 3. PANTALLAS ─────────────────────────────────────────── */
+.screen { display: none; padding: 1.5rem 1rem 5rem; max-width: 680px; margin: 0 auto; }
+.screen.active { display: block; }
+
+/* ── 4. COMPONENTES REUTILIZABLES ─────────────────────────── */
+
+/* Títulos de sección */
+.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.1rem; }
+.section-title span { color: var(--rice); }
+
+/* Etiquetas e inputs */
+label { display: block; font-size: .83rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+input[type=number],
+input[type=text],
+select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .93rem;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: .875rem;
+}
+input:focus, select:focus { border-color: var(--rice); }
+input[readonly] { background: #f8f4f0; color: var(--text-muted); }
+
+/* Slider */
+input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875rem; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; }
+.slider-row span { min-width: 28px; font-weight: 500; color: var(--rice); font-size: 1.05rem; }
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--rice);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn:hover         { background: var(--rice-dark); }
+.btn:disabled      { opacity: .4; cursor: not-allowed; }
+.btn-sm            { padding: 6px 12px; font-size: .78rem; }
+.btn-full          { width: 100%; }
+.btn-secondary     { background: transparent; color: var(--rice); border: 1.5px solid var(--rice); }
+.btn-secondary:hover { background: var(--rice-light); }
+.btn-water         { background: var(--water); }
+.btn-water:hover   { background: #2c6080; }
+.btn-danger        { background: var(--danger); }
+.btn-danger:hover  { background: #8c2920; }
+.btn-ghost         { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover   { background: var(--surface); }
+
+/* Caja de resultado */
+.result-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-top: .875rem; }
+.result-box h4 { font-size: .75rem; color: var(--text-muted); margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .08em; }
+.result-value { font-size: 2rem; font-family: 'Playfair Display', serif; color: var(--rice); }
+.result-value small { font-size: .9rem; color: var(--text-muted); font-family: 'DM Sans', sans-serif; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .875rem; }
+.result-tip { font-size: .8rem; color: var(--text-muted); margin-top: .4rem; line-height: 1.5; }
+
+/* Línea divisoria */
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+/* Nota / texto secundario */
+.note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
+
+/* Fila info (clave: valor) */
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: .87rem; }
+.info-row:last-child { border-bottom: none; }
+.info-row .lbl { color: var(--text-muted); }
+.info-row .val { font-weight: 500; }
+
+/* Badges */
+.tag-ok      { background: #e6f4ec; color: var(--success); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
+.tag-pending { background: var(--rice-light); color: var(--rice-dark); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
+
+/* Estado vacío */
+.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: .88rem; }
+.empty-state .es-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+/* Tabs internos */
+.inner-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.inner-tab {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: .8rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-muted);
+  transition: all .15s;
+}
+.inner-tab.active { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+
+/* ── 5. PANTALLA: HOME ────────────────────────────────────── */
+.hero { text-align: center; padding: 2.5rem 0 2rem; }
+.hero-grain {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--rice), var(--saffron));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1.25rem;
+}
+.hero h1 { font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1.2; margin-bottom: .5rem; }
+.hero h1 em { color: var(--rice); font-style: italic; }
+.hero p { color: var(--text-muted); font-size: .92rem; margin-bottom: 2rem; }
+
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: .875rem; }
+.recipe-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.1rem .9rem;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(42,31,20,.1); }
+.recipe-card .emoji { font-size: 1.8rem; margin-bottom: .4rem; }
+.recipe-card h3 { font-size: .92rem; font-weight: 500; margin-bottom: .2rem; }
+.recipe-card .meta { font-size: .75rem; color: var(--text-muted); }
+.recipe-card .difficulty { display: inline-block; margin-top: .4rem; font-size: .7rem; padding: 2px 8px; border-radius: 20px; background: var(--rice-light); color: var(--rice-dark); }
+
+/* ── 6. PANTALLA: RECETA ──────────────────────────────────── */
+.step-header { display: flex; align-items: flex-start; gap: .875rem; margin-bottom: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; }
+.step-header h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+.comensales-badge { margin-left: auto; background: var(--rice-light); color: var(--rice-dark); font-size: .75rem; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 1.25rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--rice); border-radius: 2px; transition: width .4s ease; }
+
+.step-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 1rem; }
+.step-inner { display: flex; }
+.step-num { background: var(--rice); color: #fff; font-family: 'Playfair Display', serif; font-size: 1.4rem; width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-body { padding: .875rem; flex: 1; }
+.step-body h3 { font-size: .93rem; font-weight: 500; margin-bottom: .2rem; }
+.step-body p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
+.step-timing { font-size: .75rem; background: var(--rice-light); color: var(--rice-dark); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: .4rem; }
+.step-ingredients { background: var(--rice-light); border-top: 1px solid var(--border); padding: .65rem .875rem; font-size: .82rem; color: var(--rice-dark); line-height: 1.7; }
+
+.step-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1.1rem; }
+.step-counter { flex: 1; text-align: center; font-size: .82rem; color: var(--text-muted); }
+
+/* Botón Instagram reel */
+.reel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.reel-btn:hover { opacity: .88; }
+.recipe-card .reel-btn { display: block; margin-top: .5rem; font-size: .72rem; padding: 5px 10px; text-align: center; }
+
+.ing-list { list-style: none; }
+.ing-list li { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
+.ing-list li:last-child { border-bottom: none; }
+.ing-amount { font-weight: 500; color: var(--rice); }
+
+/* ── 7. PANTALLA: AGUA ────────────────────────────────────── */
+
+/* Selector tipo de arroz */
+.water-type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: 1.1rem; }
+.water-type-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: .65rem .4rem;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .75rem;
+  color: var(--text);
+  transition: all .15s;
+  line-height: 1.4;
+}
+.water-type-btn .wt-emoji { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+.water-type-btn .wt-ratio { font-size: .68rem; color: var(--text-muted); display: block; margin-top: 2px; }
+.water-type-btn.selected { border-color: var(--water); background: var(--water-light); color: var(--water); }
+.water-type-btn.selected .wt-ratio { color: var(--water); }
+
+/* Tarjetas de equipo */
+.profiles-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+.profile-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: .875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.profile-card:hover { border-color: var(--rice); }
+.profile-card.active-profile { border-color: var(--rice); background: var(--rice-light); }
+.profile-icon { font-size: 1.6rem; flex-shrink: 0; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: .9rem; font-weight: 500; margin-bottom: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-meta { font-size: .75rem; color: var(--text-muted); }
+.profile-badge { font-size: .7rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.profile-badge.ok      { background: #e6f4ec; color: var(--success); }
+.profile-badge.pending { background: var(--rice-light); color: var(--rice-dark); }
+.profile-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Formulario de equipo */
+.equip-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1rem; }
+.equip-form h4 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: .875rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+.size-presets { display: flex; gap: 6px; margin-bottom: .875rem; flex-wrap: wrap; }
+.size-preset {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .75rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-muted);
+  transition: all .15s;
+}
+.size-preset:hover { border-color: var(--rice); color: var(--rice); }
+.size-preset.sel   { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+
+.burner-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .875rem; }
+.burner-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: .55rem .3rem;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  color: var(--text-muted);
+  transition: all .15s;
+}
+.burner-btn .b-emoji { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+.burner-btn.sel { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+
+/* Calibración — caja informativa */
+.cal-box { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1.1rem; }
+.cal-box h4 { color: var(--water); font-size: .9rem; margin-bottom: .6rem; font-weight: 500; }
+.cal-box p { font-size: .82rem; color: #4a6f85; line-height: 1.6; margin-bottom: .5rem; }
+
+/* Calibración — cronómetro */
+.countdown-wrap { text-align: center; padding: 1.5rem 0; }
+.countdown-circle {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 6px solid var(--border);
+  margin: 0 auto 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  background: #fff;
+}
+.countdown-circle svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.countdown-circle svg circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+.countdown-circle svg .track { stroke: var(--rice-light); }
+.countdown-circle svg .fill  { stroke: var(--rice); transition: stroke-dashoffset 1s linear; }
+.countdown-time { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--text); position: relative; z-index: 1; line-height: 1; }
+.countdown-time small { font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--text-muted); display: block; margin-top: 4px; }
+.countdown-state { font-size: .88rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+/* Calibración — medición final */
+.measure-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
+.measure-form h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: .25rem; }
+.measure-form p { font-size: .83rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6; }
+.measure-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.evap-result { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1rem; margin-top: 1rem; text-align: center; }
+.evap-val   { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--water); }
+.evap-label { font-size: .78rem; color: #4a6f85; margin-top: 2px; }
+.evap-badge { display: inline-block; background: rgba(74,124,89,.15); color: var(--success); padding: 3px 12px; border-radius: 20px; font-size: .8rem; font-weight: 500; margin-top: .5rem; }
+
+/* Alerta modal */
+.alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+.alert-box { background: #fff; border-radius: 16px; padding: 2rem 1.5rem; max-width: 360px; width: 100%; text-align: center; }
+.alert-box .alert-icon { font-size: 3rem; margin-bottom: 1rem; }
+.alert-box h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: .75rem; }
+.alert-box p { font-size: .88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; }
+
+/* ── 7b. TEMPORIZADOR DE PASO ─────────────────────────────── */
+.step-timer {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  margin-top: .75rem;
+}
+.step-timer-display {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--text);
+  min-width: 68px;
+  line-height: 1;
+}
+.step-timer-display.running { color: var(--rice); }
+.step-timer-display.done    { color: var(--success); }
+.step-timer-label { font-size: .75rem; color: var(--text-muted); flex: 1; }
+.step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 3px; }
+.step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
+
+/* ── 7c. MODAL COMPARTIR ──────────────────────────────────── */
+.share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 0; }
+.share-sheet {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 1.25rem 2rem;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.share-sheet h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1rem; }
+.share-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+.share-opt {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: .875rem .75rem;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  color: var(--text);
+  transition: all .15s;
+}
+.share-opt:hover { border-color: var(--rice); background: var(--rice-light); }
+.share-opt .so-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+.share-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: .8rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.share-actions { display: flex; gap: .6rem; }
+
+/* ── 8. PANTALLA: NIVELADOR ───────────────────────────────── */
+.level-container { display: flex; flex-direction: column; align-items: center; padding: .5rem 0; gap: 1.25rem; }
+
+.paella-view { position: relative; width: 240px; height: 240px; }
+.paella-dish {
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 35%, #d4956a, #8B5A2B 70%, #5a3318);
+  border: 6px solid #6B3D1E;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(42,31,20,.3);
+}
+.rice-surface { position: absolute; inset: 0; background: radial-gradient(ellipse at 45% 40%, #d4a876 0%, #b8834a 40%, #8B5A2B 80%); border-radius: 50%; }
+/* Burbuja — doble de tamaño (56 → 112px), punto interior proporcionado */
+.water-bubble { position: absolute; width: 112px; height: 112px; left: 50%; top: 50%; border-radius: 50%; background: rgba(58,124,165,.35); border: 3px solid rgba(58,124,165,.65); display: flex; align-items: center; justify-content: center; }
+.bubble-center { width: 28px; height: 28px; border-radius: 50%; background: var(--water); }
+.crosshair { position: absolute; width: 240px; height: 240px; left: 0; top: 0; pointer-events: none; }
+
+.level-angle { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--text); text-align: center; }
+.level-angle small { font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text-muted); display: block; }
+.level-status { padding: 9px 22px; border-radius: 20px; font-size: .88rem; font-weight: 500; text-align: center; }
+.level-status.ok   { background: #e6f4ec; color: var(--success); }
+.level-status.warn { background: var(--rice-light); color: var(--rice-dark); }
+.level-status.bad  { background: #fdecea; color: var(--danger); }
+.sensor-denied { background: #fdecea; border: 1px solid rgba(181,55,42,.2); border-radius: var(--r); padding: 1.1rem; text-align: center; width: 100%; }
+.sensor-denied p { color: var(--danger); font-size: .87rem; line-height: 1.6; }
+
+/* Botones de punto 0 */
+.zero-actions { display: flex; gap: .6rem; width: 100%; }
+
+/* ── 10. PANTALLA: INSTRUCCIONES ──────────────────────────── */
+.instructions-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.instruction-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
+.instruction-card-header:hover { background: var(--surface); }
+.instruction-icon { font-size: 1.8rem; flex-shrink: 0; }
+.instruction-info { flex: 1; }
+.instruction-info h3 { font-size: .95rem; font-weight: 500; margin-bottom: 2px; }
+.instruction-info p  { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
+.instruction-chevron { font-size: .9rem; color: var(--text-muted); transition: transform .2s; }
+.instruction-chevron.open { transform: rotate(180deg); }
+.instruction-video { display: none; }
+.instruction-video.open { display: block; }
+.instruction-video iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  display: block;
+}
+.instruction-desc {
+  padding: .875rem 1rem 1rem;
+  font-size: .83rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+}
+
+/* ── 11. PANTALLA: BÁSCULA ────────────────────────────────── */
+.scale-experimental-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: .75rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.scale-pad {
+  background: #fff;
+  border: 2px dashed var(--border);
+  border-radius: var(--r);
+  aspect-ratio: 1;
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, background .2s;
+}
+.scale-pad.active {
+  border-color: var(--rice);
+  border-style: solid;
+  background: var(--rice-light);
+}
+.scale-pad.calibrating {
+  border-color: var(--water);
+  border-style: solid;
+  background: var(--water-light);
+}
+.scale-pad-icon { font-size: 3rem; }
+.scale-pad-hint { font-size: .82rem; color: var(--text-muted); text-align: center; padding: 0 1rem; }
+.scale-reading {
+  text-align: center;
+  margin: 1rem auto 0;
+  max-width: 320px;
+  width: 100%;
+}
+.scale-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  color: var(--text);
+  line-height: 1;
+}
+.scale-value.has-weight { color: var(--rice); }
+.scale-value small { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; color: var(--text-muted); }
+.scale-raw { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+
+.scale-cal-steps { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+.scale-cal-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: .875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+}
+.scale-cal-step.done  { border-color: var(--success); background: #e6f4ec; }
+.scale-cal-step.active-step { border-color: var(--water); background: var(--water-light); }
+.scale-cal-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 500; flex-shrink: 0;
+}
+.scale-cal-step.done .scale-cal-num  { background: var(--success); color: #fff; }
+.scale-cal-step.active-step .scale-cal-num { background: var(--water); color: #fff; }
+.scale-cal-info { flex: 1; font-size: .83rem; }
+.scale-cal-info strong { display: block; margin-bottom: 2px; }
+.scale-cal-info span { color: var(--text-muted); font-size: .78rem; }
+.scale-disclaimer {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--r);
+  padding: .875rem 1rem;
+  font-size: .78rem;
+  color: #856404;
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+@media (max-width: 420px) {
+  .recipe-grid  { grid-template-columns: 1fr 1fr; }
+  .result-grid  { grid-template-columns: 1fr; }
+  .measure-row  { grid-template-columns: 1fr; }
+  .form-row     { grid-template-columns: 1fr; }
+}
+@media (min-width: 680px) {
+  .bottom-nav { max-width: 680px; left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- ============================================================
+  HTML — una sección por pantalla
+============================================================ -->
+
+<!-- NAVEGACIÓN SUPERIOR — solo logo -->
+<nav>
+  <div class="nav-logo">🍳 Maestro <span>Arrocero</span></div>
+</nav>
+
+<!-- NAVEGACIÓN INFERIOR — tabs estilo app nativa -->
+<div class="bottom-nav">
+  <button class="bottom-tab active" id="btab-home" onclick="Nav.goTo('home')">
+    <span class="bt-icon">🍚</span>Recetas
+  </button>
+  <button class="bottom-tab" id="btab-agua" onclick="Nav.goTo('agua')">
+    <span class="bt-icon">💧</span>Agua
+  </button>
+  <button class="bottom-tab" id="btab-nivel" onclick="Nav.goTo('nivel')">
+    <span class="bt-icon">📐</span>Nivel
+  </button>
+  <button class="bottom-tab" id="btab-bascula" onclick="Nav.goTo('bascula')">
+    <span class="bt-icon">⚖️</span>Báscula
+  </button>
+  <button class="bottom-tab" id="btab-instrucciones" onclick="Nav.goTo('instrucciones')">
+    <span class="bt-icon">🎬</span>Guías
+  </button>
+</div>
+
+<!-- PANTALLA: HOME -->
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <div class="hero-grain">🍚</div>
+    <h1>El arte del <em>arroz</em> perfecto</h1>
+    <p>Recetas guiadas paso a paso. Elige tu receta y ajusta las cantidades.</p>
+  </div>
+  <div class="recipe-grid" id="recipe-grid"></div>
+</div>
+
+<!-- PANTALLA: RECETA -->
+<div id="screen-recipe" class="screen">
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="Recipe.switchTab('guia')">Guía paso a paso</button>
+    <button class="inner-tab"        onclick="Recipe.switchTab('ingredientes')">Ingredientes</button>
+  </div>
+
+  <!-- Tab: guía -->
+  <div id="tab-guia">
+    <div class="step-header">
+      <div>
+        <h2 id="recipe-title-step">—</h2>
+        <div class="note" id="recipe-subtitle-step"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+        <div class="comensales-badge" id="comensales-badge">4 personas</div>
+        <a id="recipe-reel-btn" class="reel-btn" href="#" target="_blank" style="display:none">▶ Instagram</a>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
+    <div id="step-display"></div>
+    <div class="step-nav">
+      <button class="btn btn-secondary" id="btn-prev" onclick="Recipe.changeStep(-1)">← Anterior</button>
+      <div class="step-counter" id="step-counter">Paso 1 de 8</div>
+      <button class="btn" id="btn-next" onclick="Recipe.changeStep(1)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Tab: ingredientes -->
+  <div id="tab-ingredientes" style="display:none">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap;">
+      <div style="font-size:.83rem;color:var(--text-muted);font-weight:500;">Comensales:</div>
+      <div class="slider-row" style="flex:1;min-width:160px;">
+        <input type="range" min="1" max="20" value="4" id="comensal-slider" oninput="Recipe.updateComensales(this.value)">
+        <span id="comensal-val">4</span>
+      </div>
+    </div>
+    <ul class="ing-list" id="ing-list"></ul>
+    <hr class="divider">
+    <div class="result-box">
+      <h4>Agua necesaria</h4>
+      <div class="result-value" id="ing-agua">— <small>ml</small></div>
+      <div class="result-tip"   id="ing-agua-tip">Selecciona un equipo calibrado en la sección Agua.</div>
+    </div>
+    <hr class="divider">
+    <div style="display:flex;gap:.6rem;">
+      <button class="btn btn-secondary" style="flex:1" onclick="Share.open()">↗ Compartir</button>
+      <button class="btn" style="flex:2" onclick="Recipe.switchTab('guia')">Empezar a cocinar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Compartir receta -->
+<div id="share-overlay" class="share-overlay" style="display:none" onclick="Share.closeOnBackdrop(event)">
+  <div class="share-sheet">
+    <h3>Compartir</h3>
+    <div class="share-options">
+      <button class="share-opt" onclick="Share.prepare('ingredientes')">
+        <span class="so-icon">🧺</span>Lista de ingredientes
+      </button>
+      <button class="share-opt" onclick="Share.prepare('receta')">
+        <span class="so-icon">📋</span>Receta completa
+      </button>
+    </div>
+    <div id="share-preview" class="share-preview" style="display:none"></div>
+    <div class="share-actions" id="share-actions" style="display:none">
+      <button class="btn btn-secondary" style="flex:1" onclick="Share.copy()">📋 Copiar</button>
+      <button class="btn btn-water"     style="flex:1" onclick="Share.whatsapp()">💬 WhatsApp</button>
+      <button class="btn btn-ghost btn-sm" onclick="Share.close()">✕</button>
+    </div>
+    <button class="btn btn-ghost btn-full" onclick="Share.close()" id="share-close-btn">Cancelar</button>
+  </div>
+</div>
+
+<!-- PANTALLA: AGUA -->
+<div id="screen-agua" class="screen">
+
+  <!-- SECCIÓN A: Calculadora de agua -->
+  <h2 class="section-title">Calculadora de <span>agua</span></h2>
+
+  <div class="water-type-grid">
+    <button class="water-type-btn selected" onclick="Water.selectType(this,'bomba',1.5)">
+      <span class="wt-emoji">🌾</span>Bomba<span class="wt-ratio">ratio 1:1.5</span>
+    </button>
+    <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.2)">
+      <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1.2</span>
+    </button>
+    <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.0)">
+      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.0</span>
+    </button>
+    <button class="water-type-btn" onclick="Water.selectType(this,'balilla',1.1)">
+      <span class="wt-emoji">🌿</span>Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
+    </button>
+    <button class="water-type-btn" onclick="Water.selectType(this,'dinamita',1.6)">
+      <span class="wt-emoji">💥</span>Dinamita<span class="wt-ratio">ratio 1:1.6</span>
+    </button>
+  </div>
+
+  <label>Gramos de arroz</label>
+  <input type="number" id="arroz-gramos" value="320" min="50" max="5000" oninput="Water.calc()">
+
+  <label>O ajusta por comensales <span style="font-weight:300">(80 g/persona)</span></label>
+  <div class="slider-row">
+    <input type="range" min="1" max="20" value="4" id="agua-comensales"
+      oninput="document.getElementById('agua-com-val').textContent=this.value;
+               document.getElementById('arroz-gramos').value=this.value*80;
+               Water.calc()">
+    <span id="agua-com-val">4</span>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-box">
+      <h4>Agua por ratio</h4>
+      <div class="result-value" id="agua-std">480 <small>ml</small></div>
+      <div class="result-tip"   id="agua-ratio-tip">Ratio 1:1.5 (Bomba)</div>
+    </div>
+    <div class="result-box">
+      <h4>+ Evaporación calibrada</h4>
+      <div class="result-value" id="agua-cal">— <small>ml</small></div>
+      <div class="result-tip"   id="agua-evap-tip">Sin equipo activo calibrado</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECCIÓN B: Mis equipos -->
+  <h2 class="section-title">Mis <span>equipos</span></h2>
+  <div id="profiles-list" class="profiles-list"></div>
+
+  <!-- Formulario nuevo/editar equipo (oculto por defecto) -->
+  <div id="equip-form" style="display:none">
+    <div class="equip-form">
+      <h4 id="equip-form-title">Nuevo equipo</h4>
+
+      <label>Nombre del equipo</label>
+      <input type="text" id="eq-name" placeholder="ej. Paella grande de casa">
+
+      <label>Diámetro de la paella</label>
+      <div class="size-presets" id="size-presets">
+        <button class="size-preset" onclick="Equipment.setDiam(26)">26 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(32)">32 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(38)">38 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(46)">46 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(55)">55 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(65)">65 cm</button>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Diámetro (cm)</label>
+          <input type="number" id="eq-diam" placeholder="ej. 46" min="20" max="120" oninput="Equipment.clearDiamPreset()">
+        </div>
+        <div>
+          <label>Capacidad estimada</label>
+          <input type="text" id="eq-cap" readonly placeholder="—">
+        </div>
+      </div>
+
+      <label>Tipo de quemador / fuego</label>
+      <div class="burner-grid">
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','🔥')">
+          <span class="b-emoji">🔥</span>Paellero gas
+        </button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','⚡')">
+          <span class="b-emoji">⚡</span>Vitrocerámica
+        </button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','🧲')">
+          <span class="b-emoji">🧲</span>Inducción
+        </button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','🪵')">
+          <span class="b-emoji">🪵</span>Leña
+        </button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','🫧')">
+          <span class="b-emoji">🫧</span>Cocina gas
+        </button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','🍳')">
+          <span class="b-emoji">🍳</span>Otro
+        </button>
+      </div>
+      <input type="hidden" id="eq-burner">
+
+      <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="Equipment.hideForm()">Cancelar</button>
+        <button class="btn btn-full" onclick="Equipment.save()">Guardar equipo</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECCIÓN C: Calibración de evaporación -->
+  <h2 class="section-title">Calibración de <span>evaporación</span></h2>
+
+  <!-- Estado actual del equipo activo -->
+  <div class="result-box" style="margin-top:0;margin-bottom:1rem">
+    <div id="cal-status-content"></div>
+  </div>
+
+  <!-- Fase 1: Setup (instrucciones + arranque) -->
+  <div id="cal-phase-setup">
+    <div class="cal-box">
+      <h4>🧪 Prueba de evaporación</h4>
+      <p>Mide cuánta agua evapora tu equipo activo por minuto para sumarla automáticamente al cálculo de agua de cada receta.</p>
+      <p><strong>Cómo hacerlo:</strong> llena la paella con agua (ej. 3 litros), pon el fuego a tope y pulsa iniciar. El cronómetro contará 15 minutos hacia atrás. Mantén la pantalla encendida.</p>
+    </div>
+    <label>Agua inicial que vas a poner (ml)</label>
+    <input type="number" id="cal-agua-inicial-input" value="3000" min="500" max="15000">
+    <button class="btn btn-water btn-full" id="btn-start-cal" onclick="Calibration.start()">▶ Iniciar prueba de calibración</button>
+    <div style="margin-top:1rem">
+      <button class="btn btn-secondary btn-full" onclick="Equipment.showForm(null)">+ Añadir nuevo equipo</button>
+    </div>
+  </div>
+
+  <!-- Fase 2: Cronómetro corriendo -->
+  <div id="cal-phase-running" style="display:none">
+    <div class="countdown-wrap">
+      <div class="countdown-circle">
+        <svg viewBox="0 0 200 200">
+          <circle class="track" cx="100" cy="100" r="91"/>
+          <circle class="fill" id="cal-arc" cx="100" cy="100" r="91" stroke-dasharray="571.8" stroke-dashoffset="0"/>
+        </svg>
+        <div class="countdown-time">
+          <span id="cal-time-display">15:00</span>
+          <small>restantes</small>
+        </div>
+      </div>
+      <div class="countdown-state" id="cal-state-text">🔥 Fuego al máximo — no apagues la pantalla</div>
+      <button class="btn btn-danger" onclick="Calibration.cancel()">✕ Cancelar prueba</button>
+    </div>
+  </div>
+
+  <!-- Fase 3: Medir agua restante -->
+  <div id="cal-phase-measure" style="display:none">
+    <div class="measure-form">
+      <h4>Mide el agua restante</h4>
+      <p>Apaga el fuego. Deja reposar 5 minutos y mide cuánta agua queda en la paella.</p>
+      <div class="measure-row">
+        <div>
+          <label>Agua inicial (ml)</label>
+          <input type="number" id="cal-agua-inicial-show" readonly>
+        </div>
+        <div>
+          <label>Agua que queda (ml)</label>
+          <input type="number" id="cal-agua-final" placeholder="ej. 2100" min="0" oninput="Calibration.calcEvap()">
+        </div>
+      </div>
+      <div id="evap-result-box" style="display:none" class="evap-result">
+        <div class="evap-val"   id="evap-val-display">—</div>
+        <div class="evap-label">ml evaporados por minuto</div>
+        <div class="evap-badge" id="evap-badge-txt">—</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:.75rem;">
+        <button class="btn btn-secondary"        onclick="Calibration.cancel()">Cancelar</button>
+        <button class="btn btn-full" id="btn-save-cal" onclick="Calibration.save()" disabled>Guardar calibración ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA: NIVELADOR -->
+<div id="screen-nivel" class="screen">
+  <h2 class="section-title">Nivelador de <span>paella</span></h2>
+  <p class="note" style="margin-bottom:1.25rem">Coloca el móvil sobre la paella. Pulsa <strong>Establecer punto 0</strong> para calibrar la posición de referencia de tu superficie.</p>
+
+  <div class="level-container">
+    <div class="paella-view">
+      <div class="paella-dish" id="paella-dish">
+        <div class="rice-surface"></div>
+        <div class="water-bubble" id="water-bubble">
+          <div class="bubble-center" id="bubble-center"></div>
+        </div>
+      </div>
+      <svg class="crosshair" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="28" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <circle cx="120" cy="120" r="56" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="120" y1="55"  x2="120" y2="185" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+        <line x1="55"  y1="120" x2="185" y2="120" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="level-angle">
+      <span id="angle-val">0.0</span>°
+      <small id="angle-dir">perfectamente nivelado</small>
+    </div>
+    <div class="level-status ok" id="level-status">✓ La paella está nivelada</div>
+
+    <!-- Punto 0 -->
+    <div class="zero-actions">
+      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">🎯 Establecer punto 0</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="Gyro.resetZero()">↺ Resetear</button>
+    </div>
+    <div class="note" id="zero-status" style="text-align:center">Sin punto 0 — usando horizontal absoluta</div>
+
+    <div id="sensor-denied" class="sensor-denied" style="display:none;width:100%">
+      <p>⚠️ Tu navegador necesita permiso para el giroscopio.<br><br>
+         En iOS: Ajustes → Safari → Acceso al movimiento y orientación.<br>
+         En Android debería funcionar automáticamente.</p>
+      <br>
+      <button class="btn btn-water" onclick="Gyro.requestPermission()">Activar sensor</button>
+    </div>
+
+    <div class="note" style="text-align:center">Umbral de nivelado: ±1.5°</div>
+  </div>
+</div>
+
+<!-- PANTALLA: BÁSCULA EXPERIMENTAL -->
+<div id="screen-bascula" class="screen">
+  <h2 class="section-title">Báscula <span>táctil</span></h2>
+  <div class="scale-experimental-badge">⚗️ Experimental — precisión orientativa</div>
+
+  <!-- Tabs: medir / calibrar -->
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="Scale.switchTab('medir')">⚖️ Pesar</button>
+    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">🔧 Calibrar</button>
+  </div>
+
+  <!-- TAB: MEDIR -->
+  <div id="scale-tab-medir">
+    <p class="note" style="margin-bottom:1rem">
+      Pon el móvil en una superficie plana. Coloca el objeto sobre la zona de pesado y mantén la presión.
+    </p>
+
+    <!-- Zona táctil de pesado -->
+    <div class="scale-pad" id="scale-pad"
+         ontouchstart="Scale.onTouchStart(event)"
+         ontouchmove="Scale.onTouchMove(event)"
+         ontouchend="Scale.onTouchEnd(event)">
+      <div class="scale-pad-icon" id="scale-pad-icon">🫴</div>
+      <div class="scale-pad-hint" id="scale-pad-hint">Apoya aquí el objeto a pesar</div>
+    </div>
+
+    <!-- Lectura -->
+    <div class="scale-reading">
+      <div class="scale-value" id="scale-display">
+        — <small>g</small>
+      </div>
+      <div class="scale-raw" id="scale-raw">Área de contacto: —</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Tara -->
+    <div style="display:flex;gap:.6rem;max-width:320px;margin:0 auto;">
+      <button class="btn btn-secondary" style="flex:1" onclick="Scale.tare()">⟳ Tara</button>
+      <button class="btn btn-ghost"     style="flex:1" onclick="Scale.reset()">✕ Reset</button>
+    </div>
+
+    <div class="scale-disclaimer">
+      ⚠️ Esta báscula usa el área de contacto táctil para estimar el peso. La precisión depende del dispositivo, del objeto y de la calibración. No usar para medidas críticas. Margen de error típico: ±20-80 g.
+    </div>
+  </div>
+
+  <!-- TAB: CALIBRAR -->
+  <div id="scale-tab-calibrar" style="display:none">
+    <p class="note" style="margin-bottom:1rem">
+      Calibra con dos objetos de peso conocido para mejorar la precisión. Usa p.ej. una botella de agua (500 g) y un paquete de arroz (1 kg).
+    </p>
+
+    <div class="scale-cal-steps" id="scale-cal-steps"></div>
+
+    <div style="margin-top:1rem;display:flex;gap:.6rem;">
+      <button class="btn btn-ghost btn-sm" onclick="Scale.resetCal()">↺ Borrar calibración</button>
+      <button class="btn btn-full" id="scale-cal-btn" onclick="Scale.calAction()">Capturar punto 1</button>
+    </div>
+
+    <div class="result-box" style="margin-top:1rem" id="scale-cal-result" style="display:none">
+      <div id="scale-cal-result-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA: INSTRUCCIONES -->
+<div id="screen-instrucciones" class="screen">
+  <h2 class="section-title">Guías en <span>vídeo</span></h2>
+  <p class="note" style="margin-bottom:1.5rem">Aprende a sacarle el máximo partido a cada función de la app.</p>
+
+  <div class="instructions-list" id="instructions-list"></div>
+</div>
+
+<!-- MODAL: Alerta fin de cronómetro -->
+<div id="alert-overlay" class="alert-overlay" style="display:none">
+  <div class="alert-box">
+    <div class="alert-icon">🔥</div>
+    <h3>¡Apaga el fuego!</h3>
+    <p>Han pasado los 15 minutos. Apaga el fuego ahora y deja reposar 5 minutos antes de medir el agua restante.</p>
+    <button class="btn btn-full" onclick="Calibration.goToMeasure()">Entendido — voy a medir</button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+  JAVASCRIPT — un módulo por responsabilidad
+
+  Módulos:
+    Store       — persistencia en localStorage
+    Data        — datos estáticos (recetas, constantes)
+    Nav         — navegación entre pantallas
+    Recipe      — lógica de recetas (pasos + ingredientes)
+    Water       — calculadora de agua
+    Equipment   — CRUD de perfiles de equipo
+    Calibration — prueba de evaporación cronometrada
+    Gyro        — giroscopio / nivelador
+    App         — inicialización
+============================================================ -->
+<script>
+
+/* ── STORE ──────────────────────────────────────────────────
+   Todo lo que necesita sobrevivir entre sesiones pasa por aquí.
+   El resto del código lee/escribe a través de Store, nunca
+   accede a localStorage directamente.
+──────────────────────────────────────────────────────────── */
+const Store = (() => {
+  const KEY = 'maestroArrocero_v2';
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return { profiles: [], activeProfileId: null };
+  }
+
+  function save(data) {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
+  }
+
+  // Datos en memoria, sincronizados con localStorage al mutar
+  const data = load();
+  if (!data.profiles)       data.profiles = [];
+  if (!data.activeProfileId) data.activeProfileId = null;
+
+  return {
+    getProfiles:       ()    => data.profiles,
+    getActiveId:       ()    => data.activeProfileId,
+    setActiveId:       (id)  => { data.activeProfileId = id; save(data); },
+    addProfile:        (p)   => { data.profiles.push(p); save(data); },
+    updateProfile:     (p)   => {
+      const idx = data.profiles.findIndex(x => x.id === p.id);
+      if (idx !== -1) { data.profiles[idx] = p; save(data); }
+    },
+    deleteProfile:     (id)  => {
+      data.profiles = data.profiles.filter(p => p.id !== id);
+      if (data.activeProfileId === id) data.activeProfileId = data.profiles[0]?.id || null;
+      save(data);
+    },
+    getActiveProfile:  ()    => data.profiles.find(p => p.id === data.activeProfileId) || null,
+    saveCalibration:   (evapPerMin) => {
+      const p = Store.getActiveProfile();
+      if (p) { p.evapPerMin = evapPerMin; save(data); }
+    },
+    clearCalibration:  ()    => {
+      const p = Store.getActiveProfile();
+      if (p) { p.evapPerMin = null; save(data); }
+    },
+  };
+})();
+
+
+/* ── DATA ───────────────────────────────────────────────────
+   Datos estáticos: recetas y catálogos de lookup.
+   Para añadir una receta, añade un objeto al array RECIPES.
+   Para añadir un tipo de arroz, añade una entrada a WATER_NAMES.
+──────────────────────────────────────────────────────────── */
+const Data = (() => {
+  const RECIPES = [
+    {
+      id: 'valenciana', name: 'Paella Valenciana', emoji: '🥘',
+      desc: 'La receta tradicional con pollo y conejo', difficulty: 'Media', time: '55 min',
+      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
+      riceType: 'bomba', ricePerPerson: 80, waterRatio: 1.5, cookMin: 15,
+      ingredients: [
+        { name: 'Arroz bomba',       perPerson: 80,   unit: 'g' },
+        { name: 'Pollo troceado',    perPerson: 120,  unit: 'g' },
+        { name: 'Conejo troceado',   perPerson: 80,   unit: 'g' },
+        { name: 'Judía verde plana', perPerson: 40,   unit: 'g' },
+        { name: 'Garrofó (alubia)',  perPerson: 25,   unit: 'g' },
+        { name: 'Tomate triturado',  perPerson: 30,   unit: 'ml' },
+        { name: 'Aceite de oliva',   perPerson: 15,   unit: 'ml' },
+        { name: 'Pimentón dulce',    perPerson: 1,    unit: 'g' },
+        { name: 'Azafrán',           perPerson: 0.05, unit: 'g' },
+        { name: 'Sal',               perPerson: 3,    unit: 'g' },
+      ],
+      steps: [
+        { title: 'Preparar el fuego', time: '5 min',  text: 'Enciende la paellera a fuego medio-alto. Añade el aceite y caliéntalo hasta que brille.',                                                                                                                                                      ingredients: 'Aceite de oliva' },
+        { title: 'Dorar las carnes',  time: '12 min', text: 'Sofríe el pollo y el conejo hasta que estén bien dorados. La carne debe quedar sellada para retener los jugos. Aparta hacia los lados.',                                                                                                       ingredients: 'Pollo, Conejo' },
+        { title: 'Sofrito base',      time: '8 min',  text: 'En el centro sofríe la judía verde y el garrofó 3 minutos. Añade el tomate y cocina hasta que se evapore el agua.',                                                                                                                            ingredients: 'Judía verde, Garrofó, Tomate' },
+        { title: 'Especias',          time: '1 min',  text: 'Añade el pimentón dulce y remueve rápidamente. Solo unos segundos. Mezcla con la carne.',                                                                                                                                                       ingredients: 'Pimentón dulce' },
+        { title: 'Hacer el caldo',    time: '2 min',  text: 'Vierte el agua caliente. Añade el azafrán disuelto. Llena la paella con la cantidad de agua que te marque la receta, marca la paella con la medida correspondiente, vuelve a echar la misma cantidad sin que rebose y pon a hervir.',          ingredients: 'Agua, Azafrán' },
+        { title: 'Hervir el caldo',   time: '30 min', text: 'Hierve fuerte 30 minutos para que las carnes terminen de cocinarse y el nivel llegue hasta la marca que hemos medido.',                                                                                                                         ingredients: '—' },
+        { title: 'Añadir el arroz',   time: '15 min', text: 'Reparte el arroz en forma de cruz. Fuego fuerte 15 minutos.',                                                                                                                                                                                   ingredients: 'Arroz bomba' },
+        { title: 'Reposo',            time: '5 min',  text: 'Retira del fuego y déjalo reposar 5 minutos.',                                                                                                                                                                                                  ingredients: '—' },
+      ],
+    },
+    {
+      id: 'caldoso', name: 'Arroz Caldoso', emoji: '🍲',
+      desc: 'Meloso y con marisco fresco', difficulty: 'Media-alta', time: '50 min',
+      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
+      riceType: 'redondo', ricePerPerson: 75, waterRatio: 1.2, cookMin: 15,
+      ingredients: [
+        { name: 'Arroz redondo',     perPerson: 75,  unit: 'g' },
+        { name: 'Gambas o cigalas',  perPerson: 100, unit: 'g' },
+        { name: 'Mejillones',        perPerson: 80,  unit: 'g' },
+        { name: 'Calamar',           perPerson: 60,  unit: 'g' },
+        { name: 'Caldo de marisco',  perPerson: 260, unit: 'ml' },
+        { name: 'Tomate frito',      perPerson: 25,  unit: 'ml' },
+        { name: 'Cebolla',           perPerson: 30,  unit: 'g' },
+        { name: 'Ajo',               perPerson: 5,   unit: 'g' },
+        { name: 'Pimiento rojo',     perPerson: 25,  unit: 'g' },
+        { name: 'Aceite de oliva',   perPerson: 15,  unit: 'ml' },
+        { name: 'Sal y pimienta',    perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Sofrito aromático', time: '10 min', text: 'Sofríe la cebolla, ajo y pimiento en aceite caliente hasta que estén blandos.',        ingredients: 'Cebolla, Ajo, Pimiento, Aceite' },
+        { title: 'Marisco base',      time: '5 min',  text: 'Añade el calamar y sofríe 3 minutos. Incorpora el tomate frito y mezcla.',              ingredients: 'Calamar, Tomate frito' },
+        { title: 'El caldo',          time: '5 min',  text: 'Vierte el caldo caliente. Lleva a ebullición y rectifica de sal.',                      ingredients: 'Caldo de marisco, Sal' },
+        { title: 'El arroz',          time: '5 min',  text: 'Incorpora el arroz cuando hierva. Baja a fuego medio. Debe quedar caldoso.',            ingredients: 'Arroz redondo' },
+        { title: 'Marisco final',     time: '5 min',  text: 'A los 8 minutos añade las gambas y mejillones. Se cocinan rápido.',                     ingredients: 'Gambas, Mejillones' },
+        { title: 'Servir',            time: '2 min',  text: 'Sirve inmediatamente. El caldoso no espera. Acompaña con alioli.',                      ingredients: '—' },
+      ],
+    },
+    {
+      id: 'negro', name: 'Arroz Negro', emoji: '🦑',
+      desc: 'Con tinta de calamar y alioli', difficulty: 'Media', time: '45 min',
+      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
+      riceType: 'bomba', ricePerPerson: 80, waterRatio: 1.5, cookMin: 18,
+      ingredients: [
+        { name: 'Arroz bomba',       perPerson: 80,  unit: 'g' },
+        { name: 'Calamar o sepia',   perPerson: 120, unit: 'g' },
+        { name: 'Tinta de calamar',  perPerson: 4,   unit: 'g' },
+        { name: 'Gambas',            perPerson: 80,  unit: 'g' },
+        { name: 'Caldo de pescado',  perPerson: 130, unit: 'ml' },
+        { name: 'Cebolla',           perPerson: 30,  unit: 'g' },
+        { name: 'Ajo',               perPerson: 5,   unit: 'g' },
+        { name: 'Tomate',            perPerson: 30,  unit: 'g' },
+        { name: 'Aceite de oliva',   perPerson: 15,  unit: 'ml' },
+        { name: 'Sal',               perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Sofrito aromático', time: '8 min',  text: 'Sofríe cebolla y ajo en aceite hasta que doren. Añade el tomate y reduce.',                              ingredients: 'Cebolla, Ajo, Tomate, Aceite' },
+        { title: 'Sepia o calamar',   time: '5 min',  text: 'Añade el calamar y sofríe a fuego fuerte hasta que pierda el agua y empiece a dorarse.',                 ingredients: 'Calamar/Sepia' },
+        { title: 'La tinta',          time: '2 min',  text: 'Disuelve la tinta en caldo caliente y añádela al sofrito. La paellera se teñirá de negro intenso.',      ingredients: 'Tinta de calamar, Caldo' },
+        { title: 'Caldo',             time: '5 min',  text: 'Vierte el resto del caldo. Hierve 3 minutos. Sala al gusto.',                                            ingredients: 'Caldo de pescado, Sal' },
+        { title: 'El arroz',          time: '18 min', text: 'Reparte el arroz. Fuego alto 8 min, luego baja. Añade las gambas en los últimos 4 min.',                 ingredients: 'Arroz bomba, Gambas' },
+        { title: 'Reposo',            time: '5 min',  text: 'Reposa 5 minutos. Sirve con alioli casero.',                                                             ingredients: '—' },
+      ],
+    },
+    {
+      id: 'vegetal', name: 'Arroz de Verduras', emoji: '🌿',
+      desc: 'Ligero, colorido y lleno de sabor', difficulty: 'Fácil', time: '35 min',
+      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
+      riceType: 'albufera', ricePerPerson: 75, waterRatio: 1.0, cookMin: 16,
+      ingredients: [
+        { name: 'Arroz Albufera',    perPerson: 75,   unit: 'g' },
+        { name: 'Alcachofas',        perPerson: 60,   unit: 'g' },
+        { name: 'Pimiento rojo',     perPerson: 40,   unit: 'g' },
+        { name: 'Pimiento verde',    perPerson: 40,   unit: 'g' },
+        { name: 'Calabacín',         perPerson: 50,   unit: 'g' },
+        { name: 'Judía verde',       perPerson: 35,   unit: 'g' },
+        { name: 'Tomate triturado',  perPerson: 30,   unit: 'ml' },
+        { name: 'Aceite de oliva',   perPerson: 15,   unit: 'ml' },
+        { name: 'Pimentón dulce',    perPerson: 1,    unit: 'g' },
+        { name: 'Azafrán',           perPerson: 0.05, unit: 'g' },
+        { name: 'Sal',               perPerson: 3,    unit: 'g' },
+      ],
+      steps: [
+        { title: 'Limpiar y cortar',    time: '10 min', text: 'Alcachofas en cuartos, pica pimientos, trocea calabacín y judía.',                              ingredients: 'Todas las verduras' },
+        { title: 'Sofreír',             time: '10 min', text: 'Sofríe pimientos 3 min, luego alcachofas y judía. Finalmente calabacín.',                       ingredients: 'Pimientos, Alcachofa, Judía, Calabacín, Aceite' },
+        { title: 'Sofrito y pimentón',  time: '4 min',  text: 'Añade el tomate y reduce. Agrega el pimentón y mezcla rápidamente.',                           ingredients: 'Tomate, Pimentón' },
+        { title: 'Caldo y azafrán',     time: '3 min',  text: 'Vierte agua caliente con azafrán disuelto. Hierve. Rectifica de sal.',                         ingredients: 'Agua, Azafrán, Sal' },
+        { title: 'El arroz',            time: '16 min', text: 'Distribuye entre las verduras. No remuevas. Fuego alto 8 min, luego reduce.',                  ingredients: 'Arroz Albufera' },
+        { title: 'Reposo',              time: '5 min',  text: 'Retira cuando el caldo esté absorbido. Cubre y deja reposar 5 minutos.',                       ingredients: '—' },
+      ],
+    },
+  ];
+
+  const WATER_NAMES = {
+    bomba:    'Bomba',
+    redondo:  'Redondo',
+    albufera: 'Albufera',
+    balilla:  'Balilla × Sollana',
+    dinamita: 'Molino Roca Dinamita',
+  };
+
+  const BURNER_LABELS = {
+    paellero_gas: '🔥 Paellero gas',
+    vitro:        '⚡ Vitrocerámica',
+    induccion:    '🧲 Inducción',
+    lena:         '🪵 Leña',
+    cocina_gas:   '🫧 Cocina gas',
+    otro:         '🍳 Otro',
+  };
+
+  return {
+    recipes:      RECIPES,
+    waterNames:   WATER_NAMES,
+    burnerLabels: BURNER_LABELS,
+    getRecipe: (id) => RECIPES.find(r => r.id === id),
+  };
+})();
+
+
+/* ── NAV ────────────────────────────────────────────────────
+   Gestiona la navegación entre las pantallas principales.
+   Usa el bottom nav (tabs inferiores estilo app nativa).
+   Cada módulo que necesita hacer algo al entrar en su pantalla
+   registra un callback en onEnter.
+──────────────────────────────────────────────────────────── */
+const Nav = (() => {
+  const onEnterCallbacks = {};
+
+  function goTo(screen) {
+    // Pantallas
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screen)?.classList.add('active');
+
+    // Bottom tabs
+    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.getElementById('btab-' + screen);
+    if (activeTab) activeTab.classList.add('active');
+
+    if (onEnterCallbacks[screen]) onEnterCallbacks[screen]();
+  }
+
+  function onEnter(screen, fn) { onEnterCallbacks[screen] = fn; }
+
+  // Navegar a receta (no tiene tab propio en el bottom nav)
+  function goToRecipe() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-recipe').classList.add('active');
+  }
+
+  return { goTo, onEnter, goToRecipe };
+})();
+
+
+/* ── RECIPE ─────────────────────────────────────────────────
+   Gestiona la pantalla de receta:
+     - Grid de tarjetas en home
+     - Tab de ingredientes (con slider de comensales)
+     - Tab de guía paso a paso
+──────────────────────────────────────────────────────────── */
+const Recipe = (() => {
+  let currentRecipe = null;
+  let currentStep   = 0;
+  let comensales    = 4;
+
+  // ── Home: grid de recetas
+  function renderHome() {
+    document.getElementById('recipe-grid').innerHTML = Data.recipes.map(r => `
+      <div class="recipe-card" onclick="Recipe.open('${r.id}')">
+        <div class="emoji">${r.emoji}</div>
+        <h3>${r.name}</h3>
+        <div class="meta">${r.desc}</div>
+        <div class="meta" style="margin-top:3px">⏱ ${r.time}</div>
+        <span class="difficulty">${r.difficulty}</span>
+        ${r.reelUrl ? `<a class="reel-btn" href="${r.reelUrl}" target="_blank" onclick="event.stopPropagation()">▶ Ver en Instagram</a>` : ''}
+      </div>`).join('');
+  }
+
+  // ── Abrir una receta (va directamente a ingredientes)
+  function open(id) {
+    currentRecipe = Data.getRecipe(id);
+    currentStep   = 0;
+    comensales    = 4;
+    document.getElementById('recipe-title-step').textContent = currentRecipe.name;
+    document.getElementById('recipe-subtitle-step').textContent = '⏱ ' + currentRecipe.time;
+    document.getElementById('comensal-slider').value = 4;
+    document.getElementById('comensal-val').textContent = 4;
+    Nav.goToRecipe();
+    switchTab('ingredientes');
+    renderIngredients();
+  }
+
+  // ── Tab: ingredientes
+  function renderIngredients() {
+    const r = currentRecipe, n = comensales;
+    document.getElementById('comensales-badge').textContent = n + ' persona' + (n > 1 ? 's' : '');
+    document.getElementById('ing-list').innerHTML = r.ingredients.map(ing => {
+      const amt = ing.perPerson * n;
+      const disp = amt < 1    ? (amt * 1000).toFixed(0) + ' mg'
+                 : amt >= 1000 ? (amt / 1000).toFixed(1) + ' kg'
+                 :               amt.toFixed(0) + ' ' + ing.unit;
+      return `<li><span>${ing.name}</span><span class="ing-amount">${disp}</span></li>`;
+    }).join('');
+
+    // Agua = ratio base + evaporación del equipo activo
+    const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
+    const prof  = Store.getActiveProfile();
+    const evap  = prof?.evapPerMin ?? null;
+    const extra = evap !== null ? Math.round(evap * r.cookMin) : 0;
+    document.getElementById('ing-agua').innerHTML = (base + extra) + ' <small>ml</small>';
+    document.getElementById('ing-agua-tip').textContent = evap !== null
+      ? `Base ${base} ml + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${r.cookMin} min) — ${prof.name}`
+      : 'Calibra la evaporación de tu equipo en la sección Agua.';
+  }
+
+  function updateComensales(v) {
+    comensales = parseInt(v);
+    document.getElementById('comensal-val').textContent = v;
+    renderIngredients();
+  }
+
+  // ── Tab: guía paso a paso
+  function renderStep() {
+    const r     = currentRecipe;
+    const s     = r.steps[currentStep];
+    const total = r.steps.length;
+    document.getElementById('progress-fill').style.width = Math.round(((currentStep + 1) / total) * 100) + '%';
+    document.getElementById('step-counter').textContent  = `Paso ${currentStep + 1} de ${total}`;
+    // Botón reel en cabecera (solo primer paso o siempre visible)
+    const reelEl = document.getElementById('recipe-reel-btn');
+    if (reelEl) {
+      reelEl.style.display = currentRecipe.reelUrl ? '' : 'none';
+      reelEl.href = currentRecipe.reelUrl || '#';
+    }
+
+    // Parsear minutos del tiempo del paso para el temporizador
+    const stepMins = parseInt(s.time) || 0;
+    const hasTimer = stepMins > 0;
+
+    document.getElementById('step-display').innerHTML = `
+      <div class="step-card">
+        <div class="step-inner">
+          <div class="step-num">${currentStep + 1}</div>
+          <div class="step-body">
+            <h3>${s.title}</h3>
+            <p>${s.text}</p>
+            <span class="step-timing">⏱ ${s.time}</span>
+          </div>
+        </div>
+        ${s.ingredients !== '—' ? `<div class="step-ingredients">🧂 ${s.ingredients}</div>` : ''}
+      </div>
+      ${hasTimer ? `
+      <div class="step-timer" id="step-timer-widget">
+        <div>
+          <div class="step-timer-display" id="step-timer-display">${String(stepMins).padStart(2,'0')}:00</div>
+          <div class="step-timer-bar-wrap"><div class="step-timer-bar" id="step-timer-bar" style="width:0%"></div></div>
+        </div>
+        <div class="step-timer-label">Temporizador<br><span id="step-timer-state" style="color:var(--rice-dark)">Pulsa para arrancar</span></div>
+        <button class="btn btn-sm" id="step-timer-btn" onclick="StepTimer.toggle(${stepMins})">▶ Iniciar</button>
+      </div>` : ''}`;
+
+    StepTimer.reset(); // limpia cualquier timer anterior al cambiar de paso
+    document.getElementById('btn-prev').disabled = currentStep === 0;
+    document.getElementById('btn-next').textContent = currentStep === total - 1 ? '¡Listo! ✓' : 'Siguiente →';
+  }
+
+  function changeStep(dir) {
+    const total = currentRecipe.steps.length;
+    if (dir === 1 && currentStep === total - 1) { Nav.goTo('home'); return; }
+    currentStep = Math.max(0, Math.min(total - 1, currentStep + dir));
+    renderStep();
+  }
+
+  // ── Tabs internos
+  function switchTab(tab) {
+    document.querySelectorAll('.inner-tab').forEach((t, i) =>
+      t.classList.toggle('active', (i === 0 && tab === 'guia') || (i === 1 && tab === 'ingredientes')));
+    document.getElementById('tab-guia').style.display          = tab === 'guia'         ? '' : 'none';
+    document.getElementById('tab-ingredientes').style.display  = tab === 'ingredientes' ? '' : 'none';
+    if (tab === 'guia') renderStep();
+  }
+
+  // Getters para módulos externos (Share)
+  function _current()    { return currentRecipe; }
+  function _comensales() { return comensales; }
+
+  return { renderHome, open, updateComensales, renderStep, changeStep, switchTab, _current, _comensales };
+})();
+
+
+/* ── WATER ──────────────────────────────────────────────────
+   Calculadora de agua de la sección Agua.
+   Solo hace el cálculo de ratio + evaporación y actualiza el DOM.
+──────────────────────────────────────────────────────────── */
+const Water = (() => {
+  let currentType  = 'bomba';
+  let currentRatio = 1.5;
+
+  function selectType(btn, type, ratio) {
+    document.querySelectorAll('.water-type-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    currentType  = type;
+    currentRatio = ratio;
+    calc();
+  }
+
+  function calc() {
+    const g   = parseFloat(document.getElementById('arroz-gramos').value) || 0;
+    const std = Math.round(g * currentRatio);
+    document.getElementById('agua-std').innerHTML   = std + ' <small>ml</small>';
+    document.getElementById('agua-ratio-tip').textContent = `Ratio 1:${currentRatio} (${Data.waterNames[currentType]})`;
+
+    const prof = Store.getActiveProfile();
+    const evap = prof?.evapPerMin ?? null;
+    if (evap !== null) {
+      const cookMin = 18; // estimación genérica para la calculadora; la receta usa el valor exacto
+      const extra   = Math.round(evap * cookMin);
+      document.getElementById('agua-cal').innerHTML      = (std + extra) + ' <small>ml</small>';
+      document.getElementById('agua-evap-tip').textContent = `Base + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${cookMin} min) — ${prof.name}`;
+    } else {
+      document.getElementById('agua-cal').innerHTML        = '— <small>ml</small>';
+      document.getElementById('agua-evap-tip').textContent = prof
+        ? `Calibra el equipo "${prof.name}" abajo`
+        : 'Añade y selecciona un equipo primero';
+    }
+  }
+
+  return { selectType, calc };
+})();
+
+
+/* ── EQUIPMENT ──────────────────────────────────────────────
+   CRUD de perfiles de equipo (paella + quemador).
+   Renderiza la lista y gestiona el formulario de alta/edición.
+──────────────────────────────────────────────────────────── */
+const Equipment = (() => {
+  let editingId      = null;
+  let selectedBurner = '';
+
+  // ── Lista de equipos
+  function renderList() {
+    const profiles = Store.getProfiles();
+    const list     = document.getElementById('profiles-list');
+    if (!profiles.length) {
+      list.innerHTML = `<div class="empty-state"><div class="es-icon">🍳</div>Aún no tienes equipos. Añade uno abajo para calibrar la evaporación.</div>`;
+      return;
+    }
+    list.innerHTML = profiles.map(p => {
+      const isActive = p.id === Store.getActiveId();
+      const calOk    = p.evapPerMin != null;
+      return `
+        <div class="profile-card ${isActive ? 'active-profile' : ''}" onclick="Equipment.setActive('${p.id}')">
+          <div class="profile-icon">${p.burnerEmoji || '🍳'}</div>
+          <div class="profile-info">
+            <div class="profile-name">${p.name}</div>
+            <div class="profile-meta">${p.diam ? p.diam + ' cm' : '—'} · ${Data.burnerLabels[p.burner] || '—'}</div>
+            ${calOk ? `<div class="profile-meta" style="color:var(--success)">⌀ ${p.evapPerMin.toFixed(1)} ml/min evaporación</div>` : ''}
+          </div>
+          <span class="profile-badge ${calOk ? 'ok' : 'pending'}">${calOk ? 'Calibrado ✓' : 'Sin calibrar'}</span>
+          <div class="profile-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost btn-sm" onclick="Equipment.showForm('${p.id}')">✎</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="Equipment.remove('${p.id}')">✕</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Activar un perfil
+  function setActive(id) {
+    Store.setActiveId(id);
+    renderList();
+    Calibration.renderStatus();
+    Water.calc();
+  }
+
+  // ── Mostrar formulario (null = nuevo, id = editar)
+  function showForm(id) {
+    editingId      = id;
+    selectedBurner = '';
+    document.getElementById('equip-form-title').textContent = id ? 'Editar equipo' : 'Nuevo equipo';
+
+    // Limpiar
+    document.getElementById('eq-name').value  = '';
+    document.getElementById('eq-diam').value  = '';
+    document.getElementById('eq-cap').value   = '';
+    document.getElementById('eq-burner').value = '';
+    document.querySelectorAll('.burner-btn').forEach(b => b.classList.remove('sel'));
+    document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('sel'));
+
+    // Si edición, rellenar
+    if (id) {
+      const p = Store.getProfiles().find(x => x.id === id);
+      if (p) {
+        document.getElementById('eq-name').value  = p.name  || '';
+        document.getElementById('eq-diam').value  = p.diam  || '';
+        document.getElementById('eq-burner').value = p.burner || '';
+        selectedBurner = p.burner || '';
+        updateCapacity();
+        if (p.diam)   document.querySelectorAll('.size-preset').forEach(b => { if (parseInt(b.textContent) === p.diam) b.classList.add('sel'); });
+        if (p.burner) document.querySelectorAll('.burner-btn').forEach(b  => { if (b.getAttribute('onclick')?.includes(`'${p.burner}'`)) b.classList.add('sel'); });
+      }
+    }
+    document.getElementById('equip-form').style.display = '';
+    document.getElementById('equip-form').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function hideForm() {
+    document.getElementById('equip-form').style.display = 'none';
+    editingId = null;
+  }
+
+  // ── Helpers de formulario
+  function setDiam(v) {
+    document.getElementById('eq-diam').value = v;
+    document.querySelectorAll('.size-preset').forEach(b => b.classList.toggle('sel', parseInt(b.textContent) === v));
+    updateCapacity();
+  }
+
+  function clearDiamPreset() {
+    document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('sel'));
+    updateCapacity();
+  }
+
+  function updateCapacity() {
+    const d = parseFloat(document.getElementById('eq-diam').value);
+    document.getElementById('eq-cap').value = d
+      ? '~' + (Math.PI * (d / 2) * (d / 2) * 2 / 1000).toFixed(1) + ' L'
+      : '—';
+  }
+
+  function selectBurner(btn, key, emoji) {
+    document.querySelectorAll('.burner-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    document.getElementById('eq-burner').value = key;
+    selectedBurner = key;
+  }
+
+  // ── Guardar (nuevo o edición)
+  function save() {
+    const name   = document.getElementById('eq-name').value.trim();
+    const diam   = parseFloat(document.getElementById('eq-diam').value) || null;
+    const burner = document.getElementById('eq-burner').value;
+    if (!name) { alert('Pon un nombre al equipo.'); return; }
+
+    const burnerEmoji = document.querySelector('.burner-btn.sel')?.querySelector('.b-emoji')?.textContent || '🍳';
+
+    if (editingId) {
+      const existing = Store.getProfiles().find(x => x.id === editingId);
+      if (existing) {
+        existing.name = name; existing.diam = diam; existing.burner = burner; existing.burnerEmoji = burnerEmoji;
+        Store.updateProfile(existing);
+      }
+    } else {
+      const newP = { id: 'p_' + Date.now(), name, diam, burner, burnerEmoji, evapPerMin: null };
+      Store.addProfile(newP);
+      if (!Store.getActiveId()) Store.setActiveId(newP.id);
+    }
+
+    hideForm();
+    renderList();
+    Calibration.renderStatus();
+    Water.calc();
+  }
+
+  // ── Eliminar
+  function remove(id) {
+    if (!confirm('¿Eliminar este equipo y su calibración?')) return;
+    Store.deleteProfile(id);
+    renderList();
+    Calibration.renderStatus();
+    Water.calc();
+  }
+
+  return { renderList, setActive, showForm, hideForm, setDiam, clearDiamPreset, selectBurner, save, remove };
+})();
+
+
+/* ── CALIBRATION ────────────────────────────────────────────
+   Prueba de evaporación cronometrada (15 minutos).
+   Fases: setup → running → measure → (guarda en Store)
+──────────────────────────────────────────────────────────── */
+const Calibration = (() => {
+  const DURATION_SECS = 900; // 15 minutos
+  const CIRCUMFERENCE = 571.8; // 2π × 91
+
+  let timer       = null;
+  let seconds     = DURATION_SECS;
+  let aguaInicial = 3000;
+  let wakeLock    = null;
+  let pendingEvap = null;
+
+  // ── Estado visual del equipo activo
+  function renderStatus() {
+    const prof = Store.getActiveProfile();
+    const box  = document.getElementById('cal-status-content');
+    const btn  = document.getElementById('btn-start-cal');
+
+    if (!prof) {
+      box.innerHTML = `
+        <div class="info-row"><span class="lbl">Equipo activo</span><span class="tag-pending">Ninguno</span></div>
+        <div class="info-row" style="border:none;padding-bottom:0;font-size:.82rem;color:var(--text-muted)">
+          Añade y selecciona un equipo para calibrar.
+        </div>`;
+      if (btn) btn.disabled = true;
+      return;
+    }
+    if (btn) btn.disabled = false;
+
+    if (prof.evapPerMin != null) {
+      box.innerHTML = `
+        <div class="info-row"><span class="lbl">Equipo activo</span><span class="val">${prof.name}</span></div>
+        <div class="info-row"><span class="lbl">Estado</span><span class="tag-ok">Calibrado ✓</span></div>
+        <div class="info-row"><span class="lbl">Evaporación</span><span class="val">${prof.evapPerMin.toFixed(2)} ml/min</span></div>
+        <div class="info-row" style="border:none;padding-bottom:0">
+          <button class="btn btn-secondary btn-sm" onclick="Calibration.reset()">Repetir calibración</button>
+        </div>`;
+    } else {
+      box.innerHTML = `
+        <div class="info-row"><span class="lbl">Equipo activo</span><span class="val">${prof.name}</span></div>
+        <div class="info-row"><span class="lbl">Estado</span><span class="tag-pending">Sin calibrar</span></div>
+        <div class="info-row" style="border:none;padding-bottom:0;font-size:.82rem;color:var(--text-muted)">
+          Haz la prueba de evaporación para cálculos precisos.
+        </div>`;
+    }
+  }
+
+  // ── Cambiar fase visible
+  function showPhase(phase) {
+    document.getElementById('cal-phase-setup').style.display   = phase === 'setup'   ? '' : 'none';
+    document.getElementById('cal-phase-running').style.display = phase === 'running' ? '' : 'none';
+    document.getElementById('cal-phase-measure').style.display = phase === 'measure' ? '' : 'none';
+  }
+
+  // ── Fase 1 → 2: arrancar cronómetro
+  async function start() {
+    if (!Store.getActiveProfile()) return;
+    aguaInicial = parseInt(document.getElementById('cal-agua-inicial-input').value) || 3000;
+    seconds     = DURATION_SECS;
+    showPhase('running');
+    updateClock();
+
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+
+    timer = setInterval(() => {
+      seconds--;
+      updateClock();
+      if (seconds <= 0) {
+        clearInterval(timer); timer = null;
+        releaseWakeLock();
+        document.getElementById('alert-overlay').style.display = 'flex';
+      }
+    }, 1000);
+  }
+
+  function updateClock() {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    document.getElementById('cal-time-display').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    const arc = document.getElementById('cal-arc');
+    if (arc) arc.style.strokeDashoffset = CIRCUMFERENCE * (1 - (DURATION_SECS - seconds) / DURATION_SECS);
+    document.getElementById('cal-state-text').textContent =
+      seconds > 600 ? '🔥 Fuego al máximo — no apagues la pantalla' :
+      seconds > 300 ? '🔥 A mitad de la prueba, sigue así' :
+                      '🔥 ¡Ya casi! Aguanta un poco más';
+  }
+
+  // ── Fase 2 → 3: ir a medir
+  function goToMeasure() {
+    document.getElementById('alert-overlay').style.display = 'none';
+    showPhase('measure');
+    document.getElementById('cal-agua-inicial-show').value = aguaInicial;
+    document.getElementById('cal-agua-final').value        = '';
+    document.getElementById('evap-result-box').style.display = 'none';
+    document.getElementById('btn-save-cal').disabled = true;
+  }
+
+  // ── Fase 3: calcular evaporación al escribir
+  function calcEvap() {
+    const final = parseFloat(document.getElementById('cal-agua-final').value);
+    if (isNaN(final) || final >= aguaInicial || final < 0) {
+      document.getElementById('evap-result-box').style.display = 'none';
+      document.getElementById('btn-save-cal').disabled = true;
+      return;
+    }
+    const evaporado = aguaInicial - final;
+    pendingEvap     = evaporado / 15;
+    document.getElementById('evap-result-box').style.display    = 'block';
+    document.getElementById('evap-val-display').textContent     = pendingEvap.toFixed(1);
+    document.getElementById('evap-badge-txt').textContent       = `${evaporado} ml evaporados en 15 min`;
+    document.getElementById('btn-save-cal').disabled = false;
+  }
+
+  // ── Guardar y volver a setup
+  function save() {
+    Store.saveCalibration(pendingEvap);
+    showPhase('setup');
+    renderStatus();
+    Water.calc();
+  }
+
+  // ── Cancelar desde cualquier fase
+  function cancel() {
+    if (timer) { clearInterval(timer); timer = null; }
+    releaseWakeLock();
+    document.getElementById('alert-overlay').style.display = 'none';
+    showPhase('setup');
+  }
+
+  // ── Borrar calibración del equipo activo
+  function reset() {
+    Store.clearCalibration();
+    renderStatus();
+    Water.calc();
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  }
+
+  return { renderStatus, start, updateClock, goToMeasure, calcEvap, save, cancel, reset };
+})();
+
+
+/* ── GYRO ───────────────────────────────────────────────────
+   Giroscopio para el nivelador de paella.
+
+   Punto 0: el usuario puede calibrar su superficie de referencia
+   pulsando "Establecer punto 0". Se guarda el beta/gamma actual
+   y se resta en cada lectura posterior.
+
+   Diferencias iOS / Android:
+     - iOS:     requestPermission() obligatorio; sensor a ~60 Hz pero
+                con jitter alto → throttle 50 ms + suavizado fuerte
+     - Android: sin permiso explícito; tasa variable → throttle 30 ms
+                + suavizado más ligero
+
+   El render se desacopla del sensor con requestAnimationFrame
+   para evitar jank aunque el sensor llegue muy frecuente.
+──────────────────────────────────────────────────────────── */
+const Gyro = (() => {
+  const isIOS          = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const THROTTLE_MS    = isIOS ? 50  : 30;
+  const SMOOTH_ALPHA   = isIOS ? 0.25 : 0.35;
+
+  let active      = false;
+  let lastTime    = 0;
+  let smoothBeta  = 0;
+  let smoothGamma = 0;
+
+  // Punto 0: offset restado a cada lectura
+  let zeroBeta  = 0;
+  let zeroGamma = 0;
+  let hasZero   = false;
+
+  // Cache DOM
+  let elBubble, elDish, elAngleVal, elAngleDir, elStatus, elBubbleCenter, elZeroStatus;
+
+  function init() {
+    if (active) return;
+    elBubble      = document.getElementById('water-bubble');
+    elDish        = document.getElementById('paella-dish');
+    elAngleVal    = document.getElementById('angle-val');
+    elAngleDir    = document.getElementById('angle-dir');
+    elStatus      = document.getElementById('level-status');
+    elBubbleCenter= document.getElementById('bubble-center');
+    elZeroStatus  = document.getElementById('zero-status');
+
+    elBubble.style.transition = 'none';
+    elDish.style.transition   = 'none';
+
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      document.getElementById('sensor-denied').style.display = 'block';
+    } else if (window.DeviceOrientationEvent) {
+      _start();
+    } else {
+      document.getElementById('sensor-denied').style.display = 'block';
+    }
+  }
+
+  function requestPermission() {
+    DeviceOrientationEvent.requestPermission()
+      .then(result => {
+        if (result === 'granted') {
+          _start();
+          document.getElementById('sensor-denied').style.display = 'none';
+        }
+      })
+      .catch(console.error);
+  }
+
+  function _start() {
+    active = true;
+    window.addEventListener('deviceorientation', _onSensor, { passive: true });
+  }
+
+  // ── Establece la posición actual como punto 0
+  function setZero() {
+    zeroBeta  = smoothBeta;
+    zeroGamma = smoothGamma;
+    hasZero   = true;
+    if (elZeroStatus) elZeroStatus.textContent = `🎯 Punto 0 establecido (β${zeroBeta.toFixed(1)}° γ${zeroGamma.toFixed(1)}°)`;
+  }
+
+  // ── Resetea el punto 0 (vuelve a horizontal absoluta)
+  function resetZero() {
+    zeroBeta  = 0;
+    zeroGamma = 0;
+    hasZero   = false;
+    if (elZeroStatus) elZeroStatus.textContent = 'Sin punto 0 — usando horizontal absoluta';
+  }
+
+  function _onSensor(e) {
+    const now = Date.now();
+    if (now - lastTime < THROTTLE_MS) return;
+    lastTime = now;
+
+    smoothBeta  = SMOOTH_ALPHA * (e.beta  || 0) + (1 - SMOOTH_ALPHA) * smoothBeta;
+    smoothGamma = SMOOTH_ALPHA * (e.gamma || 0) + (1 - SMOOTH_ALPHA) * smoothGamma;
+
+    // Aplicar offset del punto 0
+    const adjBeta  = smoothBeta  - zeroBeta;
+    const adjGamma = smoothGamma - zeroGamma;
+
+    const angle = Math.sqrt(adjBeta * adjBeta + adjGamma * adjGamma);
+    const cx    = Math.max(-40, Math.min(40, adjGamma));
+    const cy    = Math.max(-40, Math.min(40, adjBeta));
+    // Rango de movimiento de la burbuja: la paella mide 240px, burbuja 112px
+    // Max desplazamiento desde centro: (240-112)/2 = 64px → usamos 55 para margen
+    const bx    = (cx / 40) * 55;
+    const by    = (cy / 40) * 55;
+
+    requestAnimationFrame(() => {
+      if (!elBubble) return;
+      elBubble.style.transform = `translate(calc(-50% + ${bx.toFixed(1)}px), calc(-50% + ${by.toFixed(1)}px))`;
+      elDish.style.transform   = `rotate(${(cx * 0.3).toFixed(1)}deg) rotateX(${(-cy * 0.3).toFixed(1)}deg)`;
+      elAngleVal.textContent   = angle.toFixed(1);
+
+      if (angle < 1.5) {
+        elStatus.className       = 'level-status ok';
+        elStatus.textContent     = '✓ La paella está nivelada';
+        elAngleDir.textContent   = 'perfectamente nivelada';
+        elBubbleCenter.style.background = '#4A7C59';
+      } else if (angle < 4) {
+        elStatus.className       = 'level-status warn';
+        elStatus.textContent     = '⚠ Ajusta ligeramente';
+        elAngleDir.textContent   = 'inclinación leve';
+        elBubbleCenter.style.background = 'var(--saffron)';
+      } else {
+        elStatus.className       = 'level-status bad';
+        elStatus.textContent     = '✗ No está nivelada';
+        elAngleDir.textContent   = 'inclinación pronunciada';
+        elBubbleCenter.style.background = 'var(--danger)';
+      }
+    });
+  }
+
+  return { init, requestPermission, setZero, resetZero };
+})();
+
+
+/* ── STEP TIMER ─────────────────────────────────────────────
+   Temporizador por paso de receta. Manual: el usuario decide
+   cuándo arrancarlo. Muestra cuenta atrás, barra de progreso
+   y vibra + suena al terminar (si el dispositivo lo soporta).
+──────────────────────────────────────────────────────────── */
+const StepTimer = (() => {
+  let timer      = null;
+  let totalSecs  = 0;
+  let remaining  = 0;
+  let running    = false;
+
+  // Sonido de alerta: beep sintético con Web Audio API
+  function _beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.3, 0.6].forEach(offset => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.4, ctx.currentTime + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.25);
+        osc.start(ctx.currentTime + offset);
+        osc.stop(ctx.currentTime + offset + 0.25);
+      });
+    } catch(e) {}
+  }
+
+  function _vibrate() {
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 600]);
+  }
+
+  function _updateUI() {
+    const el     = document.getElementById('step-timer-display');
+    const bar    = document.getElementById('step-timer-bar');
+    const state  = document.getElementById('step-timer-state');
+    const btn    = document.getElementById('step-timer-btn');
+    if (!el) return;
+
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+    const pct = totalSecs > 0 ? ((totalSecs - remaining) / totalSecs) * 100 : 0;
+    if (bar) bar.style.width = pct + '%';
+
+    if (remaining <= 0) {
+      el.className      = 'step-timer-display done';
+      if (state) state.textContent = '✓ Tiempo completado';
+      if (btn)   btn.textContent   = '↺ Reiniciar';
+      if (bar)   bar.style.background = 'var(--success)';
+    } else if (running) {
+      el.className      = 'step-timer-display running';
+      if (state) state.textContent = 'En marcha…';
+      if (btn)   btn.textContent   = '⏸ Pausar';
+    } else {
+      el.className      = 'step-timer-display';
+      if (state) state.textContent = 'Pausado';
+      if (btn)   btn.textContent   = '▶ Continuar';
+    }
+  }
+
+  // Llamado desde el botón en el HTML del paso
+  function toggle(minutes) {
+    // Si ya terminó → reiniciar
+    if (remaining <= 0 && totalSecs > 0) {
+      reset();
+      totalSecs = minutes * 60;
+      remaining = totalSecs;
+      _updateUI();
+      return;
+    }
+    // Primera pulsación → arrancar
+    if (totalSecs === 0) {
+      totalSecs = minutes * 60;
+      remaining = totalSecs;
+    }
+    if (running) {
+      // Pausar
+      clearInterval(timer); timer = null;
+      running = false;
+    } else {
+      // Arrancar / reanudar
+      running = true;
+      timer = setInterval(() => {
+        remaining--;
+        _updateUI();
+        if (remaining <= 0) {
+          clearInterval(timer); timer = null;
+          running = false;
+          _beep();
+          _vibrate();
+        }
+      }, 1000);
+    }
+    _updateUI();
+  }
+
+  // Limpia el timer al cambiar de paso
+  function reset() {
+    if (timer) { clearInterval(timer); timer = null; }
+    totalSecs = 0; remaining = 0; running = false;
+  }
+
+  return { toggle, reset };
+})();
+
+
+/* ── SHARE ──────────────────────────────────────────────────
+   Compartir receta o lista de ingredientes.
+   Genera texto plano formateado, lo muestra en preview
+   y ofrece copiar al portapapeles o abrir en WhatsApp.
+──────────────────────────────────────────────────────────── */
+const Share = (() => {
+  let currentText = '';
+
+  function open() {
+    // Resetear a estado inicial
+    document.getElementById('share-preview').style.display  = 'none';
+    document.getElementById('share-actions').style.display  = 'none';
+    document.getElementById('share-overlay').style.display  = 'flex';
+  }
+
+  function close() {
+    document.getElementById('share-overlay').style.display = 'none';
+    currentText = '';
+  }
+
+  function closeOnBackdrop(e) {
+    if (e.target.id === 'share-overlay') close();
+  }
+
+  // Genera el texto según el modo elegido
+  function prepare(mode) {
+    const r = Recipe._current();  // getter expuesto por Recipe
+    const n = Recipe._comensales();
+    if (!r) return;
+
+    if (mode === 'ingredientes') {
+      const lines = r.ingredients.map(ing => {
+        const amt  = ing.perPerson * n;
+        const disp = amt < 1    ? (amt * 1000).toFixed(0) + ' mg'
+                   : amt >= 1000 ? (amt / 1000).toFixed(1) + ' kg'
+                   :               amt.toFixed(0) + ' ' + ing.unit;
+        return `• ${ing.name}: ${disp}`;
+      });
+      const prof  = Store.getActiveProfile();
+      const evap  = prof?.evapPerMin ?? null;
+      const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
+      const extra = evap ? Math.round(evap * r.cookMin) : 0;
+      const agua  = base + extra;
+      currentText =
+        `🍚 ${r.name} — ${n} persona${n > 1 ? 's' : ''}\n\n` +
+        `INGREDIENTES\n${lines.join('\n')}\n\n` +
+        `💧 Agua necesaria: ${agua} ml` +
+        (evap ? ` (ratio + evaporación ${prof.name})` : '') +
+        `\n\n— Maestro Arrocero`;
+    } else {
+      const steps = r.steps.map((s, i) =>
+        `${i + 1}. ${s.title} (${s.time})\n   ${s.text}`).join('\n\n');
+      currentText =
+        `🍚 ${r.name}\n⏱ ${r.time} · ${r.difficulty}\n\n` +
+        `PASOS\n${steps}\n\n— Maestro Arrocero`;
+    }
+
+    const preview = document.getElementById('share-preview');
+    preview.textContent = currentText;
+    preview.style.display = 'block';
+    document.getElementById('share-actions').style.display = 'flex';
+    document.getElementById('share-close-btn').style.display = 'none';
+  }
+
+  function copy() {
+    if (!currentText) return;
+    navigator.clipboard.writeText(currentText)
+      .then(() => {
+        const btn = document.querySelector('#share-actions .btn-secondary');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copiado';
+        setTimeout(() => btn.textContent = orig, 2000);
+      })
+      .catch(() => {
+        // Fallback para móviles que no soporten clipboard API
+        const ta = document.createElement('textarea');
+        ta.value = currentText;
+        document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+      });
+  }
+
+  function whatsapp() {
+    if (!currentText) return;
+    const url = 'https://wa.me/?text=' + encodeURIComponent(currentText);
+    window.open(url, '_blank');
+  }
+
+  return { open, close, closeOnBackdrop, prepare, copy, whatsapp };
+})();
+
+
+/* ── SCALE ──────────────────────────────────────────────────
+   Báscula táctil experimental.
+
+   Técnica: el evento Touch expone radiusX y radiusY de cada
+   punto de contacto — el área elíptica que aplasta el objeto.
+   A mayor peso → mayor deformación → mayor área.
+
+   Calibración de 2 puntos:
+     - Punto A: objeto de peso conocido P_a → área media A_a
+     - Punto B: objeto de peso conocido P_b → área media A_b
+     - Regresión lineal: peso = m * área + b
+       donde m = (P_b - P_a) / (A_a_b - A_a)
+             b = P_a - m * A_a
+
+   Sin calibración usa valores por defecto estimados (~15 g/px²)
+   que son muy imprecisos pero dan una idea del orden de magnitud.
+──────────────────────────────────────────────────────────── */
+const Scale = (() => {
+  // Calibración: dos puntos (área, gramos)
+  const CAL_POINTS  = [
+    { label: 'Objeto ligero',  hint: 'ej. botella 500 ml llena',  grams: 500  },
+    { label: 'Objeto pesado',  hint: 'ej. paquete arroz 1 kg',    grams: 1000 },
+  ];
+  const DEFAULT_M = 15;   // g por unidad de área² (sin calibrar)
+  const DEFAULT_B = -200; // offset base sin calibrar
+
+  let calData     = Store.loadScale?.() || { points: [], m: null, b: null };
+  let taraArea    = 0;
+  let lastArea    = 0;
+  let calStep     = 0;    // 0 = esperando p1, 1 = esperando p2, 2 = completo
+  let currentTab  = 'medir';
+  let touchActive = false;
+  let areaReadings = [];  // medias durante el toque activo
+
+  // ── Conversión área → gramos
+  function areaToGrams(area) {
+    const netArea = Math.max(0, area - taraArea);
+    if (calData.m !== null) return Math.round(calData.m * netArea + calData.b);
+    return Math.round(DEFAULT_M * netArea + DEFAULT_B);
+  }
+
+  // ── Calcular área elíptica media de todos los touches
+  function touchArea(e) {
+    let total = 0;
+    for (const t of e.touches) {
+      const rx = t.radiusX || 10;
+      const ry = t.radiusY || 10;
+      total += Math.PI * rx * ry;
+    }
+    return total;
+  }
+
+  // ── Handlers táctiles
+  function onTouchStart(e) {
+    e.preventDefault();
+    touchActive  = true;
+    areaReadings = [];
+    lastArea     = touchArea(e);
+    _updatePad(true);
+  }
+
+  function onTouchMove(e) {
+    e.preventDefault();
+    if (!touchActive) return;
+    lastArea = touchArea(e);
+    areaReadings.push(lastArea);
+    _renderReading(lastArea);
+  }
+
+  function onTouchEnd(e) {
+    e.preventDefault();
+    touchActive = false;
+    // Usar la media de las últimas lecturas para estabilidad
+    if (areaReadings.length > 3) {
+      const sorted = [...areaReadings].sort((a,b) => a-b);
+      const mid    = sorted.slice(Math.floor(sorted.length*.25), Math.floor(sorted.length*.75));
+      lastArea     = mid.reduce((s,v) => s+v, 0) / mid.length;
+    }
+    _renderReading(lastArea);
+    _updatePad(false);
+  }
+
+  function _updatePad(active) {
+    const pad  = document.getElementById('scale-pad');
+    const icon = document.getElementById('scale-pad-icon');
+    const hint = document.getElementById('scale-pad-hint');
+    if (!pad) return;
+    pad.classList.toggle('active', active);
+    if (active) {
+      icon.textContent = '📲';
+      hint.textContent = 'Manteniendo…';
+    } else {
+      icon.textContent = '🫴';
+      hint.textContent = 'Apoya aquí el objeto a pesar';
+    }
+  }
+
+  function _renderReading(area) {
+    const grams  = areaToGrams(area);
+    const el     = document.getElementById('scale-display');
+    const raw    = document.getElementById('scale-raw');
+    if (!el) return;
+    const display = grams > 0 ? grams : 0;
+    el.className  = 'scale-value' + (display > 0 ? ' has-weight' : '');
+    el.innerHTML  = `${display} <small>g</small>`;
+    if (raw) raw.textContent = `Área de contacto: ${area.toFixed(1)} px²`;
+  }
+
+  function tare() {
+    taraArea = lastArea;
+    _renderReading(0);
+  }
+
+  function reset() {
+    taraArea = 0; lastArea = 0; areaReadings = [];
+    const el = document.getElementById('scale-display');
+    if (el) { el.className = 'scale-value'; el.innerHTML = '— <small>g</small>'; }
+    const raw = document.getElementById('scale-raw');
+    if (raw) raw.textContent = 'Área de contacto: —';
+  }
+
+  // ── Calibración
+  function renderCalSteps() {
+    const container = document.getElementById('scale-cal-steps');
+    if (!container) return;
+    container.innerHTML = CAL_POINTS.map((p, i) => {
+      const done    = calData.points[i] !== undefined;
+      const current = i === calStep && !done;
+      return `
+        <div class="scale-cal-step ${done ? 'done' : current ? 'active-step' : ''}">
+          <div class="scale-cal-num">${done ? '✓' : i + 1}</div>
+          <div class="scale-cal-info">
+            <strong>${p.label} — ${p.grams} g</strong>
+            <span>${p.hint}</span>
+            ${done ? `<span style="color:var(--success);display:block">Área capturada: ${calData.points[i].area.toFixed(1)} px²</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    const btn = document.getElementById('scale-cal-btn');
+    if (!btn) return;
+    if (calStep >= CAL_POINTS.length) {
+      btn.textContent = '✓ Calibración completa';
+      btn.disabled    = true;
+      _showCalResult();
+    } else {
+      btn.textContent = `Capturar punto ${calStep + 1} (${CAL_POINTS[calStep].grams} g)`;
+      btn.disabled    = lastArea === 0;
+    }
+  }
+
+  function calAction() {
+    if (calStep >= CAL_POINTS.length) return;
+    if (lastArea === 0) { alert('Primero apoya el objeto en la zona de pesado.'); return; }
+
+    calData.points[calStep] = { grams: CAL_POINTS[calStep].grams, area: lastArea };
+    calStep++;
+
+    if (calStep >= CAL_POINTS.length) {
+      // Calcular regresión lineal de 2 puntos
+      const p1 = calData.points[0];
+      const p2 = calData.points[1];
+      calData.m = (p2.grams - p1.grams) / (p2.area - p1.area);
+      calData.b = p1.grams - calData.m * p1.area;
+      _saveCalData();
+    }
+    renderCalSteps();
+  }
+
+  function _showCalResult() {
+    const box = document.getElementById('scale-cal-result');
+    const content = document.getElementById('scale-cal-result-content');
+    if (!box || !content || calData.m === null) return;
+    box.style.display = 'block';
+    content.innerHTML = `
+      <div class="info-row"><span class="lbl">Pendiente (m)</span><span class="val">${calData.m.toFixed(3)} g/px²</span></div>
+      <div class="info-row"><span class="lbl">Offset (b)</span><span class="val">${calData.b.toFixed(1)} g</span></div>
+      <div class="info-row" style="border:none"><span class="lbl">Estado</span><span class="tag-ok">Calibrada ✓</span></div>`;
+  }
+
+  function resetCal() {
+    if (!confirm('¿Borrar la calibración?')) return;
+    calData  = { points: [], m: null, b: null };
+    calStep  = 0;
+    _saveCalData();
+    renderCalSteps();
+    const box = document.getElementById('scale-cal-result');
+    if (box) box.style.display = 'none';
+  }
+
+  function _saveCalData() {
+    try { localStorage.setItem('maestroArrocero_scale', JSON.stringify(calData)); } catch(e) {}
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('#screen-bascula .inner-tab').forEach((t, i) =>
+      t.classList.toggle('active', (i===0&&tab==='medir')||(i===1&&tab==='calibrar')));
+    document.getElementById('scale-tab-medir').style.display    = tab === 'medir'    ? '' : 'none';
+    document.getElementById('scale-tab-calibrar').style.display = tab === 'calibrar' ? '' : 'none';
+    if (tab === 'calibrar') renderCalSteps();
+  }
+
+  function init() {
+    // Cargar calibración guardada
+    try {
+      const raw = localStorage.getItem('maestroArrocero_scale');
+      if (raw) {
+        calData = JSON.parse(raw);
+        calStep = calData.points?.length || 0;
+      }
+    } catch(e) {}
+  }
+
+  return { onTouchStart, onTouchMove, onTouchEnd, tare, reset, switchTab, calAction, resetCal, init };
+})();
+
+
+/* ── INSTRUCTIONS ───────────────────────────────────────────
+   Pantalla de guías en vídeo. Cada entrada tiene un vídeo de
+   YouTube embebido que se carga al desplegar (lazy load).
+   Para añadir un vídeo: añade un objeto al array GUIDES con
+   el youtubeId del vídeo (la parte después de ?v= en la URL).
+──────────────────────────────────────────────────────────── */
+const Instructions = (() => {
+  const GUIDES = [
+    {
+      id:        'calibracion',
+      icon:      '🧪',
+      title:     'Cómo calibrar la evaporación',
+      desc:      'Aprende a hacer la prueba de evaporación para que la app calcule el agua exacta según tu equipo y tu fuego.',
+      youtubeId: '', // ej: 'dQw4w9WgXcQ'
+    },
+    {
+      id:        'nivelador',
+      icon:      '📐',
+      title:     'Cómo usar el nivelador',
+      desc:      'Coloca el móvil correctamente sobre la paella y aprende a establecer el punto 0 para compensar superficies irregulares.',
+      youtubeId: '',
+    },
+    {
+      id:        'agua',
+      icon:      '💧',
+      title:     'El cálculo del agua',
+      desc:      'Entiende cómo funciona el ratio de arroz y cómo la calibración personal mejora los resultados de cada receta.',
+      youtubeId: '',
+    },
+  ];
+
+  let openId = null;
+
+  function render() {
+    const list = document.getElementById('instructions-list');
+    list.innerHTML = GUIDES.map(g => `
+      <div class="instruction-card" id="icard-${g.id}">
+        <div class="instruction-card-header" onclick="Instructions.toggle('${g.id}')">
+          <div class="instruction-icon">${g.icon}</div>
+          <div class="instruction-info">
+            <h3>${g.title}</h3>
+            <p>${g.desc}</p>
+          </div>
+          <div class="instruction-chevron" id="ichev-${g.id}">▼</div>
+        </div>
+        <div class="instruction-video" id="ivid-${g.id}">
+          ${g.youtubeId
+            ? `<iframe src="https://www.youtube.com/embed/${g.youtubeId}?rel=0&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen loading="lazy"></iframe>`
+            : `<div style="background:var(--surface);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--text-muted);font-size:.85rem">
+                 <span style="font-size:2rem">🎬</span>Vídeo próximamente
+               </div>`
+          }
+          <div class="instruction-desc">${g.desc}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function toggle(id) {
+    const vid  = document.getElementById('ivid-'  + id);
+    const chev = document.getElementById('ichev-' + id);
+    const isOpen = vid.classList.contains('open');
+
+    // Cerrar el que estaba abierto
+    if (openId && openId !== id) {
+      document.getElementById('ivid-'  + openId)?.classList.remove('open');
+      document.getElementById('ichev-' + openId)?.classList.remove('open');
+    }
+
+    vid.classList.toggle('open', !isOpen);
+    chev.classList.toggle('open', !isOpen);
+    openId = isOpen ? null : id;
+  }
+
+  return { render, toggle };
+})();
+
+
+/* ── APP ────────────────────────────────────────────────────
+   Punto de entrada: inicializa módulos y registra callbacks
+   de navegación. Todo lo que necesita "pasar" entre módulos
+   se coordina aquí.
+──────────────────────────────────────────────────────────── */
+const App = (() => {
+  function init() {
+    Recipe.renderHome();
+    Instructions.render();
+    Scale.init();
+
+    Nav.onEnter('agua', () => {
+      Equipment.renderList();
+      Calibration.renderStatus();
+      Water.calc();
+    });
+    Nav.onEnter('nivel', () => {
+      Gyro.init();
+    });
+    Nav.onEnter('bascula', () => {
+      Scale.switchTab('medir');
+    });
+    Nav.onEnter('instrucciones', () => {});
+  }
+
+  return { init };
+})();
+
+App.init();
+
+</script>
+</body>
+</html>
