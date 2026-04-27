@@ -564,7 +564,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 
 /* ── 10. PANTALLA: INSTRUCCIONES ──────────────────────────── */
 .instructions-list { display: flex; flex-direction: column; gap: 1.25rem; }
-.instruction-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.instruction-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
 .instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
 .instruction-card-header:hover { background: var(--surface); }
 .instruction-icon { font-size: 1.8rem; flex-shrink: 0; }
@@ -604,7 +604,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   margin-bottom: 1rem;
 }
 .scale-pad {
-  background: #fff;
+  background: var(--card-bg);
   border: 2px dashed var(--border);
   border-radius: var(--r);
   aspect-ratio: 1;
@@ -661,7 +661,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   align-items: center;
   gap: .875rem;
 }
-.scale-cal-step.done  { border-color: var(--success); background: #e6f4ec; }
+.scale-cal-step.done  { border-color: var(--success); background: rgba(74,124,89,.12); }
 .scale-cal-step.active-step { border-color: var(--water); background: var(--water-light); }
 .scale-cal-num {
   width: 28px; height: 28px;
@@ -676,15 +676,32 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 .scale-cal-info strong { display: block; margin-bottom: 2px; }
 .scale-cal-info span { color: var(--text-muted); font-size: .78rem; }
 .scale-disclaimer {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
+  background: rgba(232,160,32,.1);
+  border: 1px solid rgba(232,160,32,.3);
   border-radius: var(--r);
   padding: .875rem 1rem;
   font-size: .78rem;
-  color: #856404;
+  color: var(--text-muted);
   line-height: 1.6;
   margin-top: 1rem;
 }
+
+/* ── 12. OVERRIDES DARK MODE ESPECÍFICOS ──────────────────── */
+/* Elementos que en dark mode necesitan borde más visible */
+body.dark .instruction-card          { border-color: rgba(255,255,255,.1); }
+body.dark .instruction-card-header:hover { background: rgba(255,255,255,.04); }
+body.dark .scale-pad                 { border-color: rgba(255,255,255,.12); border-style: dashed; }
+body.dark .water-type-btn            { background: transparent; border-color: rgba(255,255,255,.1); color: var(--text-muted); }
+body.dark .water-type-btn:hover      { border-color: var(--water); color: var(--text); }
+body.dark .size-preset               { background: transparent; border-color: rgba(255,255,255,.1); }
+body.dark .burner-btn                { background: transparent; border-color: rgba(255,255,255,.1); }
+body.dark .step-header               { background: var(--surface); }
+body.dark .share-sheet               { background: var(--surface); }
+body.dark .scale-experimental-badge { background: rgba(232,160,32,.1); color: var(--saffron); border-color: rgba(232,160,32,.25); }
+body.dark .evap-result               { background: rgba(58,124,165,.12); }
+body.dark .cal-box                   { background: rgba(58,124,165,.1); }
+body.dark .tag-ok                    { background: rgba(74,124,89,.2); }
+body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 @media (max-width: 420px) {
   .recipe-grid  { grid-template-columns: 1fr 1fr; }
   .result-grid  { grid-template-columns: 1fr; }
