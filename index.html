@@ -5,70 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Maestro Arrocero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
-
-<!-- ============================================================
-  CSS — dividido en secciones con comentarios claros
-  Orden: Variables → Reset → Layout → Componentes → Pantallas
-============================================================ -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 
-/* ── 1. VARIABLES Y RESET ─────────────────────────────────── */
+/* ── 1. VARIABLES ─────────────────────────────────────────── */
 :root {
   --rice:        #C8864A;
   --rice-dark:   #8B5A2B;
-  --rice-light:  #F5E6D3;
-  --water:       #3A7CA5;
-  --water-light: #EAF4FB;
+  --rice-light:  rgba(200,134,74,.12);
   --saffron:     #E8A020;
-  --success:     #4A7C59;
-  --danger:      #b5372a;
+  --water:       #3A7CA5;
+  --water-light: rgba(58,124,165,.12);
+  --success:     #5CC86A;
+  --danger:      #E06060;
   --r:           12px;
 
-  /* TEMA CLARO (por defecto) */
-  --bg:          #FDFAF6;
-  --surface:     #FFF8F0;
-  --text:        #2A1F14;
-  --text-muted:  #7A6555;
-  --border:      rgba(139,90,43,0.15);
-  --nav-bg:      #2A1F14;
-  --nav-text:    #ffffff;
-  --bottom-bg:   #ffffff;
-  --bottom-border: rgba(139,90,43,0.15);
-  --card-bg:     #ffffff;
-  --input-bg:    #ffffff;
-  --result-bg:   #FFF8F0;
+  /* TEMA CLARO */
+  --bg:           #F4EFE8;
+  --surface:      #FFFFFF;
+  --surface2:     #EDE8E0;
+  --text:         #1A1208;
+  --text-muted:   #7A6D5E;
+  --border:       rgba(90,60,20,0.12);
+  --nav-bg:       #1A1208;
+  --bottom-bg:    #FFFFFF;
+  --bottom-border:rgba(90,60,20,0.1);
+  --card-bg:      #FFFFFF;
+  --input-bg:     #FFFFFF;
+  --overlay:      rgba(200,134,74,.08);
+  --overlay-border:rgba(200,134,74,.2);
 }
 
-/* TEMA OSCURO */
 body.dark {
-  --bg:           #0F1923;
-  --surface:      #151E28;
-  --text:         #F0EBE3;
-  --text-muted:   #8A9BAC;
-  --border:       rgba(255,255,255,0.08);
-  --nav-bg:       #0A1018;
-  --nav-text:     #ffffff;
-  --bottom-bg:    #0A1018;
-  --bottom-border: rgba(255,255,255,0.07);
-  --card-bg:      rgba(255,255,255,0.04);
-  --input-bg:     rgba(255,255,255,0.06);
-  --result-bg:    rgba(255,255,255,0.04);
-  --rice-light:   rgba(200,134,74,0.15);
-  --rice-dark:    #E8A020;
-  --water-light:  rgba(58,124,165,0.15);
-  --success:      #6BCF8A;
+  --bg:           #0D1117;
+  --surface:      #151C24;
+  --surface2:     #0A0F15;
+  --text:         #EDE8E0;
+  --text-muted:   #7A8A9A;
+  --border:       rgba(255,255,255,.07);
+  --nav-bg:       #080C10;
+  --bottom-bg:    #080C10;
+  --bottom-border:rgba(255,255,255,.06);
+  --card-bg:      rgba(255,255,255,.04);
+  --input-bg:     rgba(255,255,255,.06);
+  --overlay:      rgba(200,134,74,.07);
+  --overlay-border:rgba(200,134,74,.18);
+  --rice-light:   rgba(200,134,74,.12);
+  --water-light:  rgba(58,124,165,.12);
+  --success:      #5CC86A;
 }
 
-/* Transición suave al cambiar tema */
-body, nav, .bottom-nav, .screen, .recipe-card, .step-card,
-.result-box, .equip-form, .profile-card, .cal-box,
-.measure-form, input, select, .inner-tab, .btn-ghost {
-  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
-}
-
+/* Transición suave */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body, nav, .bottom-nav, .screen, .card, input, select, .btn-ghost, .inner-tab {
+  transition: background-color .25s, border-color .25s, color .25s;
+}
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -77,60 +68,53 @@ body {
   overflow-x: hidden;
 }
 
-/* ── 2. NAVEGACIÓN ────────────────────────────────────────── */
+/* ── 2. NAV SUPERIOR ──────────────────────────────────────── */
 nav {
   background: var(--nav-bg);
-  color: var(--nav-text);
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.25rem;
-  height: 52px;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 .nav-logo {
   font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
-  letter-spacing: .03em;
+  font-size: 1.1rem;
+  color: #fff;
+  letter-spacing: .02em;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.nav-logo span { color: var(--saffron); }
-
-/* Botón toggle tema */
+.nav-logo b { color: var(--saffron); font-style: italic; }
 .theme-toggle {
-  background: none;
-  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.07);
+  border: .5px solid rgba(255,255,255,.15);
   border-radius: 20px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   cursor: pointer;
   font-size: .75rem;
-  color: rgba(255,255,255,.75);
+  color: rgba(255,255,255,.6);
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all .2s;
-  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
 }
-.theme-toggle:hover { border-color: rgba(255,255,255,.5); color: #fff; }
-.theme-toggle .tt-icon { font-size: .95rem; }
+.theme-toggle:hover { color: #fff; border-color: rgba(255,255,255,.3); }
 
-/* Barra de tabs inferior — estilo app nativa */
+/* ── 3. BOTTOM NAV ────────────────────────────────────────── */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 62px;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
   background: var(--bottom-bg);
-  border-top: 1px solid var(--bottom-border);
+  border-top: .5px solid var(--bottom-border);
   display: flex;
-  align-items: stretch;
   z-index: 100;
-  box-shadow: 0 -4px 16px rgba(0,0,0,.1);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.08);
 }
 .bottom-tab {
   flex: 1;
@@ -142,686 +126,906 @@ nav {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 2px;
   color: var(--text-muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: .6rem;
+  font-size: .58rem;
   font-weight: 500;
-  transition: color .15s;
+  padding: 6px 2px;
   -webkit-tap-highlight-color: transparent;
+  transition: color .15s;
 }
-.bottom-tab .bt-icon {
-  font-size: 1.3rem;
-  line-height: 1;
-  transition: transform .15s;
-}
-.bottom-tab:hover  { color: var(--rice); }
+.bottom-tab .bt-icon { font-size: 1.25rem; line-height: 1; transition: transform .15s; }
 .bottom-tab.active { color: var(--rice); }
 .bottom-tab.active .bt-icon { transform: translateY(-2px); }
 
-/* ── 3. PANTALLAS ─────────────────────────────────────────── */
-.screen { display: none; padding: 1.5rem 1rem 5rem; max-width: 680px; margin: 0 auto; }
+/* ── 4. SCREENS ───────────────────────────────────────────── */
+.screen { display: none; padding: 1.25rem 1rem 5.5rem; max-width: 640px; margin: 0 auto; }
 .screen.active { display: block; }
 
-/* ── 4. COMPONENTES REUTILIZABLES ─────────────────────────── */
+/* ── 5. TIPOGRAFÍA ────────────────────────────────────────── */
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+.page-title span { color: var(--rice); font-style: italic; }
+.sec-label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: .6rem;
+}
+.note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
 
-/* Títulos de sección */
-.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.1rem; }
-.section-title span { color: var(--rice); }
+/* ── 6. TARJETAS Y SUPERFICIES ────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: .5px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.card-padded { padding: 1rem; }
+.card + .card { margin-top: .75rem; }
 
-/* Etiquetas e inputs */
-label { display: block; font-size: .83rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
-input[type=number],
-input[type=text],
-select {
+.overlay-card {
+  background: var(--overlay);
+  border: .5px solid var(--overlay-border);
+  border-radius: var(--r);
+  padding: .875rem 1rem;
+}
+.overlay-card + .overlay-card { margin-top: .6rem; }
+
+.divider { border: none; border-top: .5px solid var(--border); margin: 1rem 0; }
+
+/* ── 7. INPUTS ────────────────────────────────────────────── */
+label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+input[type=number], input[type=text], select {
   width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 10px 12px;
+  border: .5px solid var(--border);
+  border-radius: 9px;
   font-family: 'DM Sans', sans-serif;
-  font-size: .93rem;
+  font-size: .92rem;
   background: var(--input-bg);
   color: var(--text);
   outline: none;
-  transition: border-color .2s;
   margin-bottom: .875rem;
+  transition: border-color .2s;
 }
 input:focus, select:focus { border-color: var(--rice); }
-input[readonly] { background: var(--surface); color: var(--text-muted); }
+input[readonly] { background: var(--surface2); color: var(--text-muted); }
+input[type=range] { width: 100%; accent-color: var(--rice); margin: .25rem 0 .875rem; }
 
-/* Slider */
-input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875rem; }
-.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; }
-.slider-row span { min-width: 28px; font-weight: 500; color: var(--rice); font-size: 1.05rem; }
-
-/* Botones */
+/* ── 8. BOTONES ───────────────────────────────────────────── */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: var(--rice);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 11px 20px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .88rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--rice); color: #fff; border: none;
+  border-radius: 10px; padding: 12px 20px;
+  font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: background .2s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn:hover         { background: var(--rice-dark); }
-.btn:disabled      { opacity: .4; cursor: not-allowed; }
-.btn-sm            { padding: 6px 12px; font-size: .78rem; }
-.btn-full          { width: 100%; }
-.btn-secondary     { background: transparent; color: var(--rice); border: 1.5px solid var(--rice); }
+.btn:active { transform: scale(.97); }
+.btn:hover { background: var(--rice-dark); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-full { width: 100%; }
+.btn-sm { padding: 7px 14px; font-size: .78rem; border-radius: 8px; }
+.btn-secondary { background: transparent; color: var(--rice); border: 1.5px solid var(--rice); }
 .btn-secondary:hover { background: var(--rice-light); }
-.btn-water         { background: var(--water); }
-.btn-water:hover   { background: #2c6080; }
-.btn-danger        { background: var(--danger); }
-.btn-danger:hover  { background: #8c2920; }
-.btn-ghost         { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-.btn-ghost:hover   { background: var(--surface); }
+.btn-water { background: var(--water); }
+.btn-water:hover { background: #2c6080; }
+.btn-danger { background: var(--danger); }
+.btn-ghost { background: transparent; color: var(--text-muted); border: .5px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); }
 
-/* Caja de resultado */
-.result-box { background: var(--result-bg); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-top: .875rem; }
-.result-box h4 { font-size: .75rem; color: var(--text-muted); margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .08em; }
-.result-value { font-size: 2rem; font-family: 'Playfair Display', serif; color: var(--rice); }
-.result-value small { font-size: .9rem; color: var(--text-muted); font-family: 'DM Sans', sans-serif; }
-.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .875rem; }
-.result-tip { font-size: .8rem; color: var(--text-muted); margin-top: .4rem; line-height: 1.5; }
-
-/* Línea divisoria */
-.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
-
-/* Nota / texto secundario */
-.note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
-
-/* Fila info (clave: valor) */
-.info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: .87rem; }
-.info-row:last-child { border-bottom: none; }
-.info-row .lbl { color: var(--text-muted); }
-.info-row .val { font-weight: 500; }
-
-/* Badges */
-.tag-ok      { background: #e6f4ec; color: var(--success); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
-.tag-pending { background: var(--rice-light); color: var(--rice-dark); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
-
-/* Estado vacío */
-.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: .88rem; }
-.empty-state .es-icon { font-size: 2.5rem; margin-bottom: .75rem; }
-
-/* Tabs internos */
-.inner-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.inner-tab {
-  background: transparent;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: .8rem;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text-muted);
-  transition: all .15s;
-}
-.inner-tab.active { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
-
-/* ── 5. PANTALLA: HOME ────────────────────────────────────── */
-.hero { text-align: center; padding: 2.5rem 0 2rem; }
-.hero-grain {
-  width: 72px; height: 72px;
-  background: linear-gradient(135deg, var(--rice), var(--saffron));
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
-  margin: 0 auto 1.25rem;
-}
-.hero h1 { font-family: 'Playfair Display', serif; font-size: 2rem; line-height: 1.2; margin-bottom: .5rem; }
-.hero h1 em { color: var(--rice); font-style: italic; }
-.hero p { color: var(--text-muted); font-size: .92rem; margin-bottom: 2rem; }
-
-.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: .875rem; }
-.recipe-card {
+/* ── 9. MEDIDAS CLAVE (bloque visual central) ─────────────── */
+.medidas-block {
   background: var(--card-bg);
-  border: 1px solid var(--border);
+  border: .5px solid var(--border);
   border-radius: var(--r);
-  padding: 1.1rem .9rem;
-  cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
-}
-.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(42,31,20,.1); }
-.recipe-card .emoji { font-size: 1.8rem; margin-bottom: .4rem; }
-.recipe-card h3 { font-size: .92rem; font-weight: 500; margin-bottom: .2rem; }
-.recipe-card .meta { font-size: .75rem; color: var(--text-muted); }
-.recipe-card .difficulty { display: inline-block; margin-top: .4rem; font-size: .7rem; padding: 2px 8px; border-radius: 20px; background: var(--rice-light); color: var(--rice-dark); }
-
-/* ── 6. PANTALLA: RECETA ──────────────────────────────────── */
-.step-header { display: flex; align-items: flex-start; gap: .875rem; margin-bottom: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; }
-.step-header h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
-.comensales-badge { margin-left: auto; background: var(--rice-light); color: var(--rice-dark); font-size: .75rem; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-
-.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 1.25rem; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--rice); border-radius: 2px; transition: width .4s ease; }
-
-.step-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 1rem; }
-.step-inner { display: flex; }
-.step-num { background: var(--rice); color: #fff; font-family: 'Playfair Display', serif; font-size: 1.4rem; width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.step-body { padding: .875rem; flex: 1; }
-.step-body h3 { font-size: .93rem; font-weight: 500; margin-bottom: .2rem; }
-.step-body p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
-.step-timing { font-size: .75rem; background: var(--rice-light); color: var(--rice-dark); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: .4rem; }
-.step-ingredients { background: var(--rice-light); border-top: 1px solid var(--border); padding: .65rem .875rem; font-size: .82rem; color: var(--rice-dark); line-height: 1.7; }
-
-.step-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1.1rem; }
-.step-counter { flex: 1; text-align: center; font-size: .82rem; color: var(--text-muted); }
-
-/* Botón Instagram reel */
-.reel-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .78rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.reel-btn:hover { opacity: .88; }
-.recipe-card .reel-btn { display: block; margin-top: .5rem; font-size: .72rem; padding: 5px 10px; text-align: center; }
-
-.ing-list { list-style: none; }
-.ing-list li { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
-.ing-list li:last-child { border-bottom: none; }
-.ing-amount { font-weight: 500; color: var(--rice); }
-
-/* ── 7. PANTALLA: AGUA ────────────────────────────────────── */
-
-/* Selector tipo de arroz */
-.water-type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: 1.1rem; }
-.water-type-btn {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: .65rem .4rem;
-  text-align: center;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .75rem;
-  color: var(--text);
-  transition: all .15s;
-  line-height: 1.4;
-}
-.water-type-btn .wt-emoji { font-size: 1.3rem; display: block; margin-bottom: 3px; }
-.water-type-btn .wt-ratio { font-size: .68rem; color: var(--text-muted); display: block; margin-top: 2px; }
-.water-type-btn.selected { border-color: var(--water); background: var(--water-light); color: var(--water); }
-.water-type-btn.selected .wt-ratio { color: var(--water); }
-
-/* Tarjetas de equipo */
-.profiles-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
-.profile-card {
-  background: var(--card-bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  padding: .875rem 1rem;
+  padding: 1rem;
   display: flex;
   align-items: center;
+  justify-content: space-around;
+  margin-bottom: .75rem;
+}
+.medida-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.medida-icon { font-size: 1.6rem; }
+.medida-name { font-size: .62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+.medida-val { font-size: 1rem; color: var(--saffron); font-weight: 700; line-height: 1; }
+.medida-sep { font-size: 1.1rem; color: var(--border); flex-shrink: 0; }
+
+/* ── 10. COMENSALES VISUAL ────────────────────────────────── */
+.comensal-box {
+  background: var(--overlay);
+  border: .5px solid var(--overlay-border);
+  border-radius: var(--r);
+  padding: .75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: .75rem;
-  cursor: pointer;
-  transition: all .15s;
+  margin-bottom: .75rem;
 }
-.profile-card:hover { border-color: var(--rice); }
-.profile-card.active-profile { border-color: var(--rice); background: var(--rice-light); }
-.profile-icon { font-size: 1.6rem; flex-shrink: 0; }
-.profile-info { flex: 1; min-width: 0; }
-.profile-name { font-size: .9rem; font-weight: 500; margin-bottom: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.profile-meta { font-size: .75rem; color: var(--text-muted); }
-.profile-badge { font-size: .7rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-.profile-badge.ok      { background: #e6f4ec; color: var(--success); }
-.profile-badge.pending { background: var(--rice-light); color: var(--rice-dark); }
-.profile-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.comensal-num { font-size: 2rem; color: var(--saffron); font-weight: 700; line-height: 1; }
+.comensal-label { font-size: .72rem; color: var(--text-muted); }
+.comensal-sep { font-size: .9rem; color: var(--text-muted); }
 
-/* Formulario de equipo */
-.equip-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1rem; }
-.equip-form h4 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: .875rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-
-.size-presets { display: flex; gap: 6px; margin-bottom: .875rem; flex-wrap: wrap; }
-.size-preset {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: .75rem;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text-muted);
-  transition: all .15s;
+/* ── 11. SELECTOR TIPO ARROZ ──────────────────────────────── */
+.arroz-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  margin-bottom: .75rem;
 }
-.size-preset:hover { border-color: var(--rice); color: var(--rice); }
-.size-preset.sel   { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
-
-.burner-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .875rem; }
-.burner-btn {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: .55rem .3rem;
+.arroz-btn {
+  background: var(--card-bg);
+  border: .5px solid var(--border);
+  border-radius: 9px;
+  padding: .6rem .4rem;
   text-align: center;
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
   font-size: .72rem;
   color: var(--text-muted);
   transition: all .15s;
+  line-height: 1.3;
 }
-.burner-btn .b-emoji { font-size: 1.2rem; display: block; margin-bottom: 2px; }
-.burner-btn.sel { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+.arroz-btn strong { display: block; font-size: .78rem; color: var(--text); font-weight: 500; }
+.arroz-btn small { font-size: .65rem; color: var(--text-muted); }
+.arroz-btn.selected { border-color: var(--rice); background: var(--rice-light); color: var(--rice); }
+.arroz-btn.selected strong { color: var(--rice); }
+.arroz-btn.selected small { color: var(--rice); opacity: .8; }
 
-/* Calibración — caja informativa */
-.cal-box { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1.1rem; }
-.cal-box h4 { color: var(--water); font-size: .9rem; margin-bottom: .6rem; font-weight: 500; }
-.cal-box p { font-size: .82rem; color: #4a6f85; line-height: 1.6; margin-bottom: .5rem; }
-
-/* Calibración — cronómetro */
-.countdown-wrap { text-align: center; padding: 1.5rem 0; }
-.countdown-circle {
-  width: 200px; height: 200px;
-  border-radius: 50%;
-  border: 6px solid var(--border);
-  margin: 0 auto 1.5rem;
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  background: var(--card-bg);
-}
-.countdown-circle svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.countdown-circle svg circle { fill: none; stroke-width: 6; stroke-linecap: round; }
-.countdown-circle svg .track { stroke: var(--rice-light); }
-.countdown-circle svg .fill  { stroke: var(--rice); transition: stroke-dashoffset 1s linear; }
-.countdown-time { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--text); position: relative; z-index: 1; line-height: 1; }
-.countdown-time small { font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--text-muted); display: block; margin-top: 4px; }
-.countdown-state { font-size: .88rem; color: var(--text-muted); margin-bottom: 1.5rem; }
-
-/* Calibración — medición final */
-.measure-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
-.measure-form h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: .25rem; }
-.measure-form p { font-size: .83rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6; }
-.measure-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-.evap-result { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1rem; margin-top: 1rem; text-align: center; }
-.evap-val   { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--water); }
-.evap-label { font-size: .78rem; color: #4a6f85; margin-top: 2px; }
-.evap-badge { display: inline-block; background: rgba(74,124,89,.15); color: var(--success); padding: 3px 12px; border-radius: 20px; font-size: .8rem; font-weight: 500; margin-top: .5rem; }
-
-/* Alerta modal */
-.alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
-.alert-box { background: var(--card-bg); border-radius: 16px; padding: 2rem 1.5rem; max-width: 360px; width: 100%; text-align: center; border: 1px solid var(--border); }
-.alert-box .alert-icon { font-size: 3rem; margin-bottom: 1rem; }
-.alert-box h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: .75rem; }
-.alert-box p { font-size: .88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; }
-
-/* ── 7b. TEMPORIZADOR DE PASO ─────────────────────────────── */
-.step-timer {
+/* ── 12. EQUIPO ACTIVO BAR ────────────────────────────────── */
+.equip-bar {
+  background: var(--overlay);
+  border: .5px solid var(--overlay-border);
+  border-radius: var(--r);
+  padding: .75rem 1rem;
   display: flex;
   align-items: center;
   gap: .75rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: .75rem 1rem;
-  margin-top: .75rem;
+  margin-bottom: .75rem;
 }
-.step-timer-display {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  color: var(--text);
-  min-width: 68px;
-  line-height: 1;
-}
-.step-timer-display.running { color: var(--rice); }
-.step-timer-display.done    { color: var(--success); }
-.step-timer-label { font-size: .75rem; color: var(--text-muted); flex: 1; }
-.step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 3px; }
-.step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
+.equip-bar-icon { font-size: 1.5rem; flex-shrink: 0; }
+.equip-bar-info { flex: 1; min-width: 0; }
+.equip-bar-name { font-size: .9rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.equip-bar-meta { font-size: .72rem; color: var(--text-muted); }
+.equip-bar-badge { font-size: .68rem; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.equip-bar-badge.ok { background: rgba(92,200,106,.15); color: var(--success); }
+.equip-bar-badge.pending { background: var(--rice-light); color: var(--rice); }
 
-/* ── 7c. MODAL COMPARTIR ──────────────────────────────────── */
-.share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 0; }
-.share-sheet {
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  padding: 1.5rem 1.25rem 2rem;
-  width: 100%;
-  max-width: 480px;
-  animation: slideUp .25s ease;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.share-sheet h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1rem; }
-.share-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
-.share-opt {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: .875rem .75rem;
-  text-align: center;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .82rem;
-  color: var(--text);
-  transition: all .15s;
-}
-.share-opt:hover { border-color: var(--rice); background: var(--rice-light); }
-.share-opt .so-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
-.share-preview {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  font-size: .8rem;
-  color: var(--text-muted);
-  line-height: 1.7;
-  max-height: 180px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.share-actions { display: flex; gap: .6rem; }
-
-/* ── 8. PANTALLA: NIVELADOR ───────────────────────────────── */
-.level-container { display: flex; flex-direction: column; align-items: center; padding: .5rem 0; gap: 1.25rem; }
-
-.paella-view { position: relative; width: 240px; height: 240px; }
-.paella-dish {
-  width: 240px; height: 240px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 35%, #d4956a, #8B5A2B 70%, #5a3318);
-  border: 6px solid #6B3D1E;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(42,31,20,.3);
-}
-.rice-surface { position: absolute; inset: 0; background: radial-gradient(ellipse at 45% 40%, #d4a876 0%, #b8834a 40%, #8B5A2B 80%); border-radius: 50%; }
-/* Burbuja — doble de tamaño (56 → 112px), punto interior proporcionado */
-.water-bubble { position: absolute; width: 112px; height: 112px; left: 50%; top: 50%; border-radius: 50%; background: rgba(58,124,165,.35); border: 3px solid rgba(58,124,165,.65); display: flex; align-items: center; justify-content: center; }
-.bubble-center { width: 28px; height: 28px; border-radius: 50%; background: var(--water); }
-.crosshair { position: absolute; width: 240px; height: 240px; left: 0; top: 0; pointer-events: none; }
-
-.level-angle { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--text); text-align: center; }
-.level-angle small { font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text-muted); display: block; }
-.level-status { padding: 9px 22px; border-radius: 20px; font-size: .88rem; font-weight: 500; text-align: center; }
-.level-status.ok   { background: #e6f4ec; color: var(--success); }
-.level-status.warn { background: var(--rice-light); color: var(--rice-dark); }
-.level-status.bad  { background: #fdecea; color: var(--danger); }
-.sensor-denied { background: #fdecea; border: 1px solid rgba(181,55,42,.2); border-radius: var(--r); padding: 1.1rem; text-align: center; width: 100%; }
-.sensor-denied p { color: var(--danger); font-size: .87rem; line-height: 1.6; }
-
-/* Botones de punto 0 */
-.zero-actions { display: flex; gap: .6rem; width: 100%; }
-
-/* ── 10. PANTALLA: INSTRUCCIONES ──────────────────────────── */
-.instructions-list { display: flex; flex-direction: column; gap: 1.25rem; }
-.instruction-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
-.instruction-card-header:hover { background: var(--surface); }
-.instruction-icon { font-size: 1.8rem; flex-shrink: 0; }
-.instruction-info { flex: 1; }
-.instruction-info h3 { font-size: .95rem; font-weight: 500; margin-bottom: 2px; }
-.instruction-info p  { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
-.instruction-chevron { font-size: .9rem; color: var(--text-muted); transition: transform .2s; }
-.instruction-chevron.open { transform: rotate(180deg); }
-.instruction-video { display: none; }
-.instruction-video.open { display: block; }
-.instruction-video iframe {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border: none;
-  display: block;
-}
-.instruction-desc {
-  padding: .875rem 1rem 1rem;
-  font-size: .83rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  border-top: 1px solid var(--border);
-}
-
-/* ── 11. PANTALLA: BÁSCULA ────────────────────────────────── */
-.scale-experimental-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-  border-radius: 20px;
-  padding: 3px 12px;
-  font-size: .75rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-.scale-pad {
+/* ── 13. LISTA DE RECETAS (home) ──────────────────────────── */
+.recipe-list { display: flex; flex-direction: column; gap: .5rem; }
+.recipe-row {
   background: var(--card-bg);
-  border: 2px dashed var(--border);
-  border-radius: var(--r);
-  aspect-ratio: 1;
-  max-width: 320px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  position: relative;
-  overflow: hidden;
-  transition: border-color .2s, background .2s;
-}
-.scale-pad.active {
-  border-color: var(--rice);
-  border-style: solid;
-  background: var(--rice-light);
-}
-.scale-pad.calibrating {
-  border-color: var(--water);
-  border-style: solid;
-  background: var(--water-light);
-}
-.scale-pad-icon { font-size: 3rem; }
-.scale-pad-hint { font-size: .82rem; color: var(--text-muted); text-align: center; padding: 0 1rem; }
-.scale-reading {
-  text-align: center;
-  margin: 1rem auto 0;
-  max-width: 320px;
-  width: 100%;
-}
-.scale-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
-  color: var(--text);
-  line-height: 1;
-}
-.scale-value.has-weight { color: var(--rice); }
-.scale-value small { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; color: var(--text-muted); }
-.scale-raw { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
-
-.scale-cal-steps { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
-.scale-cal-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  border: .5px solid var(--border);
   border-radius: var(--r);
   padding: .875rem 1rem;
   display: flex;
   align-items: center;
   gap: .875rem;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
 }
-.scale-cal-step.done  { border-color: var(--success); background: rgba(74,124,89,.12); }
-.scale-cal-step.active-step { border-color: var(--water); background: var(--water-light); }
-.scale-cal-num {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--border);
+.recipe-row:active { transform: scale(.98); }
+.recipe-row.featured { background: var(--overlay); border-color: var(--overlay-border); }
+.recipe-row-emoji { font-size: 1.75rem; flex-shrink: 0; }
+.recipe-row-info { flex: 1; min-width: 0; }
+.recipe-row-name { font-size: .95rem; font-weight: 500; margin-bottom: 2px; }
+.recipe-row-meta { font-size: .75rem; color: var(--text-muted); }
+.recipe-row-time { font-size: .8rem; color: var(--rice); font-weight: 600; flex-shrink: 0; }
+.recipe-row-arr { font-size: 1.1rem; color: var(--text-muted); opacity: .4; flex-shrink: 0; }
+.recipe-row.featured .recipe-row-arr { color: var(--rice); opacity: 1; }
+
+/* ── 14. INGREDIENTES TAB ─────────────────────────────────── */
+.ing-list { list-style: none; }
+.ing-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem 0;
+  border-bottom: .5px solid var(--border);
+  font-size: .88rem;
+}
+.ing-row:last-child { border-bottom: none; }
+.ing-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(92,200,106,.15);
+  border: .5px solid rgba(92,200,106,.35);
   display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; font-weight: 500; flex-shrink: 0;
+  font-size: .7rem; color: var(--success); flex-shrink: 0;
 }
-.scale-cal-step.done .scale-cal-num  { background: var(--success); color: #fff; }
-.scale-cal-step.active-step .scale-cal-num { background: var(--water); color: #fff; }
-.scale-cal-info { flex: 1; font-size: .83rem; }
-.scale-cal-info strong { display: block; margin-bottom: 2px; }
-.scale-cal-info span { color: var(--text-muted); font-size: .78rem; }
-.scale-disclaimer {
-  background: rgba(232,160,32,.1);
-  border: 1px solid rgba(232,160,32,.3);
-  border-radius: var(--r);
-  padding: .875rem 1rem;
-  font-size: .78rem;
+.ing-name { flex: 1; color: var(--text); }
+.ing-amount { font-weight: 600; color: var(--rice); font-size: .88rem; }
+
+/* ── 15. SLIDER ROW ───────────────────────────────────────── */
+.slider-row { display: flex; align-items: center; gap: .75rem; }
+.slider-row input[type=range] { flex: 1; margin: 0; }
+.slider-val { font-size: 1.1rem; font-weight: 700; color: var(--rice); min-width: 28px; }
+
+/* ── 16. RESULT BOXES ─────────────────────────────────────── */
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+.result-box { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); padding: 1rem; }
+.result-box.accent { background: var(--overlay); border-color: var(--overlay-border); }
+.result-box.blue { background: var(--water-light); border-color: rgba(58,124,165,.25); }
+.result-lbl { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .25rem; font-weight: 600; }
+.result-val { font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1; }
+.result-val small { font-size: .8rem; font-weight: 400; color: var(--text-muted); }
+.result-box.accent .result-val { color: var(--saffron); }
+.result-box.blue .result-val { color: var(--water); }
+.result-tip { font-size: .72rem; color: var(--text-muted); margin-top: .25rem; line-height: 1.4; }
+
+/* ── 17. TABS INTERNAS ────────────────────────────────────── */
+.inner-tabs { display: flex; gap: 4px; margin-bottom: 1rem; }
+.inner-tab {
+  flex: 1;
+  background: transparent;
+  border: .5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: .8rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-top: 1rem;
+  text-align: center;
+  transition: all .15s;
+  font-weight: 500;
+}
+.inner-tab.active { border-color: var(--rice); background: var(--rice-light); color: var(--rice); }
+
+/* ── 18. RECETA — PASO INMERSIVO ──────────────────────────── */
+.step-photo-wrap {
+  width: calc(100% + 2rem);
+  margin: -1.25rem -1rem 0;
+  height: 180px;
+  background: linear-gradient(135deg, #5a2d0c 0%, #1a0a04 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.step-photo-emoji { font-size: 5rem; opacity: .55; }
+.step-photo-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(13,17,23,0) 30%, var(--bg) 100%); }
+.step-photo-badge {
+  position: absolute; top: 1rem; right: 1rem;
+  background: rgba(0,0,0,.5); border: .5px solid rgba(255,255,255,.15);
+  border-radius: 8px; padding: 4px 10px;
+  font-size: .72rem; color: rgba(255,255,255,.8);
+}
+.step-recipe-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .5rem 0 .75rem;
+}
+.step-recipe-name { font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.step-persons-badge {
+  font-size: .72rem; background: var(--rice-light);
+  color: var(--rice); padding: 3px 10px; border-radius: 20px;
+}
+.step-progress { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+.step-progress-fill { height: 100%; background: var(--rice); border-radius: 2px; transition: width .4s; }
+
+.step-big-num {
+  font-size: 5rem; font-weight: 700; line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--rice); opacity: .1;
+  margin-bottom: -.5rem;
+}
+.step-title { font-size: 1.4rem; font-weight: 600; margin-bottom: .5rem; position: relative; z-index: 1; }
+.step-text { font-size: .88rem; color: var(--text-muted); line-height: 1.65; margin-bottom: .75rem; }
+.step-ing-pill {
+  background: var(--rice-light); border-left: 3px solid var(--rice);
+  border-radius: 0 8px 8px 0; padding: .5rem .875rem;
+  font-size: .8rem; color: var(--rice); margin-bottom: 1rem;
+}
+.step-timing-badge {
+  display: inline-block; background: var(--surface2);
+  border: .5px solid var(--border); border-radius: 20px;
+  padding: 3px 10px; font-size: .72rem; color: var(--text-muted);
+  margin-bottom: 1rem;
 }
 
-/* ── 12. OVERRIDES DARK MODE ESPECÍFICOS ──────────────────── */
-/* Elementos que en dark mode necesitan borde más visible */
-body.dark .instruction-card          { border-color: rgba(255,255,255,.1); }
-body.dark .instruction-card-header:hover { background: rgba(255,255,255,.04); }
-body.dark .scale-pad                 { border-color: rgba(255,255,255,.12); border-style: dashed; }
-body.dark .water-type-btn            { background: transparent; border-color: rgba(255,255,255,.1); color: var(--text-muted); }
-body.dark .water-type-btn:hover      { border-color: var(--water); color: var(--text); }
-body.dark .size-preset               { background: transparent; border-color: rgba(255,255,255,.1); }
-body.dark .burner-btn                { background: transparent; border-color: rgba(255,255,255,.1); }
-body.dark .step-header               { background: var(--surface); }
-body.dark .share-sheet               { background: var(--surface); }
-body.dark .scale-experimental-badge { background: rgba(232,160,32,.1); color: var(--saffron); border-color: rgba(232,160,32,.25); }
-body.dark .evap-result               { background: rgba(58,124,165,.12); }
-body.dark .cal-box                   { background: rgba(58,124,165,.1); }
-body.dark .tag-ok                    { background: rgba(74,124,89,.2); }
-body.dark .tag-pending               { background: rgba(200,134,74,.15); }
+/* Temporizador de paso */
+.step-timer-widget {
+  background: var(--card-bg); border: .5px solid var(--border);
+  border-radius: var(--r); padding: .875rem 1rem;
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+}
+.step-timer-display { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; min-width: 72px; }
+.step-timer-display.running { color: var(--rice); }
+.step-timer-display.done { color: var(--success); }
+.step-timer-info { flex: 1; }
+.step-timer-label { font-size: .72rem; color: var(--text-muted); }
+.step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 4px; }
+.step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
+
+/* Progress dots */
+.step-dots { display: flex; gap: 4px; margin-bottom: .875rem; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+.step-dot.done { background: rgba(200,134,74,.4); }
+.step-dot.active { width: 22px; border-radius: 4px; background: var(--rice); }
+
+.step-nav { display: flex; gap: .625rem; }
+.step-counter { flex: 1; text-align: center; font-size: .8rem; color: var(--text-muted); align-self: center; }
+
+/* ── 19. EQUIPOS ──────────────────────────────────────────── */
+.profiles-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+.profile-card {
+  background: var(--card-bg); border: .5px solid var(--border);
+  border-radius: var(--r); padding: .875rem 1rem;
+  display: flex; align-items: center; gap: .75rem; cursor: pointer;
+  transition: border-color .15s;
+}
+.profile-card:hover { border-color: var(--rice); }
+.profile-card.active-profile { border-color: var(--rice); background: var(--overlay); }
+.profile-icon { font-size: 1.6rem; flex-shrink: 0; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: .9rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-meta { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+.profile-badge { font-size: .68rem; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.profile-badge.ok { background: rgba(92,200,106,.15); color: var(--success); }
+.profile-badge.pending { background: var(--rice-light); color: var(--rice); }
+.profile-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+.equip-form-wrap { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); padding: 1rem; margin-bottom: .75rem; }
+.equip-form-title { font-size: 1rem; font-weight: 600; margin-bottom: .875rem; }
+
+.size-presets { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: .875rem; }
+.size-preset { background: var(--card-bg); border: .5px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: .75rem; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text-muted); transition: all .15s; }
+.size-preset:hover { border-color: var(--rice); color: var(--rice); }
+.size-preset.sel { border-color: var(--rice); background: var(--rice-light); color: var(--rice); }
+
+.burner-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .875rem; }
+.burner-btn { background: var(--card-bg); border: .5px solid var(--border); border-radius: 9px; padding: .6rem .4rem; text-align: center; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .72rem; color: var(--text-muted); transition: all .15s; }
+.burner-btn .b-emoji { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+.burner-btn.sel { border-color: var(--rice); background: var(--rice-light); color: var(--rice); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+/* ── 20. CALIBRACIÓN ──────────────────────────────────────── */
+.cal-status-box { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); padding: 1rem; margin-bottom: .875rem; }
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: .5px solid var(--border); font-size: .87rem; }
+.info-row:last-child { border-bottom: none; padding-bottom: 0; }
+.info-row .lbl { color: var(--text-muted); }
+.info-row .val { font-weight: 600; }
+.tag-ok { background: rgba(92,200,106,.15); color: var(--success); padding: 2px 10px; border-radius: 20px; font-size: .72rem; }
+.tag-pending { background: var(--rice-light); color: var(--rice); padding: 2px 10px; border-radius: 20px; font-size: .72rem; }
+
+.cal-info-box { background: var(--water-light); border: .5px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1rem; margin-bottom: .875rem; }
+.cal-info-box h4 { color: var(--water); font-size: .9rem; margin-bottom: .5rem; }
+.cal-info-box p { font-size: .82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .5rem; }
+
+/* Countdown */
+.countdown-wrap { text-align: center; padding: 1.25rem 0; }
+.countdown-circle {
+  width: 180px; height: 180px; border-radius: 50%;
+  border: 5px solid var(--border); margin: 0 auto 1.25rem;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; background: var(--card-bg);
+}
+.countdown-circle svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.countdown-circle svg circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.countdown-circle svg .track { stroke: var(--border); }
+.countdown-circle svg .fill { stroke: var(--rice); transition: stroke-dashoffset 1s linear; }
+.countdown-time { font-size: 2.5rem; font-weight: 700; color: var(--text); position: relative; z-index: 1; line-height: 1; }
+.countdown-time small { font-size: .72rem; color: var(--text-muted); display: block; margin-top: 4px; font-weight: 400; }
+.countdown-state { font-size: .88rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+/* Medición final */
+.measure-form { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
+.measure-form h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: .25rem; }
+.measure-form p { font-size: .82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+.measure-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.evap-result { background: var(--water-light); border: .5px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1rem; margin-top: .875rem; text-align: center; }
+.evap-val { font-size: 2rem; font-weight: 700; color: var(--water); }
+.evap-label { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+.evap-badge { display: inline-block; background: rgba(92,200,106,.15); color: var(--success); padding: 3px 12px; border-radius: 20px; font-size: .78rem; font-weight: 500; margin-top: .5rem; }
+
+/* ── 21. NIVELADOR ────────────────────────────────────────── */
+.level-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: .5rem 0; }
+.paella-view { position: relative; width: 240px; height: 240px; }
+.paella-dish { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(ellipse at 40% 35%, #d4956a, #8B5A2B 70%, #5a3318); border: 6px solid #6B3D1E; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+.rice-surface { position: absolute; inset: 0; background: radial-gradient(ellipse at 45% 40%, #d4a876 0%, #b8834a 40%, #8B5A2B 80%); border-radius: 50%; }
+.water-bubble { position: absolute; width: 112px; height: 112px; left: 50%; top: 50%; border-radius: 50%; background: rgba(58,124,165,.35); border: 2.5px solid rgba(58,124,165,.65); display: flex; align-items: center; justify-content: center; }
+.bubble-center { width: 28px; height: 28px; border-radius: 50%; background: var(--water); }
+.crosshair { position: absolute; width: 240px; height: 240px; left: 0; top: 0; pointer-events: none; }
+.level-angle { font-size: 2.5rem; font-weight: 700; color: var(--text); text-align: center; line-height: 1; }
+.level-angle small { font-size: .85rem; font-weight: 400; color: var(--text-muted); display: block; margin-top: 4px; }
+.level-status { padding: 10px 28px; border-radius: 20px; font-size: .88rem; font-weight: 600; text-align: center; }
+.level-status.ok   { background: rgba(92,200,106,.12); color: var(--success); border: .5px solid rgba(92,200,106,.25); }
+.level-status.warn { background: var(--rice-light); color: var(--rice); border: .5px solid var(--overlay-border); }
+.level-status.bad  { background: rgba(224,96,96,.12); color: var(--danger); border: .5px solid rgba(224,96,96,.25); }
+.zero-actions { display: flex; gap: .6rem; width: 100%; }
+.sensor-denied { background: rgba(224,96,96,.1); border: .5px solid rgba(224,96,96,.2); border-radius: var(--r); padding: 1.1rem; text-align: center; width: 100%; }
+.sensor-denied p { color: var(--danger); font-size: .87rem; line-height: 1.6; }
+
+/* ── 22. BÁSCULA ──────────────────────────────────────────── */
+.scale-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(232,160,32,.1); color: var(--saffron); border: .5px solid rgba(232,160,32,.25); border-radius: 20px; padding: 4px 12px; font-size: .75rem; font-weight: 500; margin-bottom: 1rem; }
+.scale-pad { background: var(--card-bg); border: 1.5px dashed var(--border); border-radius: var(--r); aspect-ratio: 1; max-width: 300px; width: 100%; margin: 0 auto .875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .625rem; cursor: pointer; user-select: none; -webkit-user-select: none; transition: border-color .2s, background .2s; }
+.scale-pad.active { border-color: var(--rice); background: var(--rice-light); }
+.scale-pad-icon { font-size: 3rem; }
+.scale-pad-hint { font-size: .8rem; color: var(--text-muted); text-align: center; padding: 0 1rem; }
+.scale-reading { text-align: center; margin-bottom: .875rem; }
+.scale-value { font-size: 3.5rem; font-weight: 700; color: var(--text); line-height: 1; }
+.scale-value.has-weight { color: var(--rice); }
+.scale-value small { font-size: 1.2rem; font-weight: 400; color: var(--text-muted); }
+.scale-raw { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+.scale-cal-step { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); padding: .875rem 1rem; display: flex; align-items: center; gap: .875rem; margin-bottom: .6rem; }
+.scale-cal-step.done { border-color: var(--success); background: rgba(92,200,106,.08); }
+.scale-cal-step.active-step { border-color: var(--water); background: var(--water-light); }
+.scale-cal-num { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 600; flex-shrink: 0; }
+.scale-cal-step.done .scale-cal-num { background: var(--success); color: #fff; }
+.scale-cal-step.active-step .scale-cal-num { background: var(--water); color: #fff; }
+.scale-cal-info { flex: 1; font-size: .82rem; }
+.scale-cal-info strong { display: block; margin-bottom: 2px; }
+.scale-cal-info span { color: var(--text-muted); font-size: .75rem; }
+.scale-disclaimer { background: rgba(232,160,32,.08); border: .5px solid rgba(232,160,32,.2); border-radius: var(--r); padding: .875rem 1rem; font-size: .78rem; color: var(--text-muted); line-height: 1.6; margin-top: .875rem; }
+
+/* ── 23. INSTRUCCIONES ────────────────────────────────────── */
+.instruction-card { background: var(--card-bg); border: .5px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: .6rem; }
+.instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
+.instruction-card-header:hover { background: var(--surface2); }
+.instruction-icon { font-size: 1.75rem; flex-shrink: 0; }
+.instruction-info h3 { font-size: .92rem; font-weight: 500; margin-bottom: 2px; }
+.instruction-info p { font-size: .75rem; color: var(--text-muted); line-height: 1.5; }
+.instruction-chevron { font-size: .9rem; color: var(--text-muted); transition: transform .2s; margin-left: auto; }
+.instruction-chevron.open { transform: rotate(180deg); }
+.instruction-video { display: none; }
+.instruction-video.open { display: block; }
+.instruction-video iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+.instruction-desc { padding: .875rem 1rem; font-size: .82rem; color: var(--text-muted); line-height: 1.6; border-top: .5px solid var(--border); }
+
+/* ── 24. MODAL COMPARTIR ──────────────────────────────────── */
+.share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+.share-sheet { background: var(--surface); border-radius: 20px 20px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 480px; animation: slideUp .25s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.share-sheet h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+.share-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+.share-opt { background: var(--card-bg); border: .5px solid var(--border); border-radius: 10px; padding: .875rem .75rem; text-align: center; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .82rem; color: var(--text); transition: all .15s; }
+.share-opt:hover { border-color: var(--rice); background: var(--rice-light); }
+.share-opt .so-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+.share-preview { background: var(--surface2); border: .5px solid var(--border); border-radius: 10px; padding: 1rem; font-size: .8rem; color: var(--text-muted); line-height: 1.7; max-height: 180px; overflow-y: auto; margin-bottom: 1rem; white-space: pre-wrap; word-break: break-word; }
+.share-actions { display: flex; gap: .6rem; }
+
+/* ── 25. ALERT MODAL ──────────────────────────────────────── */
+.alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+.alert-box { background: var(--surface); border: .5px solid var(--border); border-radius: 18px; padding: 2rem 1.5rem; max-width: 360px; width: 100%; text-align: center; }
+.alert-box .alert-icon { font-size: 3rem; margin-bottom: 1rem; }
+.alert-box h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: .75rem; }
+.alert-box p { font-size: .88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; }
+
+/* ── 26. BOTÓN INSTAGRAM ──────────────────────────────────── */
+.reel-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-family: 'DM Sans', sans-serif; font-size: .75rem; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.reel-btn:hover { opacity: .88; }
+
+/* ── 27. EMPTY STATE ──────────────────────────────────────── */
+.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: .88rem; }
+.empty-state .es-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+/* ── 28. RESPONSIVE ───────────────────────────────────────── */
 @media (max-width: 420px) {
-  .recipe-grid  { grid-template-columns: 1fr 1fr; }
-  .result-grid  { grid-template-columns: 1fr; }
-  .measure-row  { grid-template-columns: 1fr; }
-  .form-row     { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: 1fr; }
+  .measure-row { grid-template-columns: 1fr; }
+  .form-row    { grid-template-columns: 1fr; }
+  .arroz-grid  { grid-template-columns: repeat(3,1fr); }
 }
 @media (min-width: 680px) {
-  .bottom-nav { max-width: 680px; left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .bottom-nav { max-width: 640px; left: 50%; transform: translateX(-50%); border-left: .5px solid var(--bottom-border); border-right: .5px solid var(--bottom-border); }
 }
+
+/* ── 29. DARK MODE OVERRIDES ──────────────────────────────── */
+body.dark .instruction-card { border-color: rgba(255,255,255,.08); }
+body.dark .instruction-card-header:hover { background: rgba(255,255,255,.04); }
+body.dark .scale-pad { border-color: rgba(255,255,255,.1); }
+body.dark .arroz-btn { background: transparent; }
+body.dark .burner-btn { background: transparent; }
+body.dark .size-preset { background: transparent; }
+body.dark .equip-form-wrap { background: var(--surface); }
+body.dark .share-sheet { background: var(--surface); }
+body.dark .scale-cal-step.done { background: rgba(92,200,106,.08); }
+body.dark .tag-ok { background: rgba(92,200,106,.15); }
+body.dark .tag-pending { background: rgba(200,134,74,.15); }
+body.dark .evap-result { background: rgba(58,124,165,.12); }
+body.dark .cal-info-box { background: rgba(58,124,165,.1); }
+body.dark .step-photo-overlay { background: linear-gradient(to bottom, rgba(13,17,23,0) 30%, #0D1117 100%); }
 
 </style>
 </head>
 <body>
 
-
 <!-- ============================================================
-  HTML — una sección por pantalla
+  HTML
 ============================================================ -->
 
-<!-- NAVEGACIÓN SUPERIOR — logo + toggle tema -->
+<!-- NAV SUPERIOR -->
 <nav>
-  <div class="nav-logo">🍳 Maestro <span>Arrocero</span></div>
+  <div class="nav-logo">Maestro <b>Arrocero</b></div>
   <button class="theme-toggle" id="theme-toggle" onclick="Theme.toggle()">
-    <span class="tt-icon" id="theme-icon">🌙</span>
+    <span id="theme-icon">🌙</span>
     <span id="theme-label">Oscuro</span>
   </button>
 </nav>
 
-<!-- NAVEGACIÓN INFERIOR — tabs estilo app nativa -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="bottom-tab active" id="btab-home" onclick="Nav.goTo('home')">
-    <span class="bt-icon">🍚</span>Recetas
+  <button class="bottom-tab active" id="btab-home"         onclick="Nav.goTo('home')">
+    <span class="bt-icon">⊞</span>Inicio
   </button>
-  <button class="bottom-tab" id="btab-agua" onclick="Nav.goTo('agua')">
+  <button class="bottom-tab" id="btab-agua"                onclick="Nav.goTo('agua')">
     <span class="bt-icon">💧</span>Agua
   </button>
-  <button class="bottom-tab" id="btab-nivel" onclick="Nav.goTo('nivel')">
+  <button class="bottom-tab" id="btab-nivel"               onclick="Nav.goTo('nivel')">
     <span class="bt-icon">📐</span>Nivel
   </button>
-  <button class="bottom-tab" id="btab-bascula" onclick="Nav.goTo('bascula')">
+  <button class="bottom-tab" id="btab-bascula"             onclick="Nav.goTo('bascula')">
     <span class="bt-icon">⚖️</span>Báscula
   </button>
-  <button class="bottom-tab" id="btab-instrucciones" onclick="Nav.goTo('instrucciones')">
+  <button class="bottom-tab" id="btab-instrucciones"       onclick="Nav.goTo('instrucciones')">
     <span class="bt-icon">🎬</span>Guías
   </button>
 </div>
 
-<!-- PANTALLA: HOME -->
+<!-- ══ PANTALLA: HOME — DASHBOARD ══ -->
 <div id="screen-home" class="screen active">
-  <div class="hero">
-    <div class="hero-grain">🍚</div>
-    <h1>El arte del <em>arroz</em> perfecto</h1>
-    <p>Recetas guiadas paso a paso. Elige tu receta y ajusta las cantidades.</p>
+
+  <!-- Equipo activo -->
+  <div id="home-equip-bar"></div>
+
+  <!-- Comensales visual -->
+  <div class="comensal-box" id="home-comensal-box">
+    <span style="font-size:1.5rem">👤</span>
+    <span class="comensal-sep">×</span>
+    <div style="text-align:center">
+      <div class="comensal-num" id="home-com-num">4</div>
+      <div class="comensal-label">personas</div>
+    </div>
+    <span class="comensal-sep">=</span>
+    <span style="font-size:1.5rem">🥘</span>
   </div>
-  <div class="recipe-grid" id="recipe-grid"></div>
+
+  <!-- Selector tipo de arroz -->
+  <div class="sec-label">Tipo de arroz</div>
+  <div class="arroz-grid" id="home-arroz-grid">
+    <button class="arroz-btn selected" onclick="Home.selectArroz(this,'bomba',1.5)"><strong>Bomba</strong><small>1 : 1.5</small></button>
+    <button class="arroz-btn"          onclick="Home.selectArroz(this,'redondo',1.2)"><strong>Redondo</strong><small>1 : 1.2</small></button>
+    <button class="arroz-btn"          onclick="Home.selectArroz(this,'albufera',1.0)"><strong>Albufera</strong><small>1 : 1.0</small></button>
+    <button class="arroz-btn"          onclick="Home.selectArroz(this,'balilla',1.1)"><strong>Balilla×Sollana</strong><small>1 : 1.1</small></button>
+    <button class="arroz-btn"          onclick="Home.selectArroz(this,'dinamita',1.6)"><strong>Dinamita</strong><small>1 : 1.6</small></button>
+  </div>
+
+  <!-- Slider comensales -->
+  <div class="slider-row" style="margin-bottom:.75rem">
+    <input type="range" min="1" max="20" value="4" id="home-com-slider"
+      oninput="Home.updateComensales(this.value)">
+    <span class="slider-val" id="home-com-val">4</span>
+  </div>
+
+  <!-- Medidas clave -->
+  <div class="sec-label">Medidas clave</div>
+  <div class="medidas-block">
+    <div class="medida-item">
+      <div class="medida-icon">⚖️</div>
+      <div class="medida-name">Arroz</div>
+      <div class="medida-val" id="home-med-arroz">320g</div>
+    </div>
+    <div class="medida-sep">+</div>
+    <div class="medida-item">
+      <div class="medida-icon">🫕</div>
+      <div class="medida-name">Agua</div>
+      <div class="medida-val" id="home-med-agua">480ml</div>
+    </div>
+    <div class="medida-sep">+</div>
+    <div class="medida-item">
+      <div class="medida-icon">🫒</div>
+      <div class="medida-name">Aceite</div>
+      <div class="medida-val" id="home-med-aceite">60ml</div>
+    </div>
+  </div>
+
+  <!-- Lista recetas -->
+  <div class="sec-label">Recetas</div>
+  <div class="recipe-list" id="recipe-grid"></div>
 </div>
 
-<!-- PANTALLA: RECETA -->
-<div id="screen-recipe" class="screen">
-  <div class="inner-tabs">
+<!-- ══ PANTALLA: RECETA ══ -->
+<div id="screen-recipe" class="screen" style="padding-top:0">
+  <div class="inner-tabs" style="margin-top:1.25rem">
     <button class="inner-tab active" onclick="Recipe.switchTab('guia')">Guía paso a paso</button>
     <button class="inner-tab"        onclick="Recipe.switchTab('ingredientes')">Ingredientes</button>
   </div>
 
-  <!-- Tab: guía -->
+  <!-- TAB: GUÍA -->
   <div id="tab-guia">
-    <div class="step-header">
-      <div>
-        <h2 id="recipe-title-step">—</h2>
-        <div class="note" id="recipe-subtitle-step"></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
-        <div class="comensales-badge" id="comensales-badge">4 personas</div>
+    <!-- Foto del plato -->
+    <div class="step-photo-wrap" id="step-photo-wrap">
+      <div class="step-photo-emoji" id="step-photo-emoji">🥘</div>
+      <div class="step-photo-overlay"></div>
+      <div class="step-photo-badge" id="step-photo-badge">Paso 1</div>
+    </div>
+    <!-- Cabecera receta -->
+    <div class="step-recipe-hdr">
+      <span class="step-recipe-name" id="recipe-title-step">—</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="step-persons-badge" id="comensales-badge">4 personas</div>
         <a id="recipe-reel-btn" class="reel-btn" href="#" target="_blank" style="display:none">▶ Instagram</a>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
+    <!-- Progreso -->
+    <div class="step-progress"><div class="step-progress-fill" id="progress-fill" style="width:12%"></div></div>
+    <!-- Contenido del paso -->
     <div id="step-display"></div>
-    <div class="step-nav">
+    <!-- Navegación -->
+    <div class="step-nav" style="margin-top:.875rem">
       <button class="btn btn-secondary" id="btn-prev" onclick="Recipe.changeStep(-1)">← Anterior</button>
       <div class="step-counter" id="step-counter">Paso 1 de 8</div>
       <button class="btn" id="btn-next" onclick="Recipe.changeStep(1)">Siguiente →</button>
     </div>
   </div>
 
-  <!-- Tab: ingredientes -->
+  <!-- TAB: INGREDIENTES -->
   <div id="tab-ingredientes" style="display:none">
-    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap;">
-      <div style="font-size:.83rem;color:var(--text-muted);font-weight:500;">Comensales:</div>
-      <div class="slider-row" style="flex:1;min-width:160px;">
-        <input type="range" min="1" max="20" value="4" id="comensal-slider" oninput="Recipe.updateComensales(this.value)">
-        <span id="comensal-val">4</span>
+    <!-- Comensales slider -->
+    <div class="overlay-card" style="display:flex;align-items:center;gap:1rem;margin-bottom:.875rem">
+      <span style="font-size:1.5rem">👤</span>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+          <span class="sec-label" style="margin:0">Comensales</span>
+          <span class="slider-val" id="comensal-val">4</span>
+        </div>
+        <input type="range" min="1" max="20" value="4" id="comensal-slider"
+          oninput="Recipe.updateComensales(this.value)" style="margin:0">
       </div>
     </div>
-    <ul class="ing-list" id="ing-list"></ul>
-    <hr class="divider">
-    <div class="result-box">
-      <h4>Agua necesaria</h4>
-      <div class="result-value" id="ing-agua">— <small>ml</small></div>
-      <div class="result-tip"   id="ing-agua-tip">Selecciona un equipo calibrado en la sección Agua.</div>
+    <!-- Medidas clave -->
+    <div class="sec-label">Medidas clave</div>
+    <div class="medidas-block" id="ing-medidas">
+      <div class="medida-item"><div class="medida-icon">⚖️</div><div class="medida-name">Arroz</div><div class="medida-val" id="ing-med-arroz">—</div></div>
+      <div class="medida-sep">+</div>
+      <div class="medida-item"><div class="medida-icon">🫕</div><div class="medida-name">Agua</div><div class="medida-val" id="ing-med-agua">—</div></div>
+      <div class="medida-sep">+</div>
+      <div class="medida-item"><div class="medida-icon">🫒</div><div class="medida-name">Aceite</div><div class="medida-val" id="ing-med-aceite">—</div></div>
+    </div>
+    <!-- Ingredientes -->
+    <div class="sec-label">Ingredientes completos</div>
+    <div class="card card-padded">
+      <ul class="ing-list" id="ing-list"></ul>
     </div>
     <hr class="divider">
-    <div style="display:flex;gap:.6rem;">
+    <div style="display:flex;gap:.6rem">
       <button class="btn btn-secondary" style="flex:1" onclick="Share.open()">↗ Compartir</button>
       <button class="btn" style="flex:2" onclick="Recipe.switchTab('guia')">Empezar a cocinar →</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Compartir receta -->
+<!-- ══ PANTALLA: AGUA ══ -->
+<div id="screen-agua" class="screen">
+  <div class="page-title">Calculadora de <span>agua</span></div>
+
+  <!-- Tipo de arroz -->
+  <div class="sec-label">Tipo de arroz</div>
+  <div class="arroz-grid" id="water-arroz-grid">
+    <button class="arroz-btn selected" onclick="Water.selectType(this,'bomba',1.5)"><strong>Bomba</strong><small>1 : 1.5</small></button>
+    <button class="arroz-btn"          onclick="Water.selectType(this,'redondo',1.2)"><strong>Redondo</strong><small>1 : 1.2</small></button>
+    <button class="arroz-btn"          onclick="Water.selectType(this,'albufera',1.0)"><strong>Albufera</strong><small>1 : 1.0</small></button>
+    <button class="arroz-btn"          onclick="Water.selectType(this,'balilla',1.1)"><strong>Balilla×Sollana</strong><small>1 : 1.1</small></button>
+    <button class="arroz-btn"          onclick="Water.selectType(this,'dinamita',1.6)"><strong>Dinamita</strong><small>1 : 1.6</small></button>
+  </div>
+
+  <label>Gramos de arroz</label>
+  <input type="number" id="arroz-gramos" value="320" min="50" max="5000" oninput="Water.calc()">
+
+  <label>O ajusta por comensales <span style="font-weight:300">(80 g/persona)</span></label>
+  <div class="slider-row" style="margin-bottom:.875rem">
+    <input type="range" min="1" max="20" value="4" id="agua-comensales"
+      oninput="document.getElementById('agua-com-val').textContent=this.value;
+               document.getElementById('arroz-gramos').value=this.value*80;
+               Water.calc()">
+    <span class="slider-val" id="agua-com-val">4</span>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-box accent">
+      <div class="result-lbl">Agua total</div>
+      <div class="result-val" id="agua-cal">— <small>ml</small></div>
+      <div class="result-tip" id="agua-evap-tip">Sin equipo calibrado</div>
+    </div>
+    <div class="result-box blue">
+      <div class="result-lbl">Ratio base</div>
+      <div class="result-val" id="agua-std">480 <small>ml</small></div>
+      <div class="result-tip" id="agua-ratio-tip">Bomba 1:1.5</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- MIS EQUIPOS -->
+  <div class="page-title" style="font-size:1.2rem">Mis <span>equipos</span></div>
+  <div id="profiles-list" class="profiles-list"></div>
+
+  <!-- Formulario equipo -->
+  <div id="equip-form" style="display:none">
+    <div class="equip-form-wrap">
+      <div class="equip-form-title" id="equip-form-title">Nuevo equipo</div>
+      <label>Nombre del equipo</label>
+      <input type="text" id="eq-name" placeholder="ej. Paella grande de casa">
+      <label>Diámetro de la paella</label>
+      <div class="size-presets">
+        <button class="size-preset" onclick="Equipment.setDiam(26)">26 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(32)">32 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(38)">38 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(46)">46 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(55)">55 cm</button>
+        <button class="size-preset" onclick="Equipment.setDiam(65)">65 cm</button>
+      </div>
+      <div class="form-row">
+        <div><label>Diámetro (cm)</label><input type="number" id="eq-diam" placeholder="ej. 46" min="20" max="120" oninput="Equipment.clearDiamPreset()"></div>
+        <div><label>Capacidad estimada</label><input type="text" id="eq-cap" readonly placeholder="—"></div>
+      </div>
+      <label>Tipo de quemador</label>
+      <div class="burner-grid">
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','🔥')"><span class="b-emoji">🔥</span>Paellero gas</button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','⚡')"><span class="b-emoji">⚡</span>Vitrocerámica</button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','🧲')"><span class="b-emoji">🧲</span>Inducción</button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','🪵')"><span class="b-emoji">🪵</span>Leña</button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','🫧')"><span class="b-emoji">🫧</span>Cocina gas</button>
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','🍳')"><span class="b-emoji">🍳</span>Otro</button>
+      </div>
+      <input type="hidden" id="eq-burner">
+      <div style="display:flex;gap:.75rem">
+        <button class="btn btn-ghost btn-sm" onclick="Equipment.hideForm()">Cancelar</button>
+        <button class="btn btn-full" onclick="Equipment.save()">Guardar equipo</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CALIBRACIÓN -->
+  <div class="page-title" style="font-size:1.2rem">Calibración de <span>evaporación</span></div>
+  <div class="cal-status-box"><div id="cal-status-content"></div></div>
+
+  <!-- Fase setup -->
+  <div id="cal-phase-setup">
+    <div class="cal-info-box">
+      <h4>🧪 Prueba de evaporación</h4>
+      <p>Mide cuánta agua evapora tu equipo por minuto. Llena la paella, pon el fuego a tope y pulsa iniciar. 15 minutos.</p>
+    </div>
+    <label>Agua inicial (ml)</label>
+    <input type="number" id="cal-agua-inicial-input" value="3000" min="500" max="15000">
+    <button class="btn btn-water btn-full" id="btn-start-cal" onclick="Calibration.start()">▶ Iniciar prueba</button>
+    <div style="margin-top:.75rem">
+      <button class="btn btn-secondary btn-full" onclick="Equipment.showForm(null)">+ Añadir nuevo equipo</button>
+    </div>
+  </div>
+
+  <!-- Fase running -->
+  <div id="cal-phase-running" style="display:none">
+    <div class="countdown-wrap">
+      <div class="countdown-circle">
+        <svg viewBox="0 0 200 200">
+          <circle class="track" cx="100" cy="100" r="91"/>
+          <circle class="fill" id="cal-arc" cx="100" cy="100" r="91" stroke-dasharray="571.8" stroke-dashoffset="0"/>
+        </svg>
+        <div class="countdown-time"><span id="cal-time-display">15:00</span><small>restantes</small></div>
+      </div>
+      <div class="countdown-state" id="cal-state-text">🔥 Fuego al máximo — no apagues la pantalla</div>
+      <button class="btn btn-danger" onclick="Calibration.cancel()">✕ Cancelar prueba</button>
+    </div>
+  </div>
+
+  <!-- Fase measure -->
+  <div id="cal-phase-measure" style="display:none">
+    <div class="measure-form">
+      <h4>Mide el agua restante</h4>
+      <p>Apaga el fuego. Espera 5 minutos y mide cuánta agua queda.</p>
+      <div class="measure-row">
+        <div><label>Agua inicial (ml)</label><input type="number" id="cal-agua-inicial-show" readonly></div>
+        <div><label>Agua que queda (ml)</label><input type="number" id="cal-agua-final" placeholder="ej. 2100" min="0" oninput="Calibration.calcEvap()"></div>
+      </div>
+      <div id="evap-result-box" style="display:none" class="evap-result">
+        <div class="evap-val" id="evap-val-display">—</div>
+        <div class="evap-label">ml evaporados por minuto</div>
+        <div class="evap-badge" id="evap-badge-txt">—</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:.75rem">
+        <button class="btn btn-secondary" onclick="Calibration.cancel()">Cancelar</button>
+        <button class="btn btn-full" id="btn-save-cal" onclick="Calibration.save()" disabled>Guardar ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA: NIVEL ══ -->
+<div id="screen-nivel" class="screen">
+  <div class="page-title">Nivelador de <span>paella</span></div>
+  <p class="note" style="margin-bottom:1.25rem">Coloca el móvil sobre la paella. Pulsa <strong>Punto 0</strong> para calibrar tu superficie de referencia.</p>
+  <div class="level-container">
+    <div class="paella-view">
+      <div class="paella-dish" id="paella-dish">
+        <div class="rice-surface"></div>
+        <div class="water-bubble" id="water-bubble"><div class="bubble-center" id="bubble-center"></div></div>
+      </div>
+      <svg class="crosshair" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="28" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <circle cx="120" cy="120" r="56" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+        <line x1="120" y1="55"  x2="120" y2="185" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        <line x1="55"  y1="120" x2="185" y2="120" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="level-angle"><span id="angle-val">0.0</span>°<small id="angle-dir">perfectamente nivelado</small></div>
+    <div class="level-status ok" id="level-status">✓ La paella está nivelada</div>
+    <div class="zero-actions">
+      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">🎯 Establecer punto 0</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="Gyro.resetZero()">↺ Reset</button>
+    </div>
+    <div class="note" id="zero-status" style="text-align:center">Sin punto 0 — horizontal absoluta</div>
+    <div id="sensor-denied" class="sensor-denied" style="display:none;width:100%">
+      <p>⚠️ Necesito permiso para el giroscopio.<br><br>iOS: Ajustes → Safari → Acceso al movimiento.<br>Android: debería funcionar automáticamente.</p>
+      <br><button class="btn btn-water" onclick="Gyro.requestPermission()">Activar sensor</button>
+    </div>
+    <p class="note" style="text-align:center">Umbral: ±1.5°</p>
+  </div>
+</div>
+
+<!-- ══ PANTALLA: BÁSCULA ══ -->
+<div id="screen-bascula" class="screen">
+  <div class="page-title">Báscula <span>táctil</span></div>
+  <div class="scale-badge">⚗️ Función experimental</div>
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="Scale.switchTab('medir')">⚖️ Pesar</button>
+    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">🔧 Calibrar</button>
+  </div>
+  <div id="scale-tab-medir">
+    <p class="note" style="margin-bottom:1rem">Pon el móvil en una superficie plana y apoya el objeto sobre la zona de pesado.</p>
+    <div class="scale-pad" id="scale-pad"
+      ontouchstart="Scale.onTouchStart(event)"
+      ontouchmove="Scale.onTouchMove(event)"
+      ontouchend="Scale.onTouchEnd(event)">
+      <div class="scale-pad-icon" id="scale-pad-icon">🫴</div>
+      <div class="scale-pad-hint" id="scale-pad-hint">Apoya aquí el objeto</div>
+    </div>
+    <div class="scale-reading">
+      <div class="scale-value" id="scale-display">— <small>g</small></div>
+      <div class="scale-raw" id="scale-raw">Área de contacto: —</div>
+    </div>
+    <div style="display:flex;gap:.6rem;max-width:300px;margin:0 auto">
+      <button class="btn btn-secondary btn-full" onclick="Scale.tare()">⟳ Tara</button>
+      <button class="btn btn-ghost btn-full" onclick="Scale.reset()">✕ Reset</button>
+    </div>
+    <div class="scale-disclaimer">⚠️ Báscula experimental usando el área de contacto táctil. Margen de error típico: ±20-80 g. No usar para medidas críticas.</div>
+  </div>
+  <div id="scale-tab-calibrar" style="display:none">
+    <p class="note" style="margin-bottom:1rem">Calibra con dos objetos de peso conocido para mejorar la precisión.</p>
+    <div class="scale-cal-steps" id="scale-cal-steps"></div>
+    <div style="margin-top:1rem;display:flex;gap:.6rem">
+      <button class="btn btn-ghost btn-sm" onclick="Scale.resetCal()">↺ Borrar</button>
+      <button class="btn btn-full" id="scale-cal-btn" onclick="Scale.calAction()">Capturar punto 1</button>
+    </div>
+    <div class="result-box" style="margin-top:1rem;display:none" id="scale-cal-result"><div id="scale-cal-result-content"></div></div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA: INSTRUCCIONES ══ -->
+<div id="screen-instrucciones" class="screen">
+  <div class="page-title">Guías en <span>vídeo</span></div>
+  <p class="note" style="margin-bottom:1.25rem">Aprende a sacarle el máximo partido a cada función de la app.</p>
+  <div id="instructions-list"></div>
+</div>
+
+<!-- MODALES -->
 <div id="share-overlay" class="share-overlay" style="display:none" onclick="Share.closeOnBackdrop(event)">
   <div class="share-sheet">
     <h3>Compartir</h3>
     <div class="share-options">
-      <button class="share-opt" onclick="Share.prepare('ingredientes')">
-        <span class="so-icon">🧺</span>Lista de ingredientes
-      </button>
-      <button class="share-opt" onclick="Share.prepare('receta')">
-        <span class="so-icon">📋</span>Receta completa
-      </button>
+      <button class="share-opt" onclick="Share.prepare('ingredientes')"><span class="so-icon">🧺</span>Ingredientes</button>
+      <button class="share-opt" onclick="Share.prepare('receta')"><span class="so-icon">📋</span>Receta completa</button>
     </div>
     <div id="share-preview" class="share-preview" style="display:none"></div>
     <div class="share-actions" id="share-actions" style="display:none">
@@ -833,336 +1037,99 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
   </div>
 </div>
 
-<!-- PANTALLA: AGUA -->
-<div id="screen-agua" class="screen">
-
-  <!-- SECCIÓN A: Calculadora de agua -->
-  <h2 class="section-title">Calculadora de <span>agua</span></h2>
-
-  <div class="water-type-grid">
-    <button class="water-type-btn selected" onclick="Water.selectType(this,'bomba',1.5)">
-      <span class="wt-emoji">🌾</span>Bomba<span class="wt-ratio">ratio 1:1.5</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.2)">
-      <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1.2</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.0)">
-      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.0</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'balilla',1.1)">
-      <span class="wt-emoji">🌿</span>Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'dinamita',1.6)">
-      <span class="wt-emoji">💥</span>Dinamita<span class="wt-ratio">ratio 1:1.6</span>
-    </button>
-  </div>
-
-  <label>Gramos de arroz</label>
-  <input type="number" id="arroz-gramos" value="320" min="50" max="5000" oninput="Water.calc()">
-
-  <label>O ajusta por comensales <span style="font-weight:300">(80 g/persona)</span></label>
-  <div class="slider-row">
-    <input type="range" min="1" max="20" value="4" id="agua-comensales"
-      oninput="document.getElementById('agua-com-val').textContent=this.value;
-               document.getElementById('arroz-gramos').value=this.value*80;
-               Water.calc()">
-    <span id="agua-com-val">4</span>
-  </div>
-
-  <div class="result-grid">
-    <div class="result-box">
-      <h4>Agua por ratio</h4>
-      <div class="result-value" id="agua-std">480 <small>ml</small></div>
-      <div class="result-tip"   id="agua-ratio-tip">Ratio 1:1.5 (Bomba)</div>
-    </div>
-    <div class="result-box">
-      <h4>+ Evaporación calibrada</h4>
-      <div class="result-value" id="agua-cal">— <small>ml</small></div>
-      <div class="result-tip"   id="agua-evap-tip">Sin equipo activo calibrado</div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- SECCIÓN B: Mis equipos -->
-  <h2 class="section-title">Mis <span>equipos</span></h2>
-  <div id="profiles-list" class="profiles-list"></div>
-
-  <!-- Formulario nuevo/editar equipo (oculto por defecto) -->
-  <div id="equip-form" style="display:none">
-    <div class="equip-form">
-      <h4 id="equip-form-title">Nuevo equipo</h4>
-
-      <label>Nombre del equipo</label>
-      <input type="text" id="eq-name" placeholder="ej. Paella grande de casa">
-
-      <label>Diámetro de la paella</label>
-      <div class="size-presets" id="size-presets">
-        <button class="size-preset" onclick="Equipment.setDiam(26)">26 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(32)">32 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(38)">38 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(46)">46 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(55)">55 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(65)">65 cm</button>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>Diámetro (cm)</label>
-          <input type="number" id="eq-diam" placeholder="ej. 46" min="20" max="120" oninput="Equipment.clearDiamPreset()">
-        </div>
-        <div>
-          <label>Capacidad estimada</label>
-          <input type="text" id="eq-cap" readonly placeholder="—">
-        </div>
-      </div>
-
-      <label>Tipo de quemador / fuego</label>
-      <div class="burner-grid">
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','🔥')">
-          <span class="b-emoji">🔥</span>Paellero gas
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','⚡')">
-          <span class="b-emoji">⚡</span>Vitrocerámica
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','🧲')">
-          <span class="b-emoji">🧲</span>Inducción
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','🪵')">
-          <span class="b-emoji">🪵</span>Leña
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','🫧')">
-          <span class="b-emoji">🫧</span>Cocina gas
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','🍳')">
-          <span class="b-emoji">🍳</span>Otro
-        </button>
-      </div>
-      <input type="hidden" id="eq-burner">
-
-      <div style="display:flex;gap:.75rem;margin-top:.5rem;">
-        <button class="btn btn-ghost btn-sm" onclick="Equipment.hideForm()">Cancelar</button>
-        <button class="btn btn-full" onclick="Equipment.save()">Guardar equipo</button>
-      </div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- SECCIÓN C: Calibración de evaporación -->
-  <h2 class="section-title">Calibración de <span>evaporación</span></h2>
-
-  <!-- Estado actual del equipo activo -->
-  <div class="result-box" style="margin-top:0;margin-bottom:1rem">
-    <div id="cal-status-content"></div>
-  </div>
-
-  <!-- Fase 1: Setup (instrucciones + arranque) -->
-  <div id="cal-phase-setup">
-    <div class="cal-box">
-      <h4>🧪 Prueba de evaporación</h4>
-      <p>Mide cuánta agua evapora tu equipo activo por minuto para sumarla automáticamente al cálculo de agua de cada receta.</p>
-      <p><strong>Cómo hacerlo:</strong> llena la paella con agua (ej. 3 litros), pon el fuego a tope y pulsa iniciar. El cronómetro contará 15 minutos hacia atrás. Mantén la pantalla encendida.</p>
-    </div>
-    <label>Agua inicial que vas a poner (ml)</label>
-    <input type="number" id="cal-agua-inicial-input" value="3000" min="500" max="15000">
-    <button class="btn btn-water btn-full" id="btn-start-cal" onclick="Calibration.start()">▶ Iniciar prueba de calibración</button>
-    <div style="margin-top:1rem">
-      <button class="btn btn-secondary btn-full" onclick="Equipment.showForm(null)">+ Añadir nuevo equipo</button>
-    </div>
-  </div>
-
-  <!-- Fase 2: Cronómetro corriendo -->
-  <div id="cal-phase-running" style="display:none">
-    <div class="countdown-wrap">
-      <div class="countdown-circle">
-        <svg viewBox="0 0 200 200">
-          <circle class="track" cx="100" cy="100" r="91"/>
-          <circle class="fill" id="cal-arc" cx="100" cy="100" r="91" stroke-dasharray="571.8" stroke-dashoffset="0"/>
-        </svg>
-        <div class="countdown-time">
-          <span id="cal-time-display">15:00</span>
-          <small>restantes</small>
-        </div>
-      </div>
-      <div class="countdown-state" id="cal-state-text">🔥 Fuego al máximo — no apagues la pantalla</div>
-      <button class="btn btn-danger" onclick="Calibration.cancel()">✕ Cancelar prueba</button>
-    </div>
-  </div>
-
-  <!-- Fase 3: Medir agua restante -->
-  <div id="cal-phase-measure" style="display:none">
-    <div class="measure-form">
-      <h4>Mide el agua restante</h4>
-      <p>Apaga el fuego. Deja reposar 5 minutos y mide cuánta agua queda en la paella.</p>
-      <div class="measure-row">
-        <div>
-          <label>Agua inicial (ml)</label>
-          <input type="number" id="cal-agua-inicial-show" readonly>
-        </div>
-        <div>
-          <label>Agua que queda (ml)</label>
-          <input type="number" id="cal-agua-final" placeholder="ej. 2100" min="0" oninput="Calibration.calcEvap()">
-        </div>
-      </div>
-      <div id="evap-result-box" style="display:none" class="evap-result">
-        <div class="evap-val"   id="evap-val-display">—</div>
-        <div class="evap-label">ml evaporados por minuto</div>
-        <div class="evap-badge" id="evap-badge-txt">—</div>
-      </div>
-      <div style="margin-top:1rem;display:flex;gap:.75rem;">
-        <button class="btn btn-secondary"        onclick="Calibration.cancel()">Cancelar</button>
-        <button class="btn btn-full" id="btn-save-cal" onclick="Calibration.save()" disabled>Guardar calibración ✓</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PANTALLA: NIVELADOR -->
-<div id="screen-nivel" class="screen">
-  <h2 class="section-title">Nivelador de <span>paella</span></h2>
-  <p class="note" style="margin-bottom:1.25rem">Coloca el móvil sobre la paella. Pulsa <strong>Establecer punto 0</strong> para calibrar la posición de referencia de tu superficie.</p>
-
-  <div class="level-container">
-    <div class="paella-view">
-      <div class="paella-dish" id="paella-dish">
-        <div class="rice-surface"></div>
-        <div class="water-bubble" id="water-bubble">
-          <div class="bubble-center" id="bubble-center"></div>
-        </div>
-      </div>
-      <svg class="crosshair" viewBox="0 0 240 240">
-        <circle cx="120" cy="120" r="28" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <circle cx="120" cy="120" r="56" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-        <line x1="120" y1="55"  x2="120" y2="185" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-        <line x1="55"  y1="120" x2="185" y2="120" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-      </svg>
-    </div>
-
-    <div class="level-angle">
-      <span id="angle-val">0.0</span>°
-      <small id="angle-dir">perfectamente nivelado</small>
-    </div>
-    <div class="level-status ok" id="level-status">✓ La paella está nivelada</div>
-
-    <!-- Punto 0 -->
-    <div class="zero-actions">
-      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">🎯 Establecer punto 0</button>
-      <button class="btn btn-ghost" style="flex:1" onclick="Gyro.resetZero()">↺ Resetear</button>
-    </div>
-    <div class="note" id="zero-status" style="text-align:center">Sin punto 0 — usando horizontal absoluta</div>
-
-    <div id="sensor-denied" class="sensor-denied" style="display:none;width:100%">
-      <p>⚠️ Tu navegador necesita permiso para el giroscopio.<br><br>
-         En iOS: Ajustes → Safari → Acceso al movimiento y orientación.<br>
-         En Android debería funcionar automáticamente.</p>
-      <br>
-      <button class="btn btn-water" onclick="Gyro.requestPermission()">Activar sensor</button>
-    </div>
-
-    <div class="note" style="text-align:center">Umbral de nivelado: ±1.5°</div>
-  </div>
-</div>
-
-<!-- PANTALLA: BÁSCULA EXPERIMENTAL -->
-<div id="screen-bascula" class="screen">
-  <h2 class="section-title">Báscula <span>táctil</span></h2>
-  <div class="scale-experimental-badge">⚗️ Experimental — precisión orientativa</div>
-
-  <!-- Tabs: medir / calibrar -->
-  <div class="inner-tabs">
-    <button class="inner-tab active" onclick="Scale.switchTab('medir')">⚖️ Pesar</button>
-    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">🔧 Calibrar</button>
-  </div>
-
-  <!-- TAB: MEDIR -->
-  <div id="scale-tab-medir">
-    <p class="note" style="margin-bottom:1rem">
-      Pon el móvil en una superficie plana. Coloca el objeto sobre la zona de pesado y mantén la presión.
-    </p>
-
-    <!-- Zona táctil de pesado -->
-    <div class="scale-pad" id="scale-pad"
-         ontouchstart="Scale.onTouchStart(event)"
-         ontouchmove="Scale.onTouchMove(event)"
-         ontouchend="Scale.onTouchEnd(event)">
-      <div class="scale-pad-icon" id="scale-pad-icon">🫴</div>
-      <div class="scale-pad-hint" id="scale-pad-hint">Apoya aquí el objeto a pesar</div>
-    </div>
-
-    <!-- Lectura -->
-    <div class="scale-reading">
-      <div class="scale-value" id="scale-display">
-        — <small>g</small>
-      </div>
-      <div class="scale-raw" id="scale-raw">Área de contacto: —</div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- Tara -->
-    <div style="display:flex;gap:.6rem;max-width:320px;margin:0 auto;">
-      <button class="btn btn-secondary" style="flex:1" onclick="Scale.tare()">⟳ Tara</button>
-      <button class="btn btn-ghost"     style="flex:1" onclick="Scale.reset()">✕ Reset</button>
-    </div>
-
-    <div class="scale-disclaimer">
-      ⚠️ Esta báscula usa el área de contacto táctil para estimar el peso. La precisión depende del dispositivo, del objeto y de la calibración. No usar para medidas críticas. Margen de error típico: ±20-80 g.
-    </div>
-  </div>
-
-  <!-- TAB: CALIBRAR -->
-  <div id="scale-tab-calibrar" style="display:none">
-    <p class="note" style="margin-bottom:1rem">
-      Calibra con dos objetos de peso conocido para mejorar la precisión. Usa p.ej. una botella de agua (500 g) y un paquete de arroz (1 kg).
-    </p>
-
-    <div class="scale-cal-steps" id="scale-cal-steps"></div>
-
-    <div style="margin-top:1rem;display:flex;gap:.6rem;">
-      <button class="btn btn-ghost btn-sm" onclick="Scale.resetCal()">↺ Borrar calibración</button>
-      <button class="btn btn-full" id="scale-cal-btn" onclick="Scale.calAction()">Capturar punto 1</button>
-    </div>
-
-    <div class="result-box" style="margin-top:1rem" id="scale-cal-result" style="display:none">
-      <div id="scale-cal-result-content"></div>
-    </div>
-  </div>
-</div>
-
-<!-- PANTALLA: INSTRUCCIONES -->
-<div id="screen-instrucciones" class="screen">
-  <h2 class="section-title">Guías en <span>vídeo</span></h2>
-  <p class="note" style="margin-bottom:1.5rem">Aprende a sacarle el máximo partido a cada función de la app.</p>
-
-  <div class="instructions-list" id="instructions-list"></div>
-</div>
-
-<!-- MODAL: Alerta fin de cronómetro -->
 <div id="alert-overlay" class="alert-overlay" style="display:none">
   <div class="alert-box">
     <div class="alert-icon">🔥</div>
     <h3>¡Apaga el fuego!</h3>
-    <p>Han pasado los 15 minutos. Apaga el fuego ahora y deja reposar 5 minutos antes de medir el agua restante.</p>
+    <p>Han pasado los 15 minutos. Apaga el fuego y deja reposar 5 minutos antes de medir.</p>
     <button class="btn btn-full" onclick="Calibration.goToMeasure()">Entendido — voy a medir</button>
   </div>
 </div>
 
-
 <!-- ============================================================
-  JAVASCRIPT — un módulo por responsabilidad
-
-  Módulos:
-    Store       — persistencia en localStorage
-    Data        — datos estáticos (recetas, constantes)
-    Nav         — navegación entre pantallas
-    Recipe      — lógica de recetas (pasos + ingredientes)
-    Water       — calculadora de agua
-    Equipment   — CRUD de perfiles de equipo
-    Calibration — prueba de evaporación cronometrada
-    Gyro        — giroscopio / nivelador
+  JAVASCRIPT — módulos intactos + módulo Home nuevo
+============================================================ -->
+<script>
     App         — inicialización
 ============================================================ -->
 <script>
+
+/* ── HOME ───────────────────────────────────────────────────
+   Dashboard de inicio: selector de arroz, comensales,
+   medidas clave y lista de recetas.
+   Estado sincronizado con Water para coherencia.
+──────────────────────────────────────────────────────────── */
+const Home = (() => {
+  let arrozType  = 'bomba';
+  let arrozRatio = 1.5;
+  let comensales = 4;
+  const ACEITE_PER = 15; // ml por persona
+
+  function selectArroz(btn, type, ratio) {
+    document.querySelectorAll('#home-arroz-grid .arroz-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    arrozType  = type;
+    arrozRatio = ratio;
+    // Sincronizar con Water
+    const wb = document.querySelector(`#water-arroz-grid .arroz-btn[onclick*="'${type}'"]`);
+    if (wb) {
+      document.querySelectorAll('#water-arroz-grid .arroz-btn').forEach(b => b.classList.remove('selected'));
+      wb.classList.add('selected');
+      Water.setTypeExternal(type, ratio);
+    }
+    updateMedidas();
+  }
+
+  function updateComensales(v) {
+    comensales = parseInt(v);
+    document.getElementById('home-com-num').textContent = v;
+    document.getElementById('home-com-val').textContent = v;
+    updateMedidas();
+  }
+
+  function updateMedidas() {
+    const arroz    = comensales * 80;
+    const baseAgua = Math.round(arroz * arrozRatio);
+    const prof     = Store.getActiveProfile();
+    const evap     = prof?.evapPerMin ?? null;
+    const extraEvap= evap ? Math.round(evap * 18) : 0;
+    const agua     = baseAgua + extraEvap;
+    const aceite   = comensales * ACEITE_PER;
+    document.getElementById('home-med-arroz').textContent = arroz  + 'g';
+    document.getElementById('home-med-agua').textContent  = agua   + 'ml';
+    document.getElementById('home-med-aceite').textContent= aceite + 'ml';
+  }
+
+  function renderEquipBar() {
+    const prof = Store.getActiveProfile();
+    const el   = document.getElementById('home-equip-bar');
+    if (!prof) {
+      el.innerHTML = `<div class="equip-bar" onclick="Nav.goTo('agua')" style="cursor:pointer">
+        <span class="equip-bar-icon">🍳</span>
+        <div class="equip-bar-info"><div class="equip-bar-name">Sin equipo configurado</div><div class="equip-bar-meta">Toca para añadir tu paella y quemador</div></div>
+        <span class="equip-bar-badge pending">Configurar →</span>
+      </div>`;
+      return;
+    }
+    const calOk = prof.evapPerMin != null;
+    el.innerHTML = `<div class="equip-bar" onclick="Nav.goTo('agua')" style="cursor:pointer">
+      <span class="equip-bar-icon">${prof.burnerEmoji || '🍳'}</span>
+      <div class="equip-bar-info">
+        <div class="equip-bar-name">${prof.name}</div>
+        <div class="equip-bar-meta">${prof.diam ? prof.diam + ' cm · ' : ''}${calOk ? prof.evapPerMin.toFixed(1) + ' ml/min evap.' : 'Sin calibrar'}</div>
+      </div>
+      <span class="equip-bar-badge ${calOk ? 'ok' : 'pending'}">${calOk ? '✓ Cal.' : 'Calibrar'}</span>
+    </div>`;
+  }
+
+  function init() {
+    renderEquipBar();
+    updateMedidas();
+  }
+
+  return { selectArroz, updateComensales, updateMedidas, renderEquipBar, init };
+})();
+
 
 /* ── THEME ──────────────────────────────────────────────────
    Gestiona el tema claro/oscuro.
@@ -1448,26 +1415,33 @@ const Recipe = (() => {
 
   // ── Home: grid de recetas
   function renderHome() {
-    document.getElementById('recipe-grid').innerHTML = Data.recipes.map(r => `
-      <div class="recipe-card" onclick="Recipe.open('${r.id}')">
-        <div class="emoji">${r.emoji}</div>
-        <h3>${r.name}</h3>
-        <div class="meta">${r.desc}</div>
-        <div class="meta" style="margin-top:3px">⏱ ${r.time}</div>
-        <span class="difficulty">${r.difficulty}</span>
-        ${r.reelUrl ? `<a class="reel-btn" href="${r.reelUrl}" target="_blank" onclick="event.stopPropagation()">▶ Ver en Instagram</a>` : ''}
+    document.getElementById('recipe-grid').innerHTML = Data.recipes.map((r, i) => `
+      <div class="recipe-row ${i === 0 ? 'featured' : ''}" onclick="Recipe.open('${r.id}')">
+        <div class="recipe-row-emoji">${r.emoji}</div>
+        <div class="recipe-row-info">
+          <div class="recipe-row-name">${r.name}</div>
+          <div class="recipe-row-meta">${r.riceType.charAt(0).toUpperCase() + r.riceType.slice(1)} · ${r.difficulty}</div>
+        </div>
+        <div class="recipe-row-time">${r.time}</div>
+        ${r.reelUrl
+          ? `<a class="reel-btn" href="${r.reelUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:.68rem;padding:4px 8px">▶</a>`
+          : '<div class="recipe-row-arr">›</div>'}
       </div>`).join('');
   }
 
-  // ── Abrir una receta (va directamente a ingredientes)
+  // ── Abrir una receta
   function open(id) {
     currentRecipe = Data.getRecipe(id);
     currentStep   = 0;
     comensales    = 4;
     document.getElementById('recipe-title-step').textContent = currentRecipe.name;
-    document.getElementById('recipe-subtitle-step').textContent = '⏱ ' + currentRecipe.time;
     document.getElementById('comensal-slider').value = 4;
     document.getElementById('comensal-val').textContent = 4;
+    // Foto y badge
+    document.getElementById('step-photo-emoji').textContent = currentRecipe.emoji;
+    // Reel
+    const reelEl = document.getElementById('recipe-reel-btn');
+    if (reelEl) { reelEl.style.display = currentRecipe.reelUrl ? '' : 'none'; reelEl.href = currentRecipe.reelUrl || '#'; }
     Nav.goToRecipe();
     switchTab('ingredientes');
     renderIngredients();
@@ -1477,23 +1451,26 @@ const Recipe = (() => {
   function renderIngredients() {
     const r = currentRecipe, n = comensales;
     document.getElementById('comensales-badge').textContent = n + ' persona' + (n > 1 ? 's' : '');
-    document.getElementById('ing-list').innerHTML = r.ingredients.map(ing => {
-      const amt = ing.perPerson * n;
-      const disp = amt < 1    ? (amt * 1000).toFixed(0) + ' mg'
-                 : amt >= 1000 ? (amt / 1000).toFixed(1) + ' kg'
-                 :               amt.toFixed(0) + ' ' + ing.unit;
-      return `<li><span>${ing.name}</span><span class="ing-amount">${disp}</span></li>`;
-    }).join('');
 
-    // Agua = ratio base + evaporación del equipo activo
-    const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
+    // Medidas clave
+    const arroz = r.ricePerPerson * n;
+    const base  = Math.round(arroz * r.waterRatio);
     const prof  = Store.getActiveProfile();
     const evap  = prof?.evapPerMin ?? null;
     const extra = evap !== null ? Math.round(evap * r.cookMin) : 0;
-    document.getElementById('ing-agua').innerHTML = (base + extra) + ' <small>ml</small>';
-    document.getElementById('ing-agua-tip').textContent = evap !== null
-      ? `Base ${base} ml + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${r.cookMin} min) — ${prof.name}`
-      : 'Calibra la evaporación de tu equipo en la sección Agua.';
+    const agua  = base + extra;
+    const aceite = n * 15;
+    const fmt = v => v < 1 ? (v*1000).toFixed(0)+'mg' : v >= 1000 ? (v/1000).toFixed(1)+'kg' : v.toFixed(0);
+    document.getElementById('ing-med-arroz').textContent = fmt(arroz) + 'g';
+    document.getElementById('ing-med-agua').textContent  = agua + 'ml';
+    document.getElementById('ing-med-aceite').textContent= aceite + 'ml';
+
+    // Lista ingredientes
+    document.getElementById('ing-list').innerHTML = r.ingredients.map(ing => {
+      const amt  = ing.perPerson * n;
+      const disp = amt < 1 ? (amt*1000).toFixed(0)+' mg' : amt >= 1000 ? (amt/1000).toFixed(1)+' kg' : amt.toFixed(0)+' '+ing.unit;
+      return `<li class="ing-row"><div class="ing-check">✓</div><span class="ing-name">${ing.name}</span><span class="ing-amount">${disp}</span></li>`;
+    }).join('');
   }
 
   function updateComensales(v) {
@@ -1502,68 +1479,59 @@ const Recipe = (() => {
     renderIngredients();
   }
 
-  // ── Tab: guía paso a paso
+  // ── Tab: guía paso a paso — layout inmersivo
   function renderStep() {
     const r     = currentRecipe;
     const s     = r.steps[currentStep];
     const total = r.steps.length;
-    document.getElementById('progress-fill').style.width = Math.round(((currentStep + 1) / total) * 100) + '%';
-    document.getElementById('step-counter').textContent  = `Paso ${currentStep + 1} de ${total}`;
-    // Botón reel en cabecera (solo primer paso o siempre visible)
-    const reelEl = document.getElementById('recipe-reel-btn');
-    if (reelEl) {
-      reelEl.style.display = currentRecipe.reelUrl ? '' : 'none';
-      reelEl.href = currentRecipe.reelUrl || '#';
-    }
 
-    // Parsear minutos del tiempo del paso para el temporizador
+    document.getElementById('progress-fill').style.width = Math.round(((currentStep+1)/total)*100) + '%';
+    document.getElementById('step-counter').textContent  = `Paso ${currentStep+1} de ${total}`;
+    document.getElementById('step-photo-emoji').textContent = r.emoji;
+    document.getElementById('step-photo-badge').textContent = `Paso ${currentStep+1} · ${s.title}`;
+
     const stepMins = parseInt(s.time) || 0;
     const hasTimer = stepMins > 0;
 
     document.getElementById('step-display').innerHTML = `
-      <div class="step-card">
-        <div class="step-inner">
-          <div class="step-num">${currentStep + 1}</div>
-          <div class="step-body">
-            <h3>${s.title}</h3>
-            <p>${s.text}</p>
-            <span class="step-timing">⏱ ${s.time}</span>
-          </div>
-        </div>
-        ${s.ingredients !== '—' ? `<div class="step-ingredients">🧂 ${s.ingredients}</div>` : ''}
-      </div>
+      <div class="step-big-num">${String(currentStep+1).padStart(2,'0')}</div>
+      <h2 class="step-title">${s.title}</h2>
+      <p class="step-text">${s.text}</p>
+      ${s.ingredients !== '—' ? `<div class="step-ing-pill">🧂 ${s.ingredients}</div>` : ''}
+      <div class="step-timing-badge">⏱ ${s.time}</div>
       ${hasTimer ? `
-      <div class="step-timer" id="step-timer-widget">
-        <div>
+      <div class="step-timer-widget" id="step-timer-widget">
+        <div class="step-timer-info">
           <div class="step-timer-display" id="step-timer-display">${String(stepMins).padStart(2,'0')}:00</div>
           <div class="step-timer-bar-wrap"><div class="step-timer-bar" id="step-timer-bar" style="width:0%"></div></div>
+          <div class="step-timer-label" id="step-timer-state">Pulsa para arrancar</div>
         </div>
-        <div class="step-timer-label">Temporizador<br><span id="step-timer-state" style="color:var(--rice-dark)">Pulsa para arrancar</span></div>
         <button class="btn btn-sm" id="step-timer-btn" onclick="StepTimer.toggle(${stepMins})">▶ Iniciar</button>
-      </div>` : ''}`;
+      </div>` : ''}
+      <div class="step-dots">
+        ${Array.from({length:total},(_,i) => `<div class="step-dot ${i<currentStep?'done':i===currentStep?'active':''}"></div>`).join('')}
+      </div>`;
 
-    StepTimer.reset(); // limpia cualquier timer anterior al cambiar de paso
+    StepTimer.reset();
     document.getElementById('btn-prev').disabled = currentStep === 0;
-    document.getElementById('btn-next').textContent = currentStep === total - 1 ? '¡Listo! ✓' : 'Siguiente →';
+    document.getElementById('btn-next').textContent = currentStep === total-1 ? '¡Listo! ✓' : 'Siguiente →';
   }
 
   function changeStep(dir) {
     const total = currentRecipe.steps.length;
-    if (dir === 1 && currentStep === total - 1) { Nav.goTo('home'); return; }
-    currentStep = Math.max(0, Math.min(total - 1, currentStep + dir));
+    if (dir === 1 && currentStep === total-1) { Nav.goTo('home'); return; }
+    currentStep = Math.max(0, Math.min(total-1, currentStep+dir));
     renderStep();
   }
 
-  // ── Tabs internos
   function switchTab(tab) {
-    document.querySelectorAll('.inner-tab').forEach((t, i) =>
-      t.classList.toggle('active', (i === 0 && tab === 'guia') || (i === 1 && tab === 'ingredientes')));
-    document.getElementById('tab-guia').style.display          = tab === 'guia'         ? '' : 'none';
-    document.getElementById('tab-ingredientes').style.display  = tab === 'ingredientes' ? '' : 'none';
-    if (tab === 'guia') renderStep();
+    document.querySelectorAll('.inner-tab').forEach((t,i) =>
+      t.classList.toggle('active', (i===0&&tab==='guia')||(i===1&&tab==='ingredientes')));
+    document.getElementById('tab-guia').style.display         = tab==='guia'         ? '':'none';
+    document.getElementById('tab-ingredientes').style.display = tab==='ingredientes' ? '':'none';
+    if (tab==='guia') renderStep();
   }
 
-  // Getters para módulos externos (Share)
   function _current()    { return currentRecipe; }
   function _comensales() { return comensales; }
 
@@ -1580,8 +1548,15 @@ const Water = (() => {
   let currentRatio = 1.5;
 
   function selectType(btn, type, ratio) {
-    document.querySelectorAll('.water-type-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#water-arroz-grid .arroz-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
+    currentType  = type;
+    currentRatio = ratio;
+    calc();
+  }
+
+  // Llamado desde Home cuando el usuario cambia el tipo ahí
+  function setTypeExternal(type, ratio) {
     currentType  = type;
     currentRatio = ratio;
     calc();
@@ -2547,22 +2522,23 @@ const Instructions = (() => {
 ──────────────────────────────────────────────────────────── */
 const App = (() => {
   function init() {
-    Theme.init();       // primero — evita flash de tema incorrecto
+    Theme.init();
     Recipe.renderHome();
     Instructions.render();
     Scale.init();
+    Home.init();
 
+    Nav.onEnter('home', () => {
+      Home.renderEquipBar();
+      Home.updateMedidas();
+    });
     Nav.onEnter('agua', () => {
       Equipment.renderList();
       Calibration.renderStatus();
       Water.calc();
     });
-    Nav.onEnter('nivel', () => {
-      Gyro.init();
-    });
-    Nav.onEnter('bascula', () => {
-      Scale.switchTab('medir');
-    });
+    Nav.onEnter('nivel', () => { Gyro.init(); });
+    Nav.onEnter('bascula', () => { Scale.switchTab('medir'); });
     Nav.onEnter('instrucciones', () => {});
   }
 
