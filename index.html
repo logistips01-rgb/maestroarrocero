@@ -2,2784 +2,1860 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Maestro Arrocero</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
-
-<!-- ============================================================
-  CSS — dividido en secciones con comentarios claros
-  Orden: Variables → Reset → Layout → Componentes → Pantallas
-============================================================ -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Cancionero</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --paper: #fdf8f0;
+    --ink: #1a1208;
+    --ink-muted: #6b5c3e;
+    --ink-light: #a89070;
+    --accent: #8b2e0f;
+    --accent-light: #c84a1e;
+    --staff-line: #d4c4a0;
+    --highlight: #fff3b0;
+    --tab-bg: #1a1a2e;
+    --tab-text: #e0e0ff;
+    --tab-string: #4a9eff;
+    --tab-fret: #ffcc44;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --font-body: 'Lato', sans-serif;
+    --font-size: 16px;
+  }
 
-/* ── 1. VARIABLES Y RESET ─────────────────────────────────── */
-:root {
-  --rice:        #C8864A;
-  --rice-dark:   #8B5A2B;
-  --rice-light:  #F5E6D3;
-  --water:       #3A7CA5;
-  --water-light: #EAF4FB;
-  --saffron:     #E8A020;
-  --success:     #4A7C59;
-  --danger:      #b5372a;
-  --r:           12px;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* TEMA CLARO (por defecto) */
-  --bg:          #FDFAF6;
-  --surface:     #FFF8F0;
-  --text:        #2A1F14;
-  --text-muted:  #7A6555;
-  --border:      rgba(139,90,43,0.15);
-  --nav-bg:      #2A1F14;
-  --nav-text:    #ffffff;
-  --bottom-bg:   #ffffff;
-  --bottom-border: rgba(139,90,43,0.15);
-  --card-bg:     #ffffff;
-  --input-bg:    #ffffff;
-  --result-bg:   #FFF8F0;
-}
+  body {
+    background: #e8dcc8;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(139,46,15,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(90,60,20,0.08) 0%, transparent 50%);
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--ink);
+  }
 
-/* TEMA OSCURO — Azul pizarra */
-body.dark {
-  --bg:           #1C2333;
-  --surface:      #151B29;
-  --text:         #E8EDF5;
-  --text-muted:   #8A9BBC;
-  --border:       rgba(100,130,180,0.12);
-  --nav-bg:       #151B29;
-  --nav-text:     #ffffff;
-  --bottom-bg:    #151B29;
-  --bottom-border: rgba(100,130,180,0.10);
-  --card-bg:      rgba(100,130,180,0.06);
-  --input-bg:     rgba(100,130,180,0.08);
-  --result-bg:    rgba(100,130,180,0.06);
-  --rice-light:   rgba(200,134,74,0.12);
-  --rice-dark:    #E8A020;
-  --water-light:  rgba(58,124,165,0.15);
-  --success:      #5CC86A;
-}
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
 
-/* Transición suave al cambiar tema */
-body, nav, .bottom-nav, .screen, .recipe-card, .step-card,
-.result-box, .equip-form, .profile-card, .cal-box,
-.measure-form, input, select, .inner-tab, .btn-ghost {
-  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
-}
+  .site-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: #e8c97a;
+    flex: 1;
+    min-width: 180px;
+  }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+  .site-title span { color: var(--paper); font-style: normal; font-size: 1rem; display: block; font-family: var(--font-body); letter-spacing: 0.2em; text-transform: uppercase; font-weight: 300; }
 
-/* ── 2. NAVEGACIÓN ────────────────────────────────────────── */
-nav {
-  background: var(--nav-bg);
-  color: var(--nav-text);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.25rem;
-  height: 52px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
-  letter-spacing: .03em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.nav-logo span { color: var(--saffron); }
+  .toolbar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 
-/* Botón toggle tema */
-.theme-toggle {
-  background: none;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 20px;
-  padding: 4px 10px;
-  cursor: pointer;
-  font-size: .75rem;
-  color: rgba(255,255,255,.75);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: all .2s;
-  white-space: nowrap;
-}
-.theme-toggle:hover { border-color: rgba(255,255,255,.5); color: #fff; }
-.theme-toggle .tt-icon { font-size: .95rem; }
+  .btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--paper);
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); }
+  .btn.active { background: var(--accent-light); border-color: var(--accent-light); }
+  .btn-accent { background: var(--accent); border-color: var(--accent); }
+  .btn-accent:hover { background: var(--accent-light); }
 
-/* Barra de tabs inferior — estilo app nativa */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 62px;
-  background: var(--bottom-bg);
-  border-top: 1px solid var(--bottom-border);
-  display: flex;
-  align-items: stretch;
-  z-index: 100;
-  box-shadow: 0 -4px 16px rgba(0,0,0,.1);
-}
-.bottom-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px 2px;
-  color: var(--text-muted);
-  font-family: 'DM Sans', sans-serif;
-  font-size: .6rem;
-  font-weight: 500;
-  transition: color .15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.bottom-tab .bt-icon {
-  font-size: 1.3rem;
-  line-height: 1;
-  transition: transform .15s;
-}
-.bottom-tab:hover  { color: var(--rice); }
-.bottom-tab.active { color: var(--rice); }
-.bottom-tab.active .bt-icon { transform: translateY(-2px); }
+  .sep { width: 1px; height: 28px; background: rgba(255,255,255,0.2); }
 
-/* ── 3. PANTALLAS ─────────────────────────────────────────── */
-.screen { display: none; padding: 1.5rem 1rem 5rem; max-width: 680px; margin: 0 auto; }
-.screen.active { display: block; }
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 60px);
+  }
 
-/* ── 4. COMPONENTES REUTILIZABLES ─────────────────────────── */
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+    position: sticky;
+    top: 60px;
+  }
 
-/* Títulos de sección */
-.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.1rem; }
-.section-title span { color: var(--rice); }
+  .sidebar h3 {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
 
-/* Etiquetas e inputs */
-label { display: block; font-size: .83rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
-input[type=number],
-input[type=text],
-select {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .93rem;
-  background: var(--input-bg);
-  color: var(--text);
-  outline: none;
-  transition: border-color .2s;
-  margin-bottom: .875rem;
-}
-input:focus, select:focus { border-color: var(--rice); }
-input[readonly] { background: var(--surface); color: var(--text-muted); }
+  .song-list { list-style: none; margin-bottom: 2rem; }
+  .song-list li {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+  }
+  .song-list li:hover { background: rgba(255,255,255,0.08); }
+  .song-list li.active { background: var(--accent); }
+  .song-list li .song-artist { display: block; font-size: 0.7rem; color: var(--ink-light); margin-top: 1px; }
+  .song-list li.active .song-artist { color: rgba(255,255,255,0.7); }
+  .song-list li .song-name { font-size: 0.9rem; font-weight: 400; }
 
-/* Slider */
-input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875rem; }
-.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; }
-.slider-row span { min-width: 28px; font-weight: 500; color: var(--rice); font-size: 1.05rem; }
+  .add-song-btn {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px dashed rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
+    padding: 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .add-song-btn:hover { background: rgba(255,255,255,0.1); color: var(--paper); border-color: rgba(255,255,255,0.4); }
 
-/* Botones */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: var(--rice);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 11px 20px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .88rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .2s;
-}
-.btn:hover         { background: var(--rice-dark); }
-.btn:disabled      { opacity: .4; cursor: not-allowed; }
-.btn-sm            { padding: 6px 12px; font-size: .78rem; }
-.btn-full          { width: 100%; }
-.btn-secondary     { background: transparent; color: var(--rice); border: 1.5px solid var(--rice); }
-.btn-secondary:hover { background: var(--rice-light); }
-.btn-water         { background: var(--water); }
-.btn-water:hover   { background: #2c6080; }
-.btn-danger        { background: var(--danger); }
-.btn-danger:hover  { background: #8c2920; }
-.btn-ghost         { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-.btn-ghost:hover   { background: var(--surface); }
+  /* ── MAIN ── */
+  .main {
+    padding: 2rem;
+    overflow-y: auto;
+  }
 
-/* Caja de resultado */
-.result-box { background: var(--result-bg); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-top: .875rem; }
-.result-box h4 { font-size: .75rem; color: var(--text-muted); margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .08em; }
-.result-value { font-size: 2rem; font-family: 'Playfair Display', serif; color: var(--rice); }
-.result-value small { font-size: .9rem; color: var(--text-muted); font-family: 'DM Sans', sans-serif; }
-.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .875rem; }
-.result-tip { font-size: .8rem; color: var(--text-muted); margin-top: .4rem; line-height: 1.5; }
+  /* ── PAPER CARD ── */
+  .paper-card {
+    background: var(--paper);
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.15), 0 0 40px rgba(0,0,0,0.1);
+    max-width: 820px;
+    margin: 0 auto;
+    position: relative;
+    padding: 3rem 3.5rem;
+  }
 
-/* Línea divisoria */
-.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .paper-card::before {
+    content: '';
+    position: absolute;
+    left: 60px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255,100,100,0.3);
+  }
 
-/* Nota / texto secundario */
-.note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
+  /* Staff lines decoration */
+  .paper-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: repeating-linear-gradient(
+      transparent, transparent 27px, var(--staff-line) 27px, var(--staff-line) 28px
+    );
+    pointer-events: none;
+    opacity: 0.35;
+    border-radius: 2px;
+  }
 
-/* Fila info (clave: valor) */
-.info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: .87rem; }
-.info-row:last-child { border-bottom: none; }
-.info-row .lbl { color: var(--text-muted); }
-.info-row .val { font-weight: 500; }
+  .card-content { position: relative; z-index: 1; }
 
-/* Badges */
-.tag-ok      { background: #e6f4ec; color: var(--success); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
-.tag-pending { background: var(--rice-light); color: var(--rice-dark); padding: 2px 10px; border-radius: 20px; font-size: .75rem; }
+  /* ── SONG HEADER ── */
+  .song-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
 
-/* Estado vacío */
-.empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: .88rem; }
-.empty-state .es-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  .song-title {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ink);
+  }
 
-/* Tabs internos */
-.inner-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.inner-tab {
-  background: transparent;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: .8rem;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text-muted);
-  transition: all .15s;
-}
-.inner-tab.active { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+  .song-artist-display {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--ink-muted);
+    margin-top: 0.25rem;
+  }
 
-/* ── 5. PANTALLA: HOME — layout editorial ─────────────────── */
-.home-eyebrow {
-  font-size: .68rem; font-weight: 600; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--rice); opacity: .7;
-  margin-bottom: .3rem;
-}
-.home-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.2rem; line-height: 1.1; font-weight: 700;
-  color: var(--text); margin-bottom: .3rem;
-}
-.home-title em { color: var(--rice); font-style: italic; }
-.home-subtitle {
-  font-size: .75rem; color: var(--text-muted);
-  letter-spacing: .05em; margin-bottom: 1.25rem;
-}
-.home-rule { border: none; border-top: .5px solid var(--border); margin-bottom: 1.1rem; }
+  .song-meta {
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    font-family: var(--font-body);
+    line-height: 1.8;
+  }
 
-.home-section {
-  font-size: .65rem; font-weight: 600; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--rice); opacity: .5;
-  margin-bottom: .6rem;
-}
+  .song-meta strong { color: var(--accent); font-size: 1rem; display: block; }
 
-/* Equipo activo */
-.home-equip {
-  display: flex; align-items: center; gap: .75rem;
-  padding-bottom: 1rem;
-  border-bottom: .5px solid var(--border);
-  margin-bottom: 1rem;
-}
-.home-equip-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--success); flex-shrink: 0;
-}
-.home-equip-dot.uncal { background: var(--rice); }
-.home-equip-name { font-size: .9rem; font-weight: 500; color: var(--text); }
-.home-equip-meta { font-size: .72rem; color: var(--text-muted); margin-top: 1px; }
-.home-equip-evap {
-  margin-left: auto; font-size: .9rem;
-  font-weight: 600; color: var(--rice); flex-shrink: 0;
-}
-.home-equip-evap span { font-size: .7rem; color: var(--text-muted); font-weight: 400; }
+  /* ── CHORD DIAGRAMS ROW ── */
+  .chord-diagrams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(0,0,0,0.03);
+    border-radius: 4px;
+    border: 1px solid var(--staff-line);
+  }
 
-/* Tipo de arroz — chips */
-.home-arroz-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .875rem; }
-.home-chip {
-  font-size: .72rem; padding: .3rem .7rem; border-radius: 2px;
-  border: .5px solid var(--border); color: var(--text-muted);
-  background: transparent; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; letter-spacing: .03em;
-  transition: all .15s;
-}
-.home-chip.selected {
-  border-color: var(--rice); color: var(--rice);
-  background: var(--rice-light);
-}
+  .chord-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .chord-diagram:hover { transform: scale(1.08); }
+  .chord-diagram.active-chord .chord-name { color: var(--accent-light); }
 
-/* Slider comensales */
-.home-slider-row {
-  display: flex; align-items: center;
-  justify-content: space-between; margin-bottom: .3rem;
-}
-.home-slider-lbl {
-  font-size: .65rem; font-weight: 600; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--text-muted);
-}
-.home-slider-val { font-size: 1.1rem; font-weight: 700; color: var(--rice); }
+  .chord-name {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+  }
 
-/* Medidas clave */
-.home-medidas {
-  display: flex; align-items: flex-end;
-  padding: .875rem 0;
-  border-top: .5px solid var(--border);
-  border-bottom: .5px solid var(--border);
-  margin-bottom: 1rem;
-}
-.home-medida { flex: 1; text-align: center; }
-.home-medida-icon { font-size: 1.3rem; display: block; margin-bottom: .2rem; opacity: .65; }
-.home-medida-lbl {
-  font-size: .6rem; text-transform: uppercase; letter-spacing: .08em;
-  color: var(--text-muted); display: block; margin-bottom: .15rem;
-}
-.home-medida-val { font-size: .95rem; font-weight: 700; color: var(--rice); display: block; }
-.home-medida-sep { font-size: 1rem; color: var(--border); padding-bottom: .875rem; }
+  .chord-grid {
+    position: relative;
+  }
 
-/* Lista recetas */
-.home-recipe-list { display: flex; flex-direction: column; }
-.home-recipe {
-  display: flex; align-items: center; gap: .75rem;
-  padding: .75rem 0;
-  border-bottom: .5px solid var(--border);
-  cursor: pointer;
-  transition: opacity .15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.home-recipe:last-child { border-bottom: none; }
-.home-recipe:active { opacity: .6; }
-.home-recipe-num {
-  font-size: .85rem; font-family: 'Playfair Display', serif;
-  font-style: italic; color: var(--border); min-width: 22px;
-}
-.home-recipe-emoji { font-size: 1.4rem; flex-shrink: 0; }
-.home-recipe-name { font-size: .92rem; color: var(--text-muted); flex: 1; }
-.home-recipe-name.featured { color: var(--text); font-weight: 500; }
-.home-recipe-time {
-  font-size: .65rem; font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--rice); opacity: .6;
-}
-.home-recipe-arr { font-size: 1rem; color: var(--border); margin-left: .5rem; }
-.home-recipe.featured .home-recipe-arr { color: var(--rice); }
+  /* ── LYRICS + CHORDS ── */
+  .lyrics-section { margin-bottom: 2rem; }
 
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    margin-top: 1.5rem;
+    font-family: var(--font-body);
+  }
 
-/* ── 6. PANTALLA: RECETA ──────────────────────────────────── */
-.step-header { display: flex; align-items: flex-start; gap: .875rem; margin-bottom: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; }
-.step-header h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
-.comensales-badge { margin-left: auto; background: var(--rice-light); color: var(--rice-dark); font-size: .75rem; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  .lyric-line {
+    margin-bottom: 0.15rem;
+    min-height: 1.4em;
+    font-size: var(--font-size);
+    line-height: 1.4;
+    position: relative;
+  }
 
-.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 1.25rem; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--rice); border-radius: 2px; transition: width .4s ease; }
+  .chord-line {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 1.4em;
+    margin-bottom: 0;
+    align-items: flex-end;
+  }
 
-.step-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 1rem; }
-.step-inner { display: flex; }
-.step-num { background: var(--rice); color: #fff; font-family: 'Playfair Display', serif; font-size: 1.4rem; width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.step-body { padding: .875rem; flex: 1; }
-.step-body h3 { font-size: .93rem; font-weight: 500; margin-bottom: .2rem; }
-.step-body p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
-.step-timing { font-size: .75rem; background: var(--rice-light); color: var(--rice-dark); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: .4rem; }
-.step-ingredients { background: var(--rice-light); border-top: 1px solid var(--border); padding: .65rem .875rem; font-size: .82rem; color: var(--rice-dark); line-height: 1.7; }
+  .chord-word {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 0;
+    white-space: pre;
+  }
 
-.step-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1.1rem; }
-.step-counter { flex: 1; text-align: center; font-size: .82rem; color: var(--text-muted); }
+  .chord-label {
+    font-family: var(--font-display);
+    font-size: calc(var(--font-size) * 0.85);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    min-height: 1.1em;
+    margin-bottom: 1px;
+    letter-spacing: 0.02em;
+  }
 
-/* Botón Instagram reel */
-.reel-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .78rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.reel-btn:hover { opacity: .88; }
-.recipe-card .reel-btn { display: block; margin-top: .5rem; font-size: .72rem; padding: 5px 10px; text-align: center; }
+  .chord-label:empty::before { content: '\00a0'; }
 
-.ing-list { list-style: none; }
-.ing-list li { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
-.ing-list li:last-child { border-bottom: none; }
-.ing-amount { font-weight: 500; color: var(--rice); }
+  .chord-text {
+    font-size: var(--font-size);
+    font-family: var(--font-body);
+    color: var(--ink);
+    line-height: 1.4;
+  }
 
-/* ── 7. PANTALLA: AGUA ────────────────────────────────────── */
+  /* ── TAB VIEW ── */
+  .tab-section {
+    display: none;
+    background: var(--tab-bg);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+  }
 
-/* Selector tipo de arroz */
-.water-type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: 1.1rem; }
-.water-type-btn {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: .65rem .4rem;
-  text-align: center;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .75rem;
-  color: var(--text);
-  transition: all .15s;
-  line-height: 1.4;
-}
-.water-type-btn .wt-emoji { font-size: 1.3rem; display: block; margin-bottom: 3px; }
-.water-type-btn .wt-ratio { font-size: .68rem; color: var(--text-muted); display: block; margin-top: 2px; }
-.water-type-btn.selected { border-color: var(--water); background: var(--water-light); color: var(--water); }
-.water-type-btn.selected .wt-ratio { color: var(--water); }
+  .tab-section.visible { display: block; }
 
-/* Tarjetas de equipo */
-.profiles-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
-.profile-card {
-  background: var(--card-bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  padding: .875rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  cursor: pointer;
-  transition: all .15s;
-}
-.profile-card:hover { border-color: var(--rice); }
-.profile-card.active-profile { border-color: var(--rice); background: var(--rice-light); }
-.profile-icon { font-size: 1.6rem; flex-shrink: 0; }
-.profile-info { flex: 1; min-width: 0; }
-.profile-name { font-size: .9rem; font-weight: 500; margin-bottom: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.profile-meta { font-size: .75rem; color: var(--text-muted); }
-.profile-badge { font-size: .7rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-.profile-badge.ok      { background: #e6f4ec; color: var(--success); }
-.profile-badge.pending { background: var(--rice-light); color: var(--rice-dark); }
-.profile-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .tab-title {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 1rem;
+  }
 
-/* Formulario de equipo */
-.equip-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1rem; }
-.equip-form h4 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: .875rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .tab-block {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--tab-text);
+    white-space: pre;
+  }
 
-.size-presets { display: flex; gap: 6px; margin-bottom: .875rem; flex-wrap: wrap; }
-.size-preset {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: .75rem;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text-muted);
-  transition: all .15s;
-}
-.size-preset:hover { border-color: var(--rice); color: var(--rice); }
-.size-preset.sel   { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+  .tab-string-name { color: var(--tab-string); }
+  .tab-fret-num { color: var(--tab-fret); }
 
-.burner-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .875rem; }
-.burner-btn {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: .55rem .3rem;
-  text-align: center;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .72rem;
-  color: var(--text-muted);
-  transition: all .15s;
-}
-.burner-btn .b-emoji { font-size: 1.2rem; display: block; margin-bottom: 2px; }
-.burner-btn.sel { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
+  /* ── CHORD TOOLTIP ── */
+  .chord-tooltip {
+    display: none;
+    position: fixed;
+    background: var(--ink);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    z-index: 500;
+    pointer-events: none;
+  }
+  .chord-tooltip.visible { display: block; }
+  .chord-tooltip .chord-name { color: #e8c97a; font-size: 1.1rem; margin-bottom: 0.5rem; }
 
-/* Calibración — caja informativa */
-.cal-box { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1.1rem; margin-bottom: 1.1rem; }
-.cal-box h4 { color: var(--water); font-size: .9rem; margin-bottom: .6rem; font-weight: 500; }
-.cal-box p { font-size: .82rem; color: #4a6f85; line-height: 1.6; margin-bottom: .5rem; }
+  /* ── CONTROLS ── */
+  .controls-bar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
 
-/* Calibración — cronómetro */
-.countdown-wrap { text-align: center; padding: 1.5rem 0; }
-.countdown-circle {
-  width: 200px; height: 200px;
-  border-radius: 50%;
-  border: 6px solid var(--border);
-  margin: 0 auto 1.5rem;
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  background: var(--card-bg);
-}
-.countdown-circle svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.countdown-circle svg circle { fill: none; stroke-width: 6; stroke-linecap: round; }
-.countdown-circle svg .track { stroke: var(--rice-light); }
-.countdown-circle svg .fill  { stroke: var(--rice); transition: stroke-dashoffset 1s linear; }
-.countdown-time { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--text); position: relative; z-index: 1; line-height: 1; }
-.countdown-time small { font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--text-muted); display: block; margin-top: 4px; }
-.countdown-state { font-size: .88rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(0,0,0,0.06);
+    border: 1px solid var(--staff-line);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+  }
 
-/* Calibración — medición final */
-.measure-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
-.measure-form h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: .25rem; }
-.measure-form p { font-size: .83rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6; }
-.measure-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-.evap-result { background: var(--water-light); border: 1px solid rgba(58,124,165,.2); border-radius: var(--r); padding: 1rem; margin-top: 1rem; text-align: center; }
-.evap-val   { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--water); }
-.evap-label { font-size: .78rem; color: #4a6f85; margin-top: 2px; }
-.evap-badge { display: inline-block; background: rgba(74,124,89,.15); color: var(--success); padding: 3px 12px; border-radius: 20px; font-size: .8rem; font-weight: 500; margin-top: .5rem; }
+  .control-label { font-size: 0.7rem; color: var(--ink-muted); letter-spacing: 0.05em; }
 
-/* Alerta modal */
-.alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
-.alert-box { background: var(--card-bg); border-radius: 16px; padding: 2rem 1.5rem; max-width: 360px; width: 100%; text-align: center; border: 1px solid var(--border); }
-.alert-box .alert-icon { font-size: 3rem; margin-bottom: 1rem; }
-.alert-box h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: .75rem; }
-.alert-box p { font-size: .88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; }
+  .ctrl-btn {
+    width: 26px; height: 26px;
+    border: 1px solid var(--staff-line);
+    background: var(--paper);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+    transition: all 0.1s;
+  }
+  .ctrl-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
-/* ── 7b. TEMPORIZADOR DE PASO ─────────────────────────────── */
-.step-timer {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: .75rem 1rem;
-  margin-top: .75rem;
-}
-.step-timer-display {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  color: var(--text);
-  min-width: 68px;
-  line-height: 1;
-}
-.step-timer-display.running { color: var(--rice); }
-.step-timer-display.done    { color: var(--success); }
-.step-timer-label { font-size: .75rem; color: var(--text-muted); flex: 1; }
-.step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 3px; }
-.step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
+  .ctrl-value {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    min-width: 30px;
+    text-align: center;
+    color: var(--ink);
+  }
 
-/* ── 7c. MODAL COMPARTIR ──────────────────────────────────── */
-.share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 0; }
-.share-sheet {
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  padding: 1.5rem 1.25rem 2rem;
-  width: 100%;
-  max-width: 480px;
-  animation: slideUp .25s ease;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.share-sheet h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1rem; }
-.share-options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
-.share-opt {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: .875rem .75rem;
-  text-align: center;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: .82rem;
-  color: var(--text);
-  transition: all .15s;
-}
-.share-opt:hover { border-color: var(--rice); background: var(--rice-light); }
-.share-opt .so-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
-.share-preview {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  font-size: .8rem;
-  color: var(--text-muted);
-  line-height: 1.7;
-  max-height: 180px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.share-actions { display: flex; gap: .6rem; }
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
 
-/* ── 8. PANTALLA: NIVELADOR ───────────────────────────────── */
-.level-container { display: flex; flex-direction: column; align-items: center; padding: .5rem 0; gap: 1.25rem; }
+  .modal {
+    background: var(--paper);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
 
-.paella-view { position: relative; width: 240px; height: 240px; }
-.paella-dish {
-  width: 240px; height: 240px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 35%, #d4956a, #8B5A2B 70%, #5a3318);
-  border: 6px solid #6B3D1E;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(42,31,20,.3);
-}
-.rice-surface { position: absolute; inset: 0; background: radial-gradient(ellipse at 45% 40%, #d4a876 0%, #b8834a 40%, #8B5A2B 80%); border-radius: 50%; }
-/* Burbuja — doble de tamaño (56 → 112px), punto interior proporcionado */
-.water-bubble { position: absolute; width: 112px; height: 112px; left: 50%; top: 50%; border-radius: 50%; background: rgba(58,124,165,.35); border: 3px solid rgba(58,124,165,.65); display: flex; align-items: center; justify-content: center; }
-.bubble-center { width: 28px; height: 28px; border-radius: 50%; background: var(--water); }
-.crosshair { position: absolute; width: 240px; height: 240px; left: 0; top: 0; pointer-events: none; }
+  .modal h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
 
-.level-angle { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--text); text-align: center; }
-.level-angle small { font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text-muted); display: block; }
-.level-status { padding: 9px 22px; border-radius: 20px; font-size: .88rem; font-weight: 500; text-align: center; }
-.level-status.ok   { background: #e6f4ec; color: var(--success); }
-.level-status.warn { background: var(--rice-light); color: var(--rice-dark); }
-.level-status.bad  { background: #fdecea; color: var(--danger); }
-.sensor-denied { background: #fdecea; border: 1px solid rgba(181,55,42,.2); border-radius: var(--r); padding: 1.1rem; text-align: center; width: 100%; }
-.sensor-denied p { color: var(--danger); font-size: .87rem; line-height: 1.6; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.3rem; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--staff-line);
+    border-radius: 4px;
+    background: white;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    min-height: 200px;
+    resize: vertical;
+  }
 
-/* Botones de punto 0 */
-.zero-actions { display: flex; gap: .6rem; width: 100%; }
+  .form-hint {
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    margin-top: 0.25rem;
+    line-height: 1.5;
+  }
 
-/* ── 10. PANTALLA: INSTRUCCIONES ──────────────────────────── */
-.instructions-list { display: flex; flex-direction: column; gap: 1.25rem; }
-.instruction-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
-.instruction-card-header:hover { background: var(--surface); }
-.instruction-icon { font-size: 1.8rem; flex-shrink: 0; }
-.instruction-info { flex: 1; }
-.instruction-info h3 { font-size: .95rem; font-weight: 500; margin-bottom: 2px; }
-.instruction-info p  { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
-.instruction-chevron { font-size: .9rem; color: var(--text-muted); transition: transform .2s; }
-.instruction-chevron.open { transform: rotate(180deg); }
-.instruction-video { display: none; }
-.instruction-video.open { display: block; }
-.instruction-video iframe {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border: none;
-  display: block;
-}
-.instruction-desc {
-  padding: .875rem 1rem 1rem;
-  font-size: .83rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  border-top: 1px solid var(--border);
-}
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
 
-/* ── 11. PANTALLA: BÁSCULA ────────────────────────────────── */
-.scale-experimental-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-  border-radius: 20px;
-  padding: 3px 12px;
-  font-size: .75rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-.scale-pad {
-  background: var(--card-bg);
-  border: 2px dashed var(--border);
-  border-radius: var(--r);
-  aspect-ratio: 1;
-  max-width: 320px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  position: relative;
-  overflow: hidden;
-  transition: border-color .2s, background .2s;
-}
-.scale-pad.active {
-  border-color: var(--rice);
-  border-style: solid;
-  background: var(--rice-light);
-}
-.scale-pad.calibrating {
-  border-color: var(--water);
-  border-style: solid;
-  background: var(--water-light);
-}
-.scale-pad-icon { font-size: 3rem; }
-.scale-pad-hint { font-size: .82rem; color: var(--text-muted); text-align: center; padding: 0 1rem; }
-.scale-reading {
-  text-align: center;
-  margin: 1rem auto 0;
-  max-width: 320px;
-  width: 100%;
-}
-.scale-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
-  color: var(--text);
-  line-height: 1;
-}
-.scale-value.has-weight { color: var(--rice); }
-.scale-value small { font-family: 'DM Sans', sans-serif; font-size: 1.2rem; color: var(--text-muted); }
-.scale-raw { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+  .btn-modal {
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .btn-modal.primary { background: var(--accent); color: white; }
+  .btn-modal.primary:hover { background: var(--accent-light); }
+  .btn-modal.secondary { background: rgba(0,0,0,0.08); color: var(--ink); }
+  .btn-modal.secondary:hover { background: rgba(0,0,0,0.15); }
 
-.scale-cal-steps { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
-.scale-cal-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: .875rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: .875rem;
-}
-.scale-cal-step.done  { border-color: var(--success); background: rgba(74,124,89,.12); }
-.scale-cal-step.active-step { border-color: var(--water); background: var(--water-light); }
-.scale-cal-num {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; font-weight: 500; flex-shrink: 0;
-}
-.scale-cal-step.done .scale-cal-num  { background: var(--success); color: #fff; }
-.scale-cal-step.active-step .scale-cal-num { background: var(--water); color: #fff; }
-.scale-cal-info { flex: 1; font-size: .83rem; }
-.scale-cal-info strong { display: block; margin-bottom: 2px; }
-.scale-cal-info span { color: var(--text-muted); font-size: .78rem; }
-.scale-disclaimer {
-  background: rgba(232,160,32,.1);
-  border: 1px solid rgba(232,160,32,.3);
-  border-radius: var(--r);
-  padding: .875rem 1rem;
-  font-size: .78rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-top: 1rem;
-}
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--ink-muted);
+  }
+  .empty-state h2 { font-family: var(--font-display); font-style: italic; font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .empty-state p { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-/* ── 12. OVERRIDES DARK MODE ESPECÍFICOS ──────────────────── */
-/* Elementos que en dark mode necesitan borde más visible */
-body.dark .instruction-card          { border-color: rgba(100,130,180,.12); }
-body.dark .instruction-card-header:hover { background: rgba(100,130,180,.06); }
-body.dark .scale-pad                 { border-color: rgba(100,130,180,.15); border-style: dashed; }
-body.dark .water-type-btn            { background: transparent; border-color: rgba(100,130,180,.15); color: var(--text-muted); }
-body.dark .water-type-btn:hover      { border-color: var(--water); color: var(--text); }
-body.dark .size-preset               { background: transparent; border-color: rgba(100,130,180,.15); }
-body.dark .burner-btn                { background: transparent; border-color: rgba(100,130,180,.15); }
-body.dark .step-header               { background: var(--surface); }
-body.dark .share-sheet               { background: var(--surface); }
-body.dark .scale-experimental-badge { background: rgba(232,160,32,.1); color: var(--saffron); border-color: rgba(232,160,32,.25); }
-body.dark .evap-result               { background: rgba(58,124,165,.12); }
-body.dark .cal-box                   { background: rgba(58,124,165,.1); }
-body.dark .tag-ok                    { background: rgba(74,124,89,.2); }
-body.dark .tag-pending               { background: rgba(200,134,74,.15); }
-@media (max-width: 420px) {
-  .recipe-grid  { grid-template-columns: 1fr 1fr; }
-  .result-grid  { grid-template-columns: 1fr; }
-  .measure-row  { grid-template-columns: 1fr; }
-  .form-row     { grid-template-columns: 1fr; }
-}
-@media (min-width: 680px) {
-  .bottom-nav { max-width: 680px; left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-}
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .paper-card { padding: 2rem 1.5rem; }
+    .paper-card::before { left: 30px; }
+  }
 
+  /* ── MODO MÓVIL ── */
+  body.mobile {
+    --font-size: 19px;
+  }
+
+  body.mobile .layout {
+    height: calc(100dvh - 50px);
+    overflow: hidden;
+  }
+
+  body.mobile .main {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    padding: 0;
+    padding-bottom: 1rem;
+  }
+
+  body.mobile .site-header {
+    padding: 0.6rem 1rem;
+    flex-wrap: nowrap;
+  }
+
+  body.mobile .site-title { font-size: 1.1rem; min-width: 0; }
+  body.mobile .site-title span { display: none; }
+
+  body.mobile .toolbar {
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+  }
+
+  body.mobile .btn { padding: 0.4rem 0.55rem; font-size: 0.72rem; }
+  body.mobile .sep { display: none; }
+
+  body.mobile .layout {
+    grid-template-columns: 1fr;
+    height: calc(100dvh - 50px);
+    overflow: hidden;
+  }
+
+  body.mobile .sidebar { display: none; }
+
+  body.mobile .main {
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    padding-bottom: 1rem;
+  }
+
+  body.mobile .paper-card {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1.25rem 1rem 2rem;
+    max-width: 100%;
+  }
+  body.mobile .paper-card::before { left: 24px; }
+
+  body.mobile .song-title { font-size: 1.5rem; }
+  body.mobile .song-artist-display { font-size: 0.9rem; }
+  body.mobile .song-header { margin-bottom: 1rem; }
+
+  body.mobile .chord-diagrams {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  body.mobile .chord-diagrams::-webkit-scrollbar { display: none; }
+
+  body.mobile .chord-diagram canvas { width: 64px !important; height: 80px !important; }
+
+  body.mobile .ctrl-btn { width: 38px; height: 38px; font-size: 1.1rem; }
+  body.mobile .controls-bar { gap: 0.4rem; margin-bottom: 1rem; }
+  body.mobile .control-group { padding: 0.4rem 0.7rem; }
+
+  /* Acordes en móvil: scroll horizontal en vez de wrap */
+  body.mobile .chord-diagrams { overflow-x: scroll; }
+
+  /* Lista de canciones en móvil: panel deslizante */
+  .mobile-song-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.6);
+  }
+
+  .mobile-song-panel.visible {
+    display: flex;
+  }
+
+  .mobile-song-panel-inner {
+    background: var(--ink);
+    color: var(--paper);
+    width: 80%;
+    max-width: 320px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobile-panel-close {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    margin-bottom: 1rem;
+  }
 </style>
 </head>
 <body>
 
-
-<!-- ============================================================
-  HTML — una sección por pantalla
-============================================================ -->
-
-<!-- NAVEGACIÓN SUPERIOR — logo + toggle tema -->
-<nav>
-  <div class="nav-logo">🍳 Maestro <span>Arrocero</span></div>
-  <button class="theme-toggle" id="theme-toggle" onclick="Theme.toggle()">
-    <span class="tt-icon" id="theme-icon">🌙</span>
-    <span id="theme-label">Oscuro</span>
-  </button>
-</nav>
-
-<!-- NAVEGACIÓN INFERIOR — tabs estilo app nativa -->
-<div class="bottom-nav">
-  <button class="bottom-tab active" id="btab-home" onclick="Nav.goTo('home')">
-    <span class="bt-icon">🍚</span>Recetas
-  </button>
-  <button class="bottom-tab" id="btab-agua" onclick="Nav.goTo('agua')">
-    <span class="bt-icon">💧</span>Agua
-  </button>
-  <button class="bottom-tab" id="btab-nivel" onclick="Nav.goTo('nivel')">
-    <span class="bt-icon">📐</span>Nivel
-  </button>
-  <button class="bottom-tab" id="btab-bascula" onclick="Nav.goTo('bascula')">
-    <span class="bt-icon">⚖️</span>Báscula
-  </button>
-  <button class="bottom-tab" id="btab-instrucciones" onclick="Nav.goTo('instrucciones')">
-    <span class="bt-icon">🎬</span>Guías
+<!-- ── PANTALLA DE LOGIN ── -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--ink);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;">
+  <div style="font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:2.5rem;color:#e8c97a;">Cancionero</div>
+  <div style="font-family:'Lato',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.5);letter-spacing:0.15em;text-transform:uppercase;">tu colección de tablaturas</div>
+  <button onclick="loginWithGoogle()" style="margin-top:1rem;display:flex;align-items:center;gap:0.75rem;background:white;color:#333;border:none;border-radius:8px;padding:0.8rem 1.5rem;font-size:1rem;font-family:'Lato',sans-serif;cursor:pointer;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
+    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Entrar con Google
   </button>
 </div>
 
-<!-- PANTALLA: HOME -->
-<div id="screen-home" class="screen active">
+<!-- ── APP SHELL ── -->
+<div id="appShell" style="display:none;">
 
-  <!-- Cabecera editorial -->
-  <div class="home-eyebrow">Tu receta de hoy</div>
-  <div class="home-title">El arroz <em>perfecto</em></div>
-  <div class="home-subtitle">Recetas · Medidas · Calibración</div>
-  <hr class="home-rule">
-
-  <!-- Equipo activo -->
-  <div class="home-section">Equipo activo</div>
-  <div id="home-equip-row" class="home-equip">
-    <div class="home-equip-dot" id="home-equip-dot"></div>
-    <div>
-      <div class="home-equip-name" id="home-equip-name">Sin equipo configurado</div>
-      <div class="home-equip-meta" id="home-equip-meta">Añade tu paella en la sección Agua</div>
-    </div>
-    <div class="home-equip-evap" id="home-equip-evap"></div>
+<header class="site-header">
+  <div class="site-title">
+    <span>mi colección</span>
+    Cancionero
   </div>
-
-  <!-- Tipo de arroz -->
-  <div class="home-section">Tipo de arroz</div>
-  <div class="home-arroz-chips" id="home-arroz-chips">
-    <button class="home-chip selected" onclick="Home.selectArroz(this,'bomba',1.5)">Bomba</button>
-    <button class="home-chip"          onclick="Home.selectArroz(this,'redondo',1.2)">Redondo</button>
-    <button class="home-chip"          onclick="Home.selectArroz(this,'albufera',1.0)">Albufera</button>
-    <button class="home-chip"          onclick="Home.selectArroz(this,'balilla',1.1)">Balilla</button>
-    <button class="home-chip"          onclick="Home.selectArroz(this,'dinamita',1.6)">Dinamita</button>
+  <div class="toolbar">
+    <button class="btn" id="btn-chords" onclick="toggleChords()">Acordes</button>
+    <button class="btn" id="btn-tab" onclick="toggleTab()">Tablatura</button>
+    <div class="sep"></div>
+    <button class="btn" onclick="transpose(-1)">♭ −1</button>
+    <button class="btn" onclick="transpose(1)">♯ +1</button>
+    <button class="btn" onclick="resetTranspose()">○</button>
+    <div class="sep"></div>
+    <button class="btn" id="btn-mobile" onclick="toggleMobileMode()" title="Modo móvil">📱</button>
+    <button class="btn" id="btn-songs-panel" onclick="openSongPanel()" style="display:none;" title="Lista de canciones">☰</button>
+    <button class="btn" onclick="openTuner()" title="Afinador">🎸 Afinar</button>
+    <button class="btn btn-accent" onclick="openAddSong()">+ Canción</button>
+    <button class="btn" onclick="openImport()" title="Importar de La Cuerda">↓ La Cuerda</button>
+    <img id="userAvatar" src="" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,0.3);object-fit:cover;" onclick="logout()" title="Cerrar sesión">
   </div>
+</header>
 
-  <!-- Comensales -->
-  <div class="home-slider-row">
-    <span class="home-slider-lbl">Comensales</span>
-    <span class="home-slider-val" id="home-com-val">4</span>
-  </div>
-  <input type="range" min="1" max="20" value="4" id="home-com-slider"
-    oninput="Home.updateComensales(this.value)"
-    style="width:100%;accent-color:var(--rice);margin:.2rem 0 .875rem">
-
-  <!-- Medidas clave -->
-  <div class="home-medidas">
-    <div class="home-medida">
-      <span class="home-medida-icon">⚖️</span>
-      <span class="home-medida-lbl">Arroz</span>
-      <span class="home-medida-val" id="home-med-arroz">320g</span>
-    </div>
-    <span class="home-medida-sep">·</span>
-    <div class="home-medida">
-      <span class="home-medida-icon">🫕</span>
-      <span class="home-medida-lbl">Agua</span>
-      <span class="home-medida-val" id="home-med-agua">480ml</span>
-    </div>
-    <span class="home-medida-sep">·</span>
-    <div class="home-medida">
-      <span class="home-medida-icon">🫒</span>
-      <span class="home-medida-lbl">Aceite</span>
-      <span class="home-medida-val" id="home-med-aceite">60ml</span>
-    </div>
-  </div>
-
-  <!-- Recetas -->
-  <div class="home-section">Recetas</div>
-  <div class="home-recipe-list" id="recipe-grid"></div>
-
-</div>
-
-<!-- PANTALLA: RECETA -->
-<div id="screen-recipe" class="screen">
-  <div class="inner-tabs">
-    <button class="inner-tab active" onclick="Recipe.switchTab('guia')">Guía paso a paso</button>
-    <button class="inner-tab"        onclick="Recipe.switchTab('ingredientes')">Ingredientes</button>
-  </div>
-
-  <!-- Tab: guía -->
-  <div id="tab-guia">
-    <div class="step-header">
-      <div>
-        <h2 id="recipe-title-step">—</h2>
-        <div class="note" id="recipe-subtitle-step"></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
-        <div class="comensales-badge" id="comensales-badge">4 personas</div>
-        <a id="recipe-reel-btn" class="reel-btn" href="#" target="_blank" style="display:none">▶ Instagram</a>
-      </div>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
-    <div id="step-display"></div>
-    <div class="step-nav">
-      <button class="btn btn-secondary" id="btn-prev" onclick="Recipe.changeStep(-1)">← Anterior</button>
-      <div class="step-counter" id="step-counter">Paso 1 de 8</div>
-      <button class="btn" id="btn-next" onclick="Recipe.changeStep(1)">Siguiente →</button>
-    </div>
-  </div>
-
-  <!-- Tab: ingredientes -->
-  <div id="tab-ingredientes" style="display:none">
-    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap;">
-      <div style="font-size:.83rem;color:var(--text-muted);font-weight:500;">Comensales:</div>
-      <div class="slider-row" style="flex:1;min-width:160px;">
-        <input type="range" min="1" max="20" value="4" id="comensal-slider" oninput="Recipe.updateComensales(this.value)">
-        <span id="comensal-val">4</span>
-      </div>
-    </div>
-    <ul class="ing-list" id="ing-list"></ul>
-    <hr class="divider">
-    <div class="result-box">
-      <h4>Agua necesaria</h4>
-      <div class="result-value" id="ing-agua">— <small>ml</small></div>
-      <div class="result-tip"   id="ing-agua-tip">Selecciona un equipo calibrado en la sección Agua.</div>
-    </div>
-    <hr class="divider">
-    <div style="display:flex;gap:.6rem;">
-      <button class="btn btn-secondary" style="flex:1" onclick="Share.open()">↗ Compartir</button>
-      <button class="btn" style="flex:2" onclick="Recipe.switchTab('guia')">Empezar a cocinar →</button>
-    </div>
+<!-- Panel de canciones para móvil -->
+<div class="mobile-song-panel" id="mobileSongPanel" onclick="closeSongPanel()">
+  <div class="mobile-song-panel-inner" onclick="event.stopPropagation()">
+    <button class="mobile-panel-close" onclick="closeSongPanel()">✕</button>
+    <h3 style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:0.5rem;">Canciones</h3>
+    <ul class="song-list" id="songListMobile"></ul>
+    <button class="add-song-btn" onclick="closeSongPanel();openAddSong();">＋ Añadir canción</button>
   </div>
 </div>
 
-<!-- MODAL: Compartir receta -->
-<div id="share-overlay" class="share-overlay" style="display:none" onclick="Share.closeOnBackdrop(event)">
-  <div class="share-sheet">
-    <h3>Compartir</h3>
-    <div class="share-options">
-      <button class="share-opt" onclick="Share.prepare('ingredientes')">
-        <span class="so-icon">🧺</span>Lista de ingredientes
-      </button>
-      <button class="share-opt" onclick="Share.prepare('receta')">
-        <span class="so-icon">📋</span>Receta completa
-      </button>
-    </div>
-    <div id="share-preview" class="share-preview" style="display:none"></div>
-    <div class="share-actions" id="share-actions" style="display:none">
-      <button class="btn btn-secondary" style="flex:1" onclick="Share.copy()">📋 Copiar</button>
-      <button class="btn btn-water"     style="flex:1" onclick="Share.whatsapp()">💬 WhatsApp</button>
-      <button class="btn btn-ghost btn-sm" onclick="Share.close()">✕</button>
-    </div>
-    <button class="btn btn-ghost btn-full" onclick="Share.close()" id="share-close-btn">Cancelar</button>
-  </div>
-</div>
-
-<!-- PANTALLA: AGUA -->
-<div id="screen-agua" class="screen">
-
-  <!-- SECCIÓN A: Calculadora de agua -->
-  <h2 class="section-title">Calculadora de <span>agua</span></h2>
-
-  <div class="water-type-grid">
-    <button class="water-type-btn selected" onclick="Water.selectType(this,'bomba',1.5)">
-      <span class="wt-emoji">🌾</span>Bomba<span class="wt-ratio">ratio 1:1.5</span>
+<div class="layout" id="appLayout">
+  <aside class="sidebar" id="appSidebar">
+    <h3>Canciones</h3>
+    <ul class="song-list" id="songList"></ul>
+    <button class="add-song-btn" onclick="openAddSong()">
+      ＋ Añadir canción
     </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.2)">
-      <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1.2</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.0)">
-      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.0</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'balilla',1.1)">
-      <span class="wt-emoji">🌿</span>Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
-    </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'dinamita',1.6)">
-      <span class="wt-emoji">💥</span>Dinamita<span class="wt-ratio">ratio 1:1.6</span>
-    </button>
-  </div>
+  </aside>
 
-  <label>Gramos de arroz</label>
-  <input type="number" id="arroz-gramos" value="320" min="50" max="5000" oninput="Water.calc()">
+  <main class="main">
+    <div id="mainContent"></div>
+  </main>
+</div>
 
-  <label>O ajusta por comensales <span style="font-weight:300">(80 g/persona)</span></label>
-  <div class="slider-row">
-    <input type="range" min="1" max="20" value="4" id="agua-comensales"
-      oninput="document.getElementById('agua-com-val').textContent=this.value;
-               document.getElementById('arroz-gramos').value=this.value*80;
-               Water.calc()">
-    <span id="agua-com-val">4</span>
-  </div>
+<!-- Chord tooltip -->
+<div class="chord-tooltip" id="chordTooltip">
+  <div class="chord-name" id="tooltipName"></div>
+  <canvas id="tooltipCanvas" width="100" height="110"></canvas>
+</div>
 
-  <div class="result-grid">
-    <div class="result-box">
-      <h4>Agua por ratio</h4>
-      <div class="result-value" id="agua-std">480 <small>ml</small></div>
-      <div class="result-tip"   id="agua-ratio-tip">Ratio 1:1.5 (Bomba)</div>
+<!-- Add Song Modal -->
+<div class="modal-overlay" id="addSongModal">
+  <div class="modal">
+    <h2>Nueva canción</h2>
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="newTitle" placeholder="Nombre de la canción">
     </div>
-    <div class="result-box">
-      <h4>+ Evaporación calibrada</h4>
-      <div class="result-value" id="agua-cal">— <small>ml</small></div>
-      <div class="result-tip"   id="agua-evap-tip">Sin equipo activo calibrado</div>
+    <div class="form-group">
+      <label>Artista</label>
+      <input type="text" id="newArtist" placeholder="Nombre del artista">
     </div>
-  </div>
+    <div class="form-group">
+      <label>Tonalidad</label>
+      <select id="newKey">
+        <option>Am</option><option>Em</option><option>Dm</option>
+        <option>C</option><option>G</option><option>D</option>
+        <option>F</option><option>E</option><option>A</option>
+        <option>Bm</option><option>F#m</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Letra con acordes</label>
+      <textarea id="newLyrics" placeholder="[Intro]
+[Am]Aquí va la [C]letra de la [G]canción
+Con los [Em]acordes encima de las [Am]palabras
 
-  <hr class="divider">
-
-  <!-- SECCIÓN B: Mis equipos -->
-  <h2 class="section-title">Mis <span>equipos</span></h2>
-  <div id="profiles-list" class="profiles-list"></div>
-
-  <!-- Formulario nuevo/editar equipo (oculto por defecto) -->
-  <div id="equip-form" style="display:none">
-    <div class="equip-form">
-      <h4 id="equip-form-title">Nuevo equipo</h4>
-
-      <label>Nombre del equipo</label>
-      <input type="text" id="eq-name" placeholder="ej. Paella grande de casa">
-
-      <label>Diámetro de la paella</label>
-      <div class="size-presets" id="size-presets">
-        <button class="size-preset" onclick="Equipment.setDiam(26)">26 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(32)">32 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(38)">38 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(46)">46 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(55)">55 cm</button>
-        <button class="size-preset" onclick="Equipment.setDiam(65)">65 cm</button>
-      </div>
-      <div class="form-row">
-        <div>
-          <label>Diámetro (cm)</label>
-          <input type="number" id="eq-diam" placeholder="ej. 46" min="20" max="120" oninput="Equipment.clearDiamPreset()">
-        </div>
-        <div>
-          <label>Capacidad estimada</label>
-          <input type="text" id="eq-cap" readonly placeholder="—">
-        </div>
-      </div>
-
-      <label>Tipo de quemador / fuego</label>
-      <div class="burner-grid">
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','🔥')">
-          <span class="b-emoji">🔥</span>Paellero gas
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','⚡')">
-          <span class="b-emoji">⚡</span>Vitrocerámica
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','🧲')">
-          <span class="b-emoji">🧲</span>Inducción
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','🪵')">
-          <span class="b-emoji">🪵</span>Leña
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','🫧')">
-          <span class="b-emoji">🫧</span>Cocina gas
-        </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','🍳')">
-          <span class="b-emoji">🍳</span>Otro
-        </button>
-      </div>
-      <input type="hidden" id="eq-burner">
-
-      <div style="display:flex;gap:.75rem;margin-top:.5rem;">
-        <button class="btn btn-ghost btn-sm" onclick="Equipment.hideForm()">Cancelar</button>
-        <button class="btn btn-full" onclick="Equipment.save()">Guardar equipo</button>
+[Estribillo]
+[F]Escribe los acordes [C]entre corchetes
+[G]Justo antes de la [Am]sílaba"></textarea>
+      <div class="form-hint">
+        Escribe el acorde entre [corchetes] justo antes de la sílaba donde suena.<br>
+        Usa [Verso], [Estribillo], [Puente], [Intro] para las secciones.
       </div>
     </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- SECCIÓN C: Calibración de evaporación -->
-  <h2 class="section-title">Calibración de <span>evaporación</span></h2>
-
-  <!-- Estado actual del equipo activo -->
-  <div class="result-box" style="margin-top:0;margin-bottom:1rem">
-    <div id="cal-status-content"></div>
-  </div>
-
-  <!-- Fase 1: Setup (instrucciones + arranque) -->
-  <div id="cal-phase-setup">
-    <div class="cal-box">
-      <h4>🧪 Prueba de evaporación</h4>
-      <p>Mide cuánta agua evapora tu equipo activo por minuto para sumarla automáticamente al cálculo de agua de cada receta.</p>
-      <p><strong>Cómo hacerlo:</strong> llena la paella con agua (ej. 3 litros), pon el fuego a tope y pulsa iniciar. El cronómetro contará 15 minutos hacia atrás. Mantén la pantalla encendida.</p>
+    <div class="form-group">
+      <label>Tablatura (opcional)</label>
+      <textarea id="newTab" placeholder="e|---0---2---3---2---0---|
+B|---1---3---3---3---1---|
+G|---0---2---0---2---0---|
+D|---2---0---0---0---2---|
+A|---3-------2-------3---|
+E|-----------------------|" style="min-height: 120px;"></textarea>
     </div>
-    <label>Agua inicial que vas a poner (ml)</label>
-    <input type="number" id="cal-agua-inicial-input" value="3000" min="500" max="15000">
-    <button class="btn btn-water btn-full" id="btn-start-cal" onclick="Calibration.start()">▶ Iniciar prueba de calibración</button>
-    <div style="margin-top:1rem">
-      <button class="btn btn-secondary btn-full" onclick="Equipment.showForm(null)">+ Añadir nuevo equipo</button>
-    </div>
-  </div>
-
-  <!-- Fase 2: Cronómetro corriendo -->
-  <div id="cal-phase-running" style="display:none">
-    <div class="countdown-wrap">
-      <div class="countdown-circle">
-        <svg viewBox="0 0 200 200">
-          <circle class="track" cx="100" cy="100" r="91"/>
-          <circle class="fill" id="cal-arc" cx="100" cy="100" r="91" stroke-dasharray="571.8" stroke-dashoffset="0"/>
-        </svg>
-        <div class="countdown-time">
-          <span id="cal-time-display">15:00</span>
-          <small>restantes</small>
-        </div>
-      </div>
-      <div class="countdown-state" id="cal-state-text">🔥 Fuego al máximo — no apagues la pantalla</div>
-      <button class="btn btn-danger" onclick="Calibration.cancel()">✕ Cancelar prueba</button>
-    </div>
-  </div>
-
-  <!-- Fase 3: Medir agua restante -->
-  <div id="cal-phase-measure" style="display:none">
-    <div class="measure-form">
-      <h4>Mide el agua restante</h4>
-      <p>Apaga el fuego. Deja reposar 5 minutos y mide cuánta agua queda en la paella.</p>
-      <div class="measure-row">
-        <div>
-          <label>Agua inicial (ml)</label>
-          <input type="number" id="cal-agua-inicial-show" readonly>
-        </div>
-        <div>
-          <label>Agua que queda (ml)</label>
-          <input type="number" id="cal-agua-final" placeholder="ej. 2100" min="0" oninput="Calibration.calcEvap()">
-        </div>
-      </div>
-      <div id="evap-result-box" style="display:none" class="evap-result">
-        <div class="evap-val"   id="evap-val-display">—</div>
-        <div class="evap-label">ml evaporados por minuto</div>
-        <div class="evap-badge" id="evap-badge-txt">—</div>
-      </div>
-      <div style="margin-top:1rem;display:flex;gap:.75rem;">
-        <button class="btn btn-secondary"        onclick="Calibration.cancel()">Cancelar</button>
-        <button class="btn btn-full" id="btn-save-cal" onclick="Calibration.save()" disabled>Guardar calibración ✓</button>
-      </div>
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-modal primary" onclick="saveSong()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- PANTALLA: NIVELADOR -->
-<div id="screen-nivel" class="screen">
-  <h2 class="section-title">Nivelador de <span>paella</span></h2>
-  <p class="note" style="margin-bottom:1.25rem">Coloca el móvil sobre la paella. Pulsa <strong>Establecer punto 0</strong> para calibrar la posición de referencia de tu superficie.</p>
+<!-- Import La Cuerda Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <h2>Importar de La Cuerda</h2>
 
-  <div class="level-container">
-    <div class="paella-view">
-      <div class="paella-dish" id="paella-dish">
-        <div class="rice-surface"></div>
-        <div class="water-bubble" id="water-bubble">
-          <div class="bubble-center" id="bubble-center"></div>
-        </div>
-      </div>
-      <svg class="crosshair" viewBox="0 0 240 240">
-        <circle cx="120" cy="120" r="28" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <circle cx="120" cy="120" r="56" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
-        <line x1="120" y1="55"  x2="120" y2="185" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-        <line x1="55"  y1="120" x2="185" y2="120" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-      </svg>
+    <div style="background:rgba(139,46,15,0.07);border:1px solid var(--staff-line);border-radius:6px;padding:0.8rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--ink-muted);line-height:1.6;">
+      <strong style="color:var(--accent);">Cómo hacerlo:</strong><br>
+      1. Ve a <a href="https://lacuerda.net" target="_blank" style="color:var(--accent);">lacuerda.net</a> y busca tu canción<br>
+      2. Selecciona todo el texto de la canción (Ctrl+A o selección manual)<br>
+      3. Cópialo y pégalo aquí abajo<br>
+      4. Rellena título y artista, y listo
     </div>
 
-    <div class="level-angle">
-      <span id="angle-val">0.0</span>°
-      <small id="angle-dir">perfectamente nivelado</small>
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="impTitle" placeholder="Nombre de la canción">
     </div>
-    <div class="level-status ok" id="level-status">✓ La paella está nivelada</div>
-
-    <!-- Punto 0 -->
-    <div class="zero-actions">
-      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">🎯 Establecer punto 0</button>
-      <button class="btn btn-ghost" style="flex:1" onclick="Gyro.resetZero()">↺ Resetear</button>
+    <div class="form-group">
+      <label>Artista</label>
+      <input type="text" id="impArtist" placeholder="Nombre del artista">
     </div>
-    <div class="note" id="zero-status" style="text-align:center">Sin punto 0 — usando horizontal absoluta</div>
-
-    <div id="sensor-denied" class="sensor-denied" style="display:none;width:100%">
-      <p>⚠️ Tu navegador necesita permiso para el giroscopio.<br><br>
-         En iOS: Ajustes → Safari → Acceso al movimiento y orientación.<br>
-         En Android debería funcionar automáticamente.</p>
-      <br>
-      <button class="btn btn-water" onclick="Gyro.requestPermission()">Activar sensor</button>
+    <div class="form-group">
+      <label>Tonalidad</label>
+      <select id="impKey">
+        <option>Am</option><option>Em</option><option>Dm</option>
+        <option>C</option><option>G</option><option>D</option>
+        <option>F</option><option>E</option><option>A</option>
+        <option>Bm</option><option>F#m</option>
+      </select>
     </div>
-
-    <div class="note" style="text-align:center">Umbral de nivelado: ±1.5°</div>
-  </div>
-</div>
-
-<!-- PANTALLA: BÁSCULA EXPERIMENTAL -->
-<div id="screen-bascula" class="screen">
-  <h2 class="section-title">Báscula <span>táctil</span></h2>
-  <div class="scale-experimental-badge">⚗️ Experimental — precisión orientativa</div>
-
-  <!-- Tabs: medir / calibrar -->
-  <div class="inner-tabs">
-    <button class="inner-tab active" onclick="Scale.switchTab('medir')">⚖️ Pesar</button>
-    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">🔧 Calibrar</button>
-  </div>
-
-  <!-- TAB: MEDIR -->
-  <div id="scale-tab-medir">
-    <p class="note" style="margin-bottom:1rem">
-      Pon el móvil en una superficie plana. Coloca el objeto sobre la zona de pesado y mantén la presión.
-    </p>
-
-    <!-- Zona táctil de pesado -->
-    <div class="scale-pad" id="scale-pad"
-         ontouchstart="Scale.onTouchStart(event)"
-         ontouchmove="Scale.onTouchMove(event)"
-         ontouchend="Scale.onTouchEnd(event)">
-      <div class="scale-pad-icon" id="scale-pad-icon">🫴</div>
-      <div class="scale-pad-hint" id="scale-pad-hint">Apoya aquí el objeto a pesar</div>
+    <div class="form-group">
+      <label>Pega aquí el texto copiado de La Cuerda</label>
+      <textarea id="impRaw" style="min-height:200px;font-family:var(--font-mono);font-size:0.78rem;" placeholder="Pega aquí el texto tal como está en la web..."></textarea>
     </div>
 
-    <!-- Lectura -->
-    <div class="scale-reading">
-      <div class="scale-value" id="scale-display">
-        — <small>g</small>
-      </div>
-      <div class="scale-raw" id="scale-raw">Área de contacto: —</div>
+    <div id="impPreview" style="display:none;margin-bottom:1rem;">
+      <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;">Vista previa</div>
+      <div id="impPreviewText" style="background:rgba(0,0,0,0.04);border:1px solid var(--staff-line);border-radius:4px;padding:0.75rem;font-family:var(--font-mono);font-size:0.75rem;line-height:1.7;max-height:160px;overflow-y:auto;white-space:pre-wrap;color:var(--ink);"></div>
     </div>
 
-    <hr class="divider">
-
-    <!-- Tara -->
-    <div style="display:flex;gap:.6rem;max-width:320px;margin:0 auto;">
-      <button class="btn btn-secondary" style="flex:1" onclick="Scale.tare()">⟳ Tara</button>
-      <button class="btn btn-ghost"     style="flex:1" onclick="Scale.reset()">✕ Reset</button>
-    </div>
-
-    <div class="scale-disclaimer">
-      ⚠️ Esta báscula usa el área de contacto táctil para estimar el peso. La precisión depende del dispositivo, del objeto y de la calibración. No usar para medidas críticas. Margen de error típico: ±20-80 g.
-    </div>
-  </div>
-
-  <!-- TAB: CALIBRAR -->
-  <div id="scale-tab-calibrar" style="display:none">
-    <p class="note" style="margin-bottom:1rem">
-      Calibra con dos objetos de peso conocido para mejorar la precisión. Usa p.ej. una botella de agua (500 g) y un paquete de arroz (1 kg).
-    </p>
-
-    <div class="scale-cal-steps" id="scale-cal-steps"></div>
-
-    <div style="margin-top:1rem;display:flex;gap:.6rem;">
-      <button class="btn btn-ghost btn-sm" onclick="Scale.resetCal()">↺ Borrar calibración</button>
-      <button class="btn btn-full" id="scale-cal-btn" onclick="Scale.calAction()">Capturar punto 1</button>
-    </div>
-
-    <div class="result-box" style="margin-top:1rem" id="scale-cal-result" style="display:none">
-      <div id="scale-cal-result-content"></div>
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeImport()">Cancelar</button>
+      <button class="btn-modal secondary" onclick="previewImport()">Vista previa</button>
+      <button class="btn-modal primary" onclick="saveImport()">Importar</button>
     </div>
   </div>
 </div>
 
-<!-- PANTALLA: INSTRUCCIONES -->
-<div id="screen-instrucciones" class="screen">
-  <h2 class="section-title">Guías en <span>vídeo</span></h2>
-  <p class="note" style="margin-bottom:1.5rem">Aprende a sacarle el máximo partido a cada función de la app.</p>
+<!-- ── MODAL AFINADOR ── -->
+<div class="modal-overlay" id="tunerModal">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <h2 style="margin-bottom:0.5rem;">🎸 Afinador</h2>
+    <p style="font-size:0.78rem;color:var(--ink-muted);margin-bottom:1.5rem;">Toca una cuerda y mantén el sonido</p>
 
-  <div class="instructions-list" id="instructions-list"></div>
-</div>
+    <!-- Nota detectada -->
+    <div style="margin-bottom:1rem;">
+      <div id="tnNote" style="font-family:'Playfair Display',serif;font-size:4rem;font-weight:700;color:var(--ink);line-height:1;min-height:4.5rem;">–</div>
+      <div id="tnOctave" style="font-size:0.8rem;color:var(--ink-muted);margin-top:0.2rem;">–</div>
+    </div>
 
-<!-- MODAL: Alerta fin de cronómetro -->
-<div id="alert-overlay" class="alert-overlay" style="display:none">
-  <div class="alert-box">
-    <div class="alert-icon">🔥</div>
-    <h3>¡Apaga el fuego!</h3>
-    <p>Han pasado los 15 minutos. Apaga el fuego ahora y deja reposar 5 minutos antes de medir el agua restante.</p>
-    <button class="btn btn-full" onclick="Calibration.goToMeasure()">Entendido — voy a medir</button>
+    <!-- Medidor de cents -->
+    <div style="position:relative;height:28px;background:rgba(0,0,0,0.06);border-radius:14px;margin:0 1rem 0.4rem;overflow:hidden;border:1px solid var(--staff-line);">
+      <!-- zona verde central -->
+      <div style="position:absolute;left:50%;transform:translateX(-50%);width:12%;height:100%;background:rgba(80,180,80,0.2);border-radius:4px;"></div>
+      <!-- línea central -->
+      <div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(0,0,0,0.15);transform:translateX(-50%);"></div>
+      <!-- aguja -->
+      <div id="tnNeedle" style="position:absolute;top:3px;bottom:3px;width:4px;border-radius:2px;background:var(--accent);left:50%;transform:translateX(-50%);transition:left 0.1s;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:0 1rem;font-size:0.65rem;color:var(--ink-light);margin-bottom:1.25rem;">
+      <span>−50¢</span><span style="color:green;font-weight:700;">♦ Afinado</span><span>+50¢</span>
+    </div>
+
+    <!-- Indicador afinado -->
+    <div id="tnStatus" style="font-size:0.9rem;font-weight:700;margin-bottom:1.25rem;min-height:1.4em;color:var(--ink-muted);">Esperando señal…</div>
+
+    <!-- Frecuencia -->
+    <div id="tnFreq" style="font-family:'Courier Prime',monospace;font-size:0.8rem;color:var(--ink-light);margin-bottom:1.5rem;">– Hz</div>
+
+    <!-- Cuerdas de referencia -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:0.6rem;">Cuerdas estándar (E A D G B e)</div>
+      <div style="display:flex;justify-content:center;gap:0.4rem;flex-wrap:wrap;" id="tunerStrings"></div>
+    </div>
+
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-modal secondary" onclick="closeTuner()">Cerrar</button>
+    </div>
   </div>
 </div>
 
+</div><!-- /appShell -->
 
-<!-- ============================================================
-  JAVASCRIPT — un módulo por responsabilidad
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, query, where, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  Módulos:
-    Store       — persistencia en localStorage
-    Data        — datos estáticos (recetas, constantes)
-    Nav         — navegación entre pantallas
-    Recipe      — lógica de recetas (pasos + ingredientes)
-    Water       — calculadora de agua
-    Equipment   — CRUD de perfiles de equipo
-    Calibration — prueba de evaporación cronometrada
-    Gyro        — giroscopio / nivelador
-    App         — inicialización
-============================================================ -->
+// ── FIREBASE CONFIG ───────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAPXAU79_3DrG1ut1-bTVoX_q0GIPFVcAM",
+  authDomain: "cancioner.firebaseapp.com",
+  projectId: "cancioner",
+  storageBucket: "cancioner.firebasestorage.app",
+  messagingSenderId: "646961823765",
+  appId: "1:646961823765:web:b9f3dbbf83e8598bd70e1c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+// ── AUTH UI ───────────────────────────────────────────────────────────────
+function showLoginScreen() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+}
+
+function showAppShell() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  document.getElementById('userAvatar').src = currentUser.photoURL || '';
+  document.getElementById('userAvatar').title = currentUser.displayName || currentUser.email;
+}
+
+window.loginWithGoogle = async function() {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    console.error(e);
+    alert('Error al iniciar sesión: ' + e.message);
+  }
+};
+
+window.logout = async function() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if (user) {
+    showAppShell();
+    await loadSongsFromFirebase();
+  } else {
+    showLoginScreen();
+    songs = [];
+    currentSong = null;
+  }
+});
+
+// ── FIRESTORE ─────────────────────────────────────────────────────────────
+async function loadSongsFromFirebase() {
+  if (!currentUser) return;
+  try {
+    const q = query(
+      collection(db, 'songs'),
+      where('uid', '==', currentUser.uid),
+      orderBy('createdAt', 'asc')
+    );
+    const snap = await getDocs(q);
+    songs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    renderSidebar();
+    // Seleccionar primera canción automáticamente
+    if (songs.length > 0) {
+      currentSong = songs[0];
+      // Esperar a que el DOM del appShell esté visible antes de renderizar
+      requestAnimationFrame(() => renderSong());
+    } else {
+      document.getElementById('mainContent').innerHTML = `<div class="empty-state">
+        <h2>Tu cancionero está vacío</h2>
+        <p>Añade tu primera canción para empezar</p>
+        <button class="btn btn-accent" style="padding:0.7rem 1.5rem;font-size:1rem;border-radius:6px;" onclick="openAddSong()">+ Canción</button>
+      </div>`;
+    }
+  } catch(e) {
+    console.error('Error cargando canciones:', e);
+    alert('Error al cargar canciones. Revisa la consola.');
+  }
+}
+
+window.saveAll = async function(song) {
+  if (!currentUser || !song) return;
+  try {
+    const ref = doc(db, 'songs', String(song.id));
+    await setDoc(ref, { ...song, uid: currentUser.uid });
+  } catch(e) {
+    console.error('Error guardando:', e);
+    alert('Error al guardar la canción.');
+  }
+};
+
+window.deleteSongFromDB = async function(id) {
+  if (!currentUser) return;
+  try {
+    await deleteDoc(doc(db, 'songs', String(id)));
+  } catch(e) {
+    console.error('Error borrando:', e);
+  }
+};
+
+// ── DATA ──────────────────────────────────────────────────────────────────
+</script><!-- /firebase module -->
+
 <script>
+// ── DATA (script clásico, accede a window.saveAll y window.deleteSongFromDB) ─
 
-/* ── THEME ──────────────────────────────────────────────────
-   Gestiona el tema claro/oscuro.
-   - Lee la preferencia guardada en localStorage al arrancar
-   - Si no hay preferencia guardada, usa la del sistema (prefers-color-scheme)
-   - Guarda la elección del usuario para recordarla entre visitas
-   - Actualiza el icono y el texto del botón del header
-──────────────────────────────────────────────────────────── */
-const Theme = (() => {
-  const KEY = 'maestroArrocero_theme';
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_ALT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 
-  function _apply(dark) {
-    document.body.classList.toggle('dark', dark);
-    const icon  = document.getElementById('theme-icon');
-    const label = document.getElementById('theme-label');
-    if (icon)  icon.textContent  = dark ? '☀️' : '🌙';
-    if (label) label.textContent = dark ? 'Claro' : 'Oscuro';
-  }
+// Chord voicings: [string6..string1], -1 = muted, 0 = open
+const CHORD_VOICINGS = {
+  'Am': [0,0,2,2,1,0],  'A': [-1,0,2,2,2,0],
+  'C':  [-1,3,2,0,1,0], 'Cadd9': [-1,3,2,0,3,3],
+  'D':  [-1,-1,0,2,3,2],'Dm': [-1,-1,0,2,3,1],
+  'E':  [0,2,2,1,0,0],  'Em': [0,2,2,0,0,0],
+  'F':  [1,3,3,2,1,1],  'Fm': [1,3,3,1,1,1],
+  'G':  [3,2,0,0,0,3],  'Gm': [3,5,5,3,3,3],
+  'Bm': [-1,2,4,4,3,2], 'B':  [-1,2,4,4,4,2],
+  'F#m':[-1,-1,4,2,2,2],'F#': [2,4,4,3,2,2],
+  'A7': [-1,0,2,0,2,0], 'E7': [0,2,0,1,0,0],
+  'G7': [3,2,0,0,0,1],  'D7': [-1,-1,0,2,1,2],
+};
 
-  function toggle() {
-    const isDark = document.body.classList.contains('dark');
-    _apply(!isDark);
-    try { localStorage.setItem(KEY, !isDark ? 'dark' : 'light'); } catch(e) {}
-  }
+let songs = [];
+let currentSong = null;
+let transposeAmount = 0;
+let showChordsMode = true;
+let showTabMode = false;
 
-  function init() {
-    try {
-      const saved = localStorage.getItem(KEY);
-      if (saved) {
-        _apply(saved === 'dark');
-      } else {
-        // Sin preferencia guardada → usar preferencia del sistema
-        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-        _apply(prefersDark);
-      }
-    } catch(e) { _apply(false); }
-  }
+// ── STORAGE ───────────────────────────────────────────────────────────────
+// saveAll y deleteSongFromDB están definidos en el módulo Firebase de arriba
 
-  return { toggle, init };
-})();
+// ── TRANSPOSE ─────────────────────────────────────────────────────────────
+function normalizeNote(n) { return NOTES.includes(n) ? n : NOTE_ALT.includes(n) ? NOTES[NOTE_ALT.indexOf(n)] : n; }
+function transposeChord(chord, steps) {
+  // Handle complex chords: Am7, F#m, Cadd9, etc.
+  const match = chord.match(/^([A-G][#b]?)(.*)/);
+  if (!match) return chord;
+  const root = normalizeNote(match[1]);
+  const idx = NOTES.indexOf(root);
+  if (idx === -1) return chord;
+  const newIdx = ((idx + steps) % 12 + 12) % 12;
+  return NOTES[newIdx] + match[2];
+}
 
+function transpose(delta) {
+  transposeAmount += delta;
+  renderSong();
+  document.querySelectorAll('.toolbar .btn').forEach(b => b.classList.remove('active'));
+}
 
-/* ── STORE ──────────────────────────────────────────────────
-   Todo lo que necesita sobrevivir entre sesiones pasa por aquí.
-   El resto del código lee/escribe a través de Store, nunca
-   accede a localStorage directamente.
-──────────────────────────────────────────────────────────── */
-const Store = (() => {
-  const KEY = 'maestroArrocero_v2';
+function resetTranspose() {
+  transposeAmount = 0;
+  renderSong();
+}
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
-    } catch(e) {}
-    return { profiles: [], activeProfileId: null };
-  }
-
-  function save(data) {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
-  }
-
-  // Datos en memoria, sincronizados con localStorage al mutar
-  const data = load();
-  if (!data.profiles)       data.profiles = [];
-  if (!data.activeProfileId) data.activeProfileId = null;
-
-  return {
-    getProfiles:       ()    => data.profiles,
-    getActiveId:       ()    => data.activeProfileId,
-    setActiveId:       (id)  => { data.activeProfileId = id; save(data); },
-    addProfile:        (p)   => { data.profiles.push(p); save(data); },
-    updateProfile:     (p)   => {
-      const idx = data.profiles.findIndex(x => x.id === p.id);
-      if (idx !== -1) { data.profiles[idx] = p; save(data); }
-    },
-    deleteProfile:     (id)  => {
-      data.profiles = data.profiles.filter(p => p.id !== id);
-      if (data.activeProfileId === id) data.activeProfileId = data.profiles[0]?.id || null;
-      save(data);
-    },
-    getActiveProfile:  ()    => data.profiles.find(p => p.id === data.activeProfileId) || null,
-    saveCalibration:   (evapPerMin) => {
-      const p = Store.getActiveProfile();
-      if (p) { p.evapPerMin = evapPerMin; save(data); }
-    },
-    clearCalibration:  ()    => {
-      const p = Store.getActiveProfile();
-      if (p) { p.evapPerMin = null; save(data); }
-    },
-  };
-})();
-
-
-/* ── DATA ───────────────────────────────────────────────────
-   Datos estáticos: recetas y catálogos de lookup.
-   Para añadir una receta, añade un objeto al array RECIPES.
-   Para añadir un tipo de arroz, añade una entrada a WATER_NAMES.
-──────────────────────────────────────────────────────────── */
-const Data = (() => {
-  const RECIPES = [
-    {
-      id: 'valenciana', name: 'Paella Valenciana', emoji: '🥘',
-      desc: 'La receta tradicional con pollo y conejo', difficulty: 'Media', time: '55 min',
-      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'bomba', ricePerPerson: 80, waterRatio: 1.5, cookMin: 15,
-      ingredients: [
-        { name: 'Arroz bomba',       perPerson: 80,   unit: 'g' },
-        { name: 'Pollo troceado',    perPerson: 120,  unit: 'g' },
-        { name: 'Conejo troceado',   perPerson: 80,   unit: 'g' },
-        { name: 'Judía verde plana', perPerson: 40,   unit: 'g' },
-        { name: 'Garrofó (alubia)',  perPerson: 25,   unit: 'g' },
-        { name: 'Tomate triturado',  perPerson: 30,   unit: 'ml' },
-        { name: 'Aceite de oliva',   perPerson: 15,   unit: 'ml' },
-        { name: 'Pimentón dulce',    perPerson: 1,    unit: 'g' },
-        { name: 'Azafrán',           perPerson: 0.05, unit: 'g' },
-        { name: 'Sal',               perPerson: 3,    unit: 'g' },
-      ],
-      steps: [
-        { title: 'Preparar el fuego', time: '5 min',  text: 'Enciende la paellera a fuego medio-alto. Añade el aceite y caliéntalo hasta que brille.',                                                                                                                                                      ingredients: 'Aceite de oliva' },
-        { title: 'Dorar las carnes',  time: '12 min', text: 'Sofríe el pollo y el conejo hasta que estén bien dorados. La carne debe quedar sellada para retener los jugos. Aparta hacia los lados.',                                                                                                       ingredients: 'Pollo, Conejo' },
-        { title: 'Sofrito base',      time: '8 min',  text: 'En el centro sofríe la judía verde y el garrofó 3 minutos. Añade el tomate y cocina hasta que se evapore el agua.',                                                                                                                            ingredients: 'Judía verde, Garrofó, Tomate' },
-        { title: 'Especias',          time: '1 min',  text: 'Añade el pimentón dulce y remueve rápidamente. Solo unos segundos. Mezcla con la carne.',                                                                                                                                                       ingredients: 'Pimentón dulce' },
-        { title: 'Hacer el caldo',    time: '2 min',  text: 'Vierte el agua caliente. Añade el azafrán disuelto. Llena la paella con la cantidad de agua que te marque la receta, marca la paella con la medida correspondiente, vuelve a echar la misma cantidad sin que rebose y pon a hervir.',          ingredients: 'Agua, Azafrán' },
-        { title: 'Hervir el caldo',   time: '30 min', text: 'Hierve fuerte 30 minutos para que las carnes terminen de cocinarse y el nivel llegue hasta la marca que hemos medido.',                                                                                                                         ingredients: '—' },
-        { title: 'Añadir el arroz',   time: '15 min', text: 'Reparte el arroz en forma de cruz. Fuego fuerte 15 minutos.',                                                                                                                                                                                   ingredients: 'Arroz bomba' },
-        { title: 'Reposo',            time: '5 min',  text: 'Retira del fuego y déjalo reposar 5 minutos.',                                                                                                                                                                                                  ingredients: '—' },
-      ],
-    },
-    {
-      id: 'caldoso', name: 'Arroz Caldoso', emoji: '🍲',
-      desc: 'Meloso y con marisco fresco', difficulty: 'Media-alta', time: '50 min',
-      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'redondo', ricePerPerson: 75, waterRatio: 1.2, cookMin: 15,
-      ingredients: [
-        { name: 'Arroz redondo',     perPerson: 75,  unit: 'g' },
-        { name: 'Gambas o cigalas',  perPerson: 100, unit: 'g' },
-        { name: 'Mejillones',        perPerson: 80,  unit: 'g' },
-        { name: 'Calamar',           perPerson: 60,  unit: 'g' },
-        { name: 'Caldo de marisco',  perPerson: 260, unit: 'ml' },
-        { name: 'Tomate frito',      perPerson: 25,  unit: 'ml' },
-        { name: 'Cebolla',           perPerson: 30,  unit: 'g' },
-        { name: 'Ajo',               perPerson: 5,   unit: 'g' },
-        { name: 'Pimiento rojo',     perPerson: 25,  unit: 'g' },
-        { name: 'Aceite de oliva',   perPerson: 15,  unit: 'ml' },
-        { name: 'Sal y pimienta',    perPerson: 3,   unit: 'g' },
-      ],
-      steps: [
-        { title: 'Sofrito aromático', time: '10 min', text: 'Sofríe la cebolla, ajo y pimiento en aceite caliente hasta que estén blandos.',        ingredients: 'Cebolla, Ajo, Pimiento, Aceite' },
-        { title: 'Marisco base',      time: '5 min',  text: 'Añade el calamar y sofríe 3 minutos. Incorpora el tomate frito y mezcla.',              ingredients: 'Calamar, Tomate frito' },
-        { title: 'El caldo',          time: '5 min',  text: 'Vierte el caldo caliente. Lleva a ebullición y rectifica de sal.',                      ingredients: 'Caldo de marisco, Sal' },
-        { title: 'El arroz',          time: '5 min',  text: 'Incorpora el arroz cuando hierva. Baja a fuego medio. Debe quedar caldoso.',            ingredients: 'Arroz redondo' },
-        { title: 'Marisco final',     time: '5 min',  text: 'A los 8 minutos añade las gambas y mejillones. Se cocinan rápido.',                     ingredients: 'Gambas, Mejillones' },
-        { title: 'Servir',            time: '2 min',  text: 'Sirve inmediatamente. El caldoso no espera. Acompaña con alioli.',                      ingredients: '—' },
-      ],
-    },
-    {
-      id: 'negro', name: 'Arroz Negro', emoji: '🦑',
-      desc: 'Con tinta de calamar y alioli', difficulty: 'Media', time: '45 min',
-      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'bomba', ricePerPerson: 80, waterRatio: 1.5, cookMin: 18,
-      ingredients: [
-        { name: 'Arroz bomba',       perPerson: 80,  unit: 'g' },
-        { name: 'Calamar o sepia',   perPerson: 120, unit: 'g' },
-        { name: 'Tinta de calamar',  perPerson: 4,   unit: 'g' },
-        { name: 'Gambas',            perPerson: 80,  unit: 'g' },
-        { name: 'Caldo de pescado',  perPerson: 130, unit: 'ml' },
-        { name: 'Cebolla',           perPerson: 30,  unit: 'g' },
-        { name: 'Ajo',               perPerson: 5,   unit: 'g' },
-        { name: 'Tomate',            perPerson: 30,  unit: 'g' },
-        { name: 'Aceite de oliva',   perPerson: 15,  unit: 'ml' },
-        { name: 'Sal',               perPerson: 3,   unit: 'g' },
-      ],
-      steps: [
-        { title: 'Sofrito aromático', time: '8 min',  text: 'Sofríe cebolla y ajo en aceite hasta que doren. Añade el tomate y reduce.',                              ingredients: 'Cebolla, Ajo, Tomate, Aceite' },
-        { title: 'Sepia o calamar',   time: '5 min',  text: 'Añade el calamar y sofríe a fuego fuerte hasta que pierda el agua y empiece a dorarse.',                 ingredients: 'Calamar/Sepia' },
-        { title: 'La tinta',          time: '2 min',  text: 'Disuelve la tinta en caldo caliente y añádela al sofrito. La paellera se teñirá de negro intenso.',      ingredients: 'Tinta de calamar, Caldo' },
-        { title: 'Caldo',             time: '5 min',  text: 'Vierte el resto del caldo. Hierve 3 minutos. Sala al gusto.',                                            ingredients: 'Caldo de pescado, Sal' },
-        { title: 'El arroz',          time: '18 min', text: 'Reparte el arroz. Fuego alto 8 min, luego baja. Añade las gambas en los últimos 4 min.',                 ingredients: 'Arroz bomba, Gambas' },
-        { title: 'Reposo',            time: '5 min',  text: 'Reposa 5 minutos. Sirve con alioli casero.',                                                             ingredients: '—' },
-      ],
-    },
-    {
-      id: 'vegetal', name: 'Arroz de Verduras', emoji: '🌿',
-      desc: 'Ligero, colorido y lleno de sabor', difficulty: 'Fácil', time: '35 min',
-      reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'albufera', ricePerPerson: 75, waterRatio: 1.0, cookMin: 16,
-      ingredients: [
-        { name: 'Arroz Albufera',    perPerson: 75,   unit: 'g' },
-        { name: 'Alcachofas',        perPerson: 60,   unit: 'g' },
-        { name: 'Pimiento rojo',     perPerson: 40,   unit: 'g' },
-        { name: 'Pimiento verde',    perPerson: 40,   unit: 'g' },
-        { name: 'Calabacín',         perPerson: 50,   unit: 'g' },
-        { name: 'Judía verde',       perPerson: 35,   unit: 'g' },
-        { name: 'Tomate triturado',  perPerson: 30,   unit: 'ml' },
-        { name: 'Aceite de oliva',   perPerson: 15,   unit: 'ml' },
-        { name: 'Pimentón dulce',    perPerson: 1,    unit: 'g' },
-        { name: 'Azafrán',           perPerson: 0.05, unit: 'g' },
-        { name: 'Sal',               perPerson: 3,    unit: 'g' },
-      ],
-      steps: [
-        { title: 'Limpiar y cortar',    time: '10 min', text: 'Alcachofas en cuartos, pica pimientos, trocea calabacín y judía.',                              ingredients: 'Todas las verduras' },
-        { title: 'Sofreír',             time: '10 min', text: 'Sofríe pimientos 3 min, luego alcachofas y judía. Finalmente calabacín.',                       ingredients: 'Pimientos, Alcachofa, Judía, Calabacín, Aceite' },
-        { title: 'Sofrito y pimentón',  time: '4 min',  text: 'Añade el tomate y reduce. Agrega el pimentón y mezcla rápidamente.',                           ingredients: 'Tomate, Pimentón' },
-        { title: 'Caldo y azafrán',     time: '3 min',  text: 'Vierte agua caliente con azafrán disuelto. Hierve. Rectifica de sal.',                         ingredients: 'Agua, Azafrán, Sal' },
-        { title: 'El arroz',            time: '16 min', text: 'Distribuye entre las verduras. No remuevas. Fuego alto 8 min, luego reduce.',                  ingredients: 'Arroz Albufera' },
-        { title: 'Reposo',              time: '5 min',  text: 'Retira cuando el caldo esté absorbido. Cubre y deja reposar 5 minutos.',                       ingredients: '—' },
-      ],
-    },
-  ];
-
-  const WATER_NAMES = {
-    bomba:    'Bomba',
-    redondo:  'Redondo',
-    albufera: 'Albufera',
-    balilla:  'Balilla × Sollana',
-    dinamita: 'Molino Roca Dinamita',
-  };
-
-  const BURNER_LABELS = {
-    paellero_gas: '🔥 Paellero gas',
-    vitro:        '⚡ Vitrocerámica',
-    induccion:    '🧲 Inducción',
-    lena:         '🪵 Leña',
-    cocina_gas:   '🫧 Cocina gas',
-    otro:         '🍳 Otro',
-  };
-
-  return {
-    recipes:      RECIPES,
-    waterNames:   WATER_NAMES,
-    burnerLabels: BURNER_LABELS,
-    getRecipe: (id) => RECIPES.find(r => r.id === id),
-  };
-})();
-
-
-/* ── NAV ────────────────────────────────────────────────────
-   Gestiona la navegación entre las pantallas principales.
-   Usa el bottom nav (tabs inferiores estilo app nativa).
-   Cada módulo que necesita hacer algo al entrar en su pantalla
-   registra un callback en onEnter.
-──────────────────────────────────────────────────────────── */
-const Nav = (() => {
-  const onEnterCallbacks = {};
-
-  function goTo(screen) {
-    // Pantallas
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + screen)?.classList.add('active');
-
-    // Bottom tabs
-    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-    const activeTab = document.getElementById('btab-' + screen);
-    if (activeTab) activeTab.classList.add('active');
-
-    if (onEnterCallbacks[screen]) onEnterCallbacks[screen]();
-  }
-
-  function onEnter(screen, fn) { onEnterCallbacks[screen] = fn; }
-
-  // Navegar a receta (no tiene tab propio en el bottom nav)
-  function goToRecipe() {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('screen-recipe').classList.add('active');
-  }
-
-  return { goTo, onEnter, goToRecipe };
-})();
-
-
-/* ── RECIPE ─────────────────────────────────────────────────
-   Gestiona la pantalla de receta:
-     - Grid de tarjetas en home
-     - Tab de ingredientes (con slider de comensales)
-     - Tab de guía paso a paso
-──────────────────────────────────────────────────────────── */
-const Recipe = (() => {
-  let currentRecipe = null;
-  let currentStep   = 0;
-  let comensales    = 4;
-
-  // ── Home: grid de recetas
-  function renderHome() {
-    document.getElementById('recipe-grid').innerHTML = Data.recipes.map((r, i) => `
-      <div class="home-recipe ${i === 0 ? 'featured' : ''}" onclick="Recipe.open('${r.id}')">
-        <span class="home-recipe-num">0${i+1}</span>
-        <span class="home-recipe-emoji">${r.emoji}</span>
-        <span class="home-recipe-name ${i === 0 ? 'featured' : ''}">${r.name}</span>
-        <span class="home-recipe-time">${r.time}</span>
-        ${r.reelUrl ? `<a class="reel-btn" href="${r.reelUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:.68rem;padding:4px 8px">▶</a>` : '<span class="home-recipe-arr">›</span>'}
-      </div>`).join('');
-  }
-
-  // ── Abrir una receta (va directamente a ingredientes)
-  function open(id) {
-    currentRecipe = Data.getRecipe(id);
-    currentStep   = 0;
-    comensales    = 4;
-    document.getElementById('recipe-title-step').textContent = currentRecipe.name;
-    document.getElementById('recipe-subtitle-step').textContent = '⏱ ' + currentRecipe.time;
-    document.getElementById('comensal-slider').value = 4;
-    document.getElementById('comensal-val').textContent = 4;
-    Nav.goToRecipe();
-    switchTab('ingredientes');
-    renderIngredients();
-  }
-
-  // ── Tab: ingredientes
-  function renderIngredients() {
-    const r = currentRecipe, n = comensales;
-    document.getElementById('comensales-badge').textContent = n + ' persona' + (n > 1 ? 's' : '');
-    document.getElementById('ing-list').innerHTML = r.ingredients.map(ing => {
-      const amt = ing.perPerson * n;
-      const disp = amt < 1    ? (amt * 1000).toFixed(0) + ' mg'
-                 : amt >= 1000 ? (amt / 1000).toFixed(1) + ' kg'
-                 :               amt.toFixed(0) + ' ' + ing.unit;
-      return `<li><span>${ing.name}</span><span class="ing-amount">${disp}</span></li>`;
-    }).join('');
-
-    // Agua = ratio base + evaporación del equipo activo
-    const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
-    const prof  = Store.getActiveProfile();
-    const evap  = prof?.evapPerMin ?? null;
-    const extra = evap !== null ? Math.round(evap * r.cookMin) : 0;
-    document.getElementById('ing-agua').innerHTML = (base + extra) + ' <small>ml</small>';
-    document.getElementById('ing-agua-tip').textContent = evap !== null
-      ? `Base ${base} ml + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${r.cookMin} min) — ${prof.name}`
-      : 'Calibra la evaporación de tu equipo en la sección Agua.';
-  }
-
-  function updateComensales(v) {
-    comensales = parseInt(v);
-    document.getElementById('comensal-val').textContent = v;
-    renderIngredients();
-  }
-
-  // ── Tab: guía paso a paso
-  function renderStep() {
-    const r     = currentRecipe;
-    const s     = r.steps[currentStep];
-    const total = r.steps.length;
-    document.getElementById('progress-fill').style.width = Math.round(((currentStep + 1) / total) * 100) + '%';
-    document.getElementById('step-counter').textContent  = `Paso ${currentStep + 1} de ${total}`;
-    // Botón reel en cabecera (solo primer paso o siempre visible)
-    const reelEl = document.getElementById('recipe-reel-btn');
-    if (reelEl) {
-      reelEl.style.display = currentRecipe.reelUrl ? '' : 'none';
-      reelEl.href = currentRecipe.reelUrl || '#';
+// ── PARSE LYRICS ──────────────────────────────────────────────────────────
+function parseLyrics(text) {
+  const lines = text.split('\n');
+  const result = [];
+  for (const line of lines) {
+    // Section header
+    if (/^\[([A-ZÁÉÍÓÚ][a-záéíóúñ]*)\]$/.test(line.trim())) {
+      const sec = line.trim().replace(/[\[\]]/g,'');
+      // Heuristic: section headers are single words starting uppercase in brackets
+      const isSection = ['Intro','Verso','Estribillo','Puente','Chorus','Verse','Bridge','Outro','Coda','Solo','Pre-chorus','Prechorus'].some(s => sec.toLowerCase().includes(s.toLowerCase()));
+      if (isSection) { result.push({type:'section', label: sec}); continue; }
     }
+    // Parse chords within line
+    const tokens = [];
+    const regex = /\[([A-G][#b]?[^[\]]*)\]([^[]*)/g;
+    let lastIndex = 0, match;
+    // Check if line has any chords
+    if (/\[[A-G]/.test(line)) {
+      // Leading text before first chord
+      const firstChord = line.search(/\[[A-G]/);
+      if (firstChord > 0) tokens.push({chord:'', text: line.slice(0, firstChord)});
+      while ((match = regex.exec(line)) !== null) {
+        tokens.push({chord: match[1], text: match[2]});
+        lastIndex = regex.lastIndex;
+      }
+      result.push({type: 'chords', tokens});
+    } else if (line.trim() === '') {
+      result.push({type: 'empty'});
+    } else {
+      result.push({type: 'text', text: line});
+    }
+  }
+  return result;
+}
 
-    // Parsear minutos del tiempo del paso para el temporizador
-    const stepMins = parseInt(s.time) || 0;
-    const hasTimer = stepMins > 0;
+function extractChords(song) {
+  const chords = new Set();
+  const lines = parseLyrics(song.lyrics || '');
+  for (const line of lines) {
+    if (line.type === 'chords') {
+      for (const t of line.tokens) {
+        if (t.chord) chords.add(transposeChord(t.chord, transposeAmount));
+      }
+    }
+  }
+  return [...chords];
+}
 
-    document.getElementById('step-display').innerHTML = `
-      <div class="step-card">
-        <div class="step-inner">
-          <div class="step-num">${currentStep + 1}</div>
-          <div class="step-body">
-            <h3>${s.title}</h3>
-            <p>${s.text}</p>
-            <span class="step-timing">⏱ ${s.time}</span>
-          </div>
-        </div>
-        ${s.ingredients !== '—' ? `<div class="step-ingredients">🧂 ${s.ingredients}</div>` : ''}
-      </div>
-      ${hasTimer ? `
-      <div class="step-timer" id="step-timer-widget">
+// ── DRAW CHORD DIAGRAM ────────────────────────────────────────────────────
+function drawChord(canvas, chordName, smallSize = false) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const voicing = CHORD_VOICINGS[chordName];
+  if (!voicing) {
+    ctx.fillStyle = '#888';
+    ctx.font = '10px Lato';
+    ctx.textAlign = 'center';
+    ctx.fillText(chordName, W/2, H/2);
+    return;
+  }
+
+  const strings = 6, frets = 4;
+  const PAD_L = 12, PAD_T = 12, PAD_R = 8, PAD_B = 10;
+  const gw = W - PAD_L - PAD_R;
+  const gh = H - PAD_T - PAD_B;
+  const sw = gw / (strings - 1);
+  const fh = gh / frets;
+
+  // Nut
+  ctx.fillStyle = '#1a1208';
+  ctx.fillRect(PAD_L - 1, PAD_T, gw + 2, 3);
+
+  // Grid
+  ctx.strokeStyle = '#c0a878';
+  ctx.lineWidth = 0.8;
+  for (let s = 0; s < strings; s++) {
+    ctx.beginPath();
+    ctx.moveTo(PAD_L + s * sw, PAD_T);
+    ctx.lineTo(PAD_L + s * sw, PAD_T + gh);
+    ctx.stroke();
+  }
+  for (let f = 0; f <= frets; f++) {
+    ctx.beginPath();
+    ctx.moveTo(PAD_L, PAD_T + f * fh);
+    ctx.lineTo(PAD_L + gw, PAD_T + f * fh);
+    ctx.stroke();
+  }
+
+  // Dots
+  for (let s = 0; s < strings; s++) {
+    const fret = voicing[strings - 1 - s];
+    const x = PAD_L + s * sw;
+    if (fret === -1) {
+      // Muted
+      ctx.strokeStyle = '#8b2e0f'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x-4, PAD_T-8); ctx.lineTo(x+4, PAD_T-2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x+4, PAD_T-8); ctx.lineTo(x-4, PAD_T-2); ctx.stroke();
+    } else if (fret === 0) {
+      // Open
+      ctx.strokeStyle = '#1a1208'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, PAD_T - 5, 3.5, 0, Math.PI*2);
+      ctx.stroke();
+    } else {
+      // Fret dot
+      ctx.fillStyle = '#8b2e0f';
+      ctx.beginPath();
+      ctx.arc(x, PAD_T + (fret - 0.5) * fh, fh * 0.32, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function renderSong() {
+  const el = document.getElementById('mainContent');
+  if (!currentSong) {
+    el.innerHTML = `<div class="empty-state">
+      <h2>Tu cancionero está vacío</h2>
+      <p>Añade tu primera canción para empezar</p>
+      <button class="btn btn-accent" style="padding:0.7rem 1.5rem;font-size:1rem;border-radius:6px;" onclick="openAddSong()">+ Añadir canción</button>
+    </div>`;
+    return;
+  }
+
+  const song = currentSong;
+  const allChords = extractChords(song);
+  const lines = parseLyrics(song.lyrics || '');
+  const tKey = transposeChord(song.key, transposeAmount);
+  const tLabel = transposeAmount !== 0 ? ` <span style="color:var(--accent-light);font-size:0.7rem;">[${transposeAmount>0?'+':''}${transposeAmount} semitonos]</span>` : '';
+
+  // Build chord diagrams HTML
+  let chordsHTML = '';
+  if (showChordsMode) {
+    chordsHTML = `<div class="chord-diagrams" id="chordDiagramsRow">
+      ${allChords.map(c => `
+        <div class="chord-diagram" id="cd-${c}" 
+          onmouseover="showTooltip(event,'${c}')" 
+          onmouseout="hideTooltip()"
+          ontouchstart="showTooltip(event,'${c}')">
+          <div class="chord-name">${c}</div>
+          <canvas id="canvas-${c}" width="56" height="70"></canvas>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // Build lyrics HTML
+  let lyricsHTML = '';
+  for (const line of lines) {
+    if (line.type === 'section') {
+      lyricsHTML += `<div class="section-label">${line.label}</div>`;
+    } else if (line.type === 'empty') {
+      lyricsHTML += `<div style="height:0.6em"></div>`;
+    } else if (line.type === 'text') {
+      lyricsHTML += `<div class="lyric-line">${line.text}</div>`;
+    } else if (line.type === 'chords') {
+      lyricsHTML += `<div class="chord-line">`;
+      for (const t of line.tokens) {
+        const chord = t.chord ? transposeChord(t.chord, transposeAmount) : '';
+        lyricsHTML += `<span class="chord-word">
+          <span class="chord-label">${chord}</span>
+          <span class="chord-text">${t.text || ' '}</span>
+        </span>`;
+      }
+      lyricsHTML += `</div>`;
+    }
+  }
+
+  // Tab section
+  const tabHTML = song.tab ? `<div class="tab-section ${showTabMode?'visible':''}" id="tabSection">
+    <div class="tab-title">Tablatura</div>
+    <div class="tab-block">${formatTab(song.tab)}</div>
+  </div>` : '';
+
+  el.innerHTML = `
+  <div class="paper-card">
+    <div class="card-content">
+      <div class="song-header">
         <div>
-          <div class="step-timer-display" id="step-timer-display">${String(stepMins).padStart(2,'0')}:00</div>
-          <div class="step-timer-bar-wrap"><div class="step-timer-bar" id="step-timer-bar" style="width:0%"></div></div>
+          <div class="song-title">${song.title}</div>
+          <div class="song-artist-display">${song.artist}</div>
         </div>
-        <div class="step-timer-label">Temporizador<br><span id="step-timer-state" style="color:var(--rice-dark)">Pulsa para arrancar</span></div>
-        <button class="btn btn-sm" id="step-timer-btn" onclick="StepTimer.toggle(${stepMins})">▶ Iniciar</button>
-      </div>` : ''}`;
-
-    StepTimer.reset(); // limpia cualquier timer anterior al cambiar de paso
-    document.getElementById('btn-prev').disabled = currentStep === 0;
-    document.getElementById('btn-next').textContent = currentStep === total - 1 ? '¡Listo! ✓' : 'Siguiente →';
-  }
-
-  function changeStep(dir) {
-    const total = currentRecipe.steps.length;
-    if (dir === 1 && currentStep === total - 1) { Nav.goTo('home'); return; }
-    currentStep = Math.max(0, Math.min(total - 1, currentStep + dir));
-    renderStep();
-  }
-
-  // ── Tabs internos
-  function switchTab(tab) {
-    document.querySelectorAll('.inner-tab').forEach((t, i) =>
-      t.classList.toggle('active', (i === 0 && tab === 'guia') || (i === 1 && tab === 'ingredientes')));
-    document.getElementById('tab-guia').style.display          = tab === 'guia'         ? '' : 'none';
-    document.getElementById('tab-ingredientes').style.display  = tab === 'ingredientes' ? '' : 'none';
-    if (tab === 'guia') renderStep();
-  }
-
-  // Getters para módulos externos (Share)
-  function _current()    { return currentRecipe; }
-  function _comensales() { return comensales; }
-
-  return { renderHome, open, updateComensales, renderStep, changeStep, switchTab, _current, _comensales };
-})();
-
-
-/* ── WATER ──────────────────────────────────────────────────
-   Calculadora de agua de la sección Agua.
-   Solo hace el cálculo de ratio + evaporación y actualiza el DOM.
-──────────────────────────────────────────────────────────── */
-const Water = (() => {
-  let currentType  = 'bomba';
-  let currentRatio = 1.5;
-
-  function selectType(btn, type, ratio) {
-    document.querySelectorAll('.water-type-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    currentType  = type;
-    currentRatio = ratio;
-    calc();
-  }
-
-  function calc() {
-    const g   = parseFloat(document.getElementById('arroz-gramos').value) || 0;
-    const std = Math.round(g * currentRatio);
-    document.getElementById('agua-std').innerHTML   = std + ' <small>ml</small>';
-    document.getElementById('agua-ratio-tip').textContent = `Ratio 1:${currentRatio} (${Data.waterNames[currentType]})`;
-
-    const prof = Store.getActiveProfile();
-    const evap = prof?.evapPerMin ?? null;
-    if (evap !== null) {
-      const cookMin = 18; // estimación genérica para la calculadora; la receta usa el valor exacto
-      const extra   = Math.round(evap * cookMin);
-      document.getElementById('agua-cal').innerHTML      = (std + extra) + ' <small>ml</small>';
-      document.getElementById('agua-evap-tip').textContent = `Base + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${cookMin} min) — ${prof.name}`;
-    } else {
-      document.getElementById('agua-cal').innerHTML        = '— <small>ml</small>';
-      document.getElementById('agua-evap-tip').textContent = prof
-        ? `Calibra el equipo "${prof.name}" abajo`
-        : 'Añade y selecciona un equipo primero';
-    }
-  }
-
-  return { selectType, calc };
-})();
-
-
-/* ── EQUIPMENT ──────────────────────────────────────────────
-   CRUD de perfiles de equipo (paella + quemador).
-   Renderiza la lista y gestiona el formulario de alta/edición.
-──────────────────────────────────────────────────────────── */
-const Equipment = (() => {
-  let editingId      = null;
-  let selectedBurner = '';
-
-  // ── Lista de equipos
-  function renderList() {
-    const profiles = Store.getProfiles();
-    const list     = document.getElementById('profiles-list');
-    if (!profiles.length) {
-      list.innerHTML = `<div class="empty-state"><div class="es-icon">🍳</div>Aún no tienes equipos. Añade uno abajo para calibrar la evaporación.</div>`;
-      return;
-    }
-    list.innerHTML = profiles.map(p => {
-      const isActive = p.id === Store.getActiveId();
-      const calOk    = p.evapPerMin != null;
-      return `
-        <div class="profile-card ${isActive ? 'active-profile' : ''}" onclick="Equipment.setActive('${p.id}')">
-          <div class="profile-icon">${p.burnerEmoji || '🍳'}</div>
-          <div class="profile-info">
-            <div class="profile-name">${p.name}</div>
-            <div class="profile-meta">${p.diam ? p.diam + ' cm' : '—'} · ${Data.burnerLabels[p.burner] || '—'}</div>
-            ${calOk ? `<div class="profile-meta" style="color:var(--success)">⌀ ${p.evapPerMin.toFixed(1)} ml/min evaporación</div>` : ''}
-          </div>
-          <span class="profile-badge ${calOk ? 'ok' : 'pending'}">${calOk ? 'Calibrado ✓' : 'Sin calibrar'}</span>
-          <div class="profile-actions" onclick="event.stopPropagation()">
-            <button class="btn btn-ghost btn-sm" onclick="Equipment.showForm('${p.id}')">✎</button>
-            <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="Equipment.remove('${p.id}')">✕</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  // ── Activar un perfil
-  function setActive(id) {
-    Store.setActiveId(id);
-    renderList();
-    Calibration.renderStatus();
-    Water.calc();
-  }
-
-  // ── Mostrar formulario (null = nuevo, id = editar)
-  function showForm(id) {
-    editingId      = id;
-    selectedBurner = '';
-    document.getElementById('equip-form-title').textContent = id ? 'Editar equipo' : 'Nuevo equipo';
-
-    // Limpiar
-    document.getElementById('eq-name').value  = '';
-    document.getElementById('eq-diam').value  = '';
-    document.getElementById('eq-cap').value   = '';
-    document.getElementById('eq-burner').value = '';
-    document.querySelectorAll('.burner-btn').forEach(b => b.classList.remove('sel'));
-    document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('sel'));
-
-    // Si edición, rellenar
-    if (id) {
-      const p = Store.getProfiles().find(x => x.id === id);
-      if (p) {
-        document.getElementById('eq-name').value  = p.name  || '';
-        document.getElementById('eq-diam').value  = p.diam  || '';
-        document.getElementById('eq-burner').value = p.burner || '';
-        selectedBurner = p.burner || '';
-        updateCapacity();
-        if (p.diam)   document.querySelectorAll('.size-preset').forEach(b => { if (parseInt(b.textContent) === p.diam) b.classList.add('sel'); });
-        if (p.burner) document.querySelectorAll('.burner-btn').forEach(b  => { if (b.getAttribute('onclick')?.includes(`'${p.burner}'`)) b.classList.add('sel'); });
-      }
-    }
-    document.getElementById('equip-form').style.display = '';
-    document.getElementById('equip-form').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function hideForm() {
-    document.getElementById('equip-form').style.display = 'none';
-    editingId = null;
-  }
-
-  // ── Helpers de formulario
-  function setDiam(v) {
-    document.getElementById('eq-diam').value = v;
-    document.querySelectorAll('.size-preset').forEach(b => b.classList.toggle('sel', parseInt(b.textContent) === v));
-    updateCapacity();
-  }
-
-  function clearDiamPreset() {
-    document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('sel'));
-    updateCapacity();
-  }
-
-  function updateCapacity() {
-    const d = parseFloat(document.getElementById('eq-diam').value);
-    document.getElementById('eq-cap').value = d
-      ? '~' + (Math.PI * (d / 2) * (d / 2) * 2 / 1000).toFixed(1) + ' L'
-      : '—';
-  }
-
-  function selectBurner(btn, key, emoji) {
-    document.querySelectorAll('.burner-btn').forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    document.getElementById('eq-burner').value = key;
-    selectedBurner = key;
-  }
-
-  // ── Guardar (nuevo o edición)
-  function save() {
-    const name   = document.getElementById('eq-name').value.trim();
-    const diam   = parseFloat(document.getElementById('eq-diam').value) || null;
-    const burner = document.getElementById('eq-burner').value;
-    if (!name) { alert('Pon un nombre al equipo.'); return; }
-
-    const burnerEmoji = document.querySelector('.burner-btn.sel')?.querySelector('.b-emoji')?.textContent || '🍳';
-
-    if (editingId) {
-      const existing = Store.getProfiles().find(x => x.id === editingId);
-      if (existing) {
-        existing.name = name; existing.diam = diam; existing.burner = burner; existing.burnerEmoji = burnerEmoji;
-        Store.updateProfile(existing);
-      }
-    } else {
-      const newP = { id: 'p_' + Date.now(), name, diam, burner, burnerEmoji, evapPerMin: null };
-      Store.addProfile(newP);
-      if (!Store.getActiveId()) Store.setActiveId(newP.id);
-    }
-
-    hideForm();
-    renderList();
-    Calibration.renderStatus();
-    Water.calc();
-  }
-
-  // ── Eliminar
-  function remove(id) {
-    if (!confirm('¿Eliminar este equipo y su calibración?')) return;
-    Store.deleteProfile(id);
-    renderList();
-    Calibration.renderStatus();
-    Water.calc();
-  }
-
-  return { renderList, setActive, showForm, hideForm, setDiam, clearDiamPreset, selectBurner, save, remove };
-})();
-
-
-/* ── CALIBRATION ────────────────────────────────────────────
-   Prueba de evaporación cronometrada (15 minutos).
-   Fases: setup → running → measure → (guarda en Store)
-──────────────────────────────────────────────────────────── */
-const Calibration = (() => {
-  const DURATION_SECS = 900; // 15 minutos
-  const CIRCUMFERENCE = 571.8; // 2π × 91
-
-  let timer       = null;
-  let seconds     = DURATION_SECS;
-  let aguaInicial = 3000;
-  let wakeLock    = null;
-  let pendingEvap = null;
-
-  // ── Estado visual del equipo activo
-  function renderStatus() {
-    const prof = Store.getActiveProfile();
-    const box  = document.getElementById('cal-status-content');
-    const btn  = document.getElementById('btn-start-cal');
-
-    if (!prof) {
-      box.innerHTML = `
-        <div class="info-row"><span class="lbl">Equipo activo</span><span class="tag-pending">Ninguno</span></div>
-        <div class="info-row" style="border:none;padding-bottom:0;font-size:.82rem;color:var(--text-muted)">
-          Añade y selecciona un equipo para calibrar.
-        </div>`;
-      if (btn) btn.disabled = true;
-      return;
-    }
-    if (btn) btn.disabled = false;
-
-    if (prof.evapPerMin != null) {
-      box.innerHTML = `
-        <div class="info-row"><span class="lbl">Equipo activo</span><span class="val">${prof.name}</span></div>
-        <div class="info-row"><span class="lbl">Estado</span><span class="tag-ok">Calibrado ✓</span></div>
-        <div class="info-row"><span class="lbl">Evaporación</span><span class="val">${prof.evapPerMin.toFixed(2)} ml/min</span></div>
-        <div class="info-row" style="border:none;padding-bottom:0">
-          <button class="btn btn-secondary btn-sm" onclick="Calibration.reset()">Repetir calibración</button>
-        </div>`;
-    } else {
-      box.innerHTML = `
-        <div class="info-row"><span class="lbl">Equipo activo</span><span class="val">${prof.name}</span></div>
-        <div class="info-row"><span class="lbl">Estado</span><span class="tag-pending">Sin calibrar</span></div>
-        <div class="info-row" style="border:none;padding-bottom:0;font-size:.82rem;color:var(--text-muted)">
-          Haz la prueba de evaporación para cálculos precisos.
-        </div>`;
-    }
-  }
-
-  // ── Cambiar fase visible
-  function showPhase(phase) {
-    document.getElementById('cal-phase-setup').style.display   = phase === 'setup'   ? '' : 'none';
-    document.getElementById('cal-phase-running').style.display = phase === 'running' ? '' : 'none';
-    document.getElementById('cal-phase-measure').style.display = phase === 'measure' ? '' : 'none';
-  }
-
-  // ── Fase 1 → 2: arrancar cronómetro
-  async function start() {
-    if (!Store.getActiveProfile()) return;
-    aguaInicial = parseInt(document.getElementById('cal-agua-inicial-input').value) || 3000;
-    seconds     = DURATION_SECS;
-    showPhase('running');
-    updateClock();
-
-    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
-
-    timer = setInterval(() => {
-      seconds--;
-      updateClock();
-      if (seconds <= 0) {
-        clearInterval(timer); timer = null;
-        releaseWakeLock();
-        document.getElementById('alert-overlay').style.display = 'flex';
-      }
-    }, 1000);
-  }
-
-  function updateClock() {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    document.getElementById('cal-time-display').textContent = `${m}:${String(s).padStart(2, '0')}`;
-    const arc = document.getElementById('cal-arc');
-    if (arc) arc.style.strokeDashoffset = CIRCUMFERENCE * (1 - (DURATION_SECS - seconds) / DURATION_SECS);
-    document.getElementById('cal-state-text').textContent =
-      seconds > 600 ? '🔥 Fuego al máximo — no apagues la pantalla' :
-      seconds > 300 ? '🔥 A mitad de la prueba, sigue así' :
-                      '🔥 ¡Ya casi! Aguanta un poco más';
-  }
-
-  // ── Fase 2 → 3: ir a medir
-  function goToMeasure() {
-    document.getElementById('alert-overlay').style.display = 'none';
-    showPhase('measure');
-    document.getElementById('cal-agua-inicial-show').value = aguaInicial;
-    document.getElementById('cal-agua-final').value        = '';
-    document.getElementById('evap-result-box').style.display = 'none';
-    document.getElementById('btn-save-cal').disabled = true;
-  }
-
-  // ── Fase 3: calcular evaporación al escribir
-  function calcEvap() {
-    const final = parseFloat(document.getElementById('cal-agua-final').value);
-    if (isNaN(final) || final >= aguaInicial || final < 0) {
-      document.getElementById('evap-result-box').style.display = 'none';
-      document.getElementById('btn-save-cal').disabled = true;
-      return;
-    }
-    const evaporado = aguaInicial - final;
-    pendingEvap     = evaporado / 15;
-    document.getElementById('evap-result-box').style.display    = 'block';
-    document.getElementById('evap-val-display').textContent     = pendingEvap.toFixed(1);
-    document.getElementById('evap-badge-txt').textContent       = `${evaporado} ml evaporados en 15 min`;
-    document.getElementById('btn-save-cal').disabled = false;
-  }
-
-  // ── Guardar y volver a setup
-  function save() {
-    Store.saveCalibration(pendingEvap);
-    showPhase('setup');
-    renderStatus();
-    Water.calc();
-  }
-
-  // ── Cancelar desde cualquier fase
-  function cancel() {
-    if (timer) { clearInterval(timer); timer = null; }
-    releaseWakeLock();
-    document.getElementById('alert-overlay').style.display = 'none';
-    showPhase('setup');
-  }
-
-  // ── Borrar calibración del equipo activo
-  function reset() {
-    Store.clearCalibration();
-    renderStatus();
-    Water.calc();
-  }
-
-  function releaseWakeLock() {
-    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
-  }
-
-  return { renderStatus, start, updateClock, goToMeasure, calcEvap, save, cancel, reset };
-})();
-
-
-/* ── GYRO ───────────────────────────────────────────────────
-   Giroscopio para el nivelador de paella.
-
-   Punto 0: el usuario puede calibrar su superficie de referencia
-   pulsando "Establecer punto 0". Se guarda el beta/gamma actual
-   y se resta en cada lectura posterior.
-
-   Diferencias iOS / Android:
-     - iOS:     requestPermission() obligatorio; sensor a ~60 Hz pero
-                con jitter alto → throttle 50 ms + suavizado fuerte
-     - Android: sin permiso explícito; tasa variable → throttle 30 ms
-                + suavizado más ligero
-
-   El render se desacopla del sensor con requestAnimationFrame
-   para evitar jank aunque el sensor llegue muy frecuente.
-──────────────────────────────────────────────────────────── */
-const Gyro = (() => {
-  const isIOS          = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const THROTTLE_MS    = isIOS ? 50  : 30;
-  const SMOOTH_ALPHA   = isIOS ? 0.25 : 0.35;
-
-  let active      = false;
-  let lastTime    = 0;
-  let smoothBeta  = 0;
-  let smoothGamma = 0;
-
-  // Punto 0: offset restado a cada lectura
-  let zeroBeta  = 0;
-  let zeroGamma = 0;
-  let hasZero   = false;
-
-  // Cache DOM
-  let elBubble, elDish, elAngleVal, elAngleDir, elStatus, elBubbleCenter, elZeroStatus;
-
-  function init() {
-    if (active) return;
-    elBubble      = document.getElementById('water-bubble');
-    elDish        = document.getElementById('paella-dish');
-    elAngleVal    = document.getElementById('angle-val');
-    elAngleDir    = document.getElementById('angle-dir');
-    elStatus      = document.getElementById('level-status');
-    elBubbleCenter= document.getElementById('bubble-center');
-    elZeroStatus  = document.getElementById('zero-status');
-
-    elBubble.style.transition = 'none';
-    elDish.style.transition   = 'none';
-
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-      document.getElementById('sensor-denied').style.display = 'block';
-    } else if (window.DeviceOrientationEvent) {
-      _start();
-    } else {
-      document.getElementById('sensor-denied').style.display = 'block';
-    }
-  }
-
-  function requestPermission() {
-    DeviceOrientationEvent.requestPermission()
-      .then(result => {
-        if (result === 'granted') {
-          _start();
-          document.getElementById('sensor-denied').style.display = 'none';
-        }
-      })
-      .catch(console.error);
-  }
-
-  function _start() {
-    active = true;
-    window.addEventListener('deviceorientation', _onSensor, { passive: true });
-  }
-
-  // ── Establece la posición actual como punto 0
-  function setZero() {
-    zeroBeta  = smoothBeta;
-    zeroGamma = smoothGamma;
-    hasZero   = true;
-    if (elZeroStatus) elZeroStatus.textContent = `🎯 Punto 0 establecido (β${zeroBeta.toFixed(1)}° γ${zeroGamma.toFixed(1)}°)`;
-  }
-
-  // ── Resetea el punto 0 (vuelve a horizontal absoluta)
-  function resetZero() {
-    zeroBeta  = 0;
-    zeroGamma = 0;
-    hasZero   = false;
-    if (elZeroStatus) elZeroStatus.textContent = 'Sin punto 0 — usando horizontal absoluta';
-  }
-
-  function _onSensor(e) {
-    const now = Date.now();
-    if (now - lastTime < THROTTLE_MS) return;
-    lastTime = now;
-
-    smoothBeta  = SMOOTH_ALPHA * (e.beta  || 0) + (1 - SMOOTH_ALPHA) * smoothBeta;
-    smoothGamma = SMOOTH_ALPHA * (e.gamma || 0) + (1 - SMOOTH_ALPHA) * smoothGamma;
-
-    // Aplicar offset del punto 0
-    const adjBeta  = smoothBeta  - zeroBeta;
-    const adjGamma = smoothGamma - zeroGamma;
-
-    const angle = Math.sqrt(adjBeta * adjBeta + adjGamma * adjGamma);
-    const cx    = Math.max(-40, Math.min(40, adjGamma));
-    const cy    = Math.max(-40, Math.min(40, adjBeta));
-    // Rango de movimiento de la burbuja: la paella mide 240px, burbuja 112px
-    // Max desplazamiento desde centro: (240-112)/2 = 64px → usamos 55 para margen
-    const bx    = (cx / 40) * 55;
-    const by    = (cy / 40) * 55;
-
+        <div class="song-meta">
+          <strong>${tKey}</strong>
+          Tonalidad${tLabel}
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
+        <button onclick="deleteSong('${song.id}')" style="background:none;border:1px solid rgba(180,30,30,0.35);border-radius:4px;padding:0.3rem 0.8rem;font-size:0.75rem;cursor:pointer;color:#c82020;font-family:var(--font-body);transition:all 0.15s;" onmouseover="this.style.background='rgba(180,30,30,0.08)'" onmouseout="this.style.background='none'">🗑 Eliminar canción</button>
+      </div>
+
+      <div class="controls-bar">
+        <div class="control-group">
+          <span class="control-label">Tamaño</span>
+          <button class="ctrl-btn" onclick="changeSize(-1)">−</button>
+          <span class="ctrl-value" id="sizeVal">${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size'))}px</span>
+          <button class="ctrl-btn" onclick="changeSize(1)">+</button>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Tono</span>
+          <button class="ctrl-btn" onclick="transpose(-1)">♭</button>
+          <span class="ctrl-value">${transposeAmount > 0 ? '+' : ''}${transposeAmount}</span>
+          <button class="ctrl-btn" onclick="transpose(1)">♯</button>
+        </div>
+        <button class="ctrl-btn" style="padding:0 8px;width:auto;" onclick="window.print()">⎙ Imprimir</button>
+      </div>
+
+      <!-- TELEPROMPTER -->
+      <div class="control-group" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;display:flex;align-items:center;background:rgba(0,0,0,0.04);border:1px solid var(--staff-line);border-radius:6px;padding:0.5rem 0.75rem;">
+        <span class="control-label" style="font-weight:700;">▶ Auto-scroll</span>
+        <button class="ctrl-btn" id="tpPlayBtn" onclick="toggleTeleprompter()" style="width:auto;padding:0 10px;font-size:0.8rem;">▶ Play</button>
+        <button class="ctrl-btn" onclick="resetTeleprompter()" style="width:auto;padding:0 8px;font-size:0.8rem;">↩ Reset</button>
+        <div style="display:flex;align-items:center;gap:0.4rem;">
+          <span class="control-label">BPM</span>
+          <button class="ctrl-btn" onclick="changeBpm(-5)">−</button>
+          <span class="ctrl-value" id="bpmVal" style="min-width:38px;">${currentBpm}</span>
+          <button class="ctrl-btn" onclick="changeBpm(5)">+</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.4rem;">
+          <span class="control-label">Vel</span>
+          <input type="range" id="tpSpeed" min="0.2" max="3" step="0.1" value="${tpSpeedMultiplier}"
+            oninput="tpSpeedMultiplier=parseFloat(this.value);document.getElementById('tpSpeedVal').textContent=parseFloat(this.value).toFixed(1)+'×'"
+            style="width:70px;accent-color:var(--accent);">
+          <span class="ctrl-value" id="tpSpeedVal" style="min-width:30px;">${tpSpeedMultiplier.toFixed(1)}×</span>
+        </div>
+      </div>
+
+      ${chordsHTML}
+      ${tabHTML}
+      <div class="lyrics-section" id="lyricsSection">${lyricsHTML}</div>
+    </div>
+  </div>`;
+
+  // Draw chord canvases
+  if (showChordsMode) {
     requestAnimationFrame(() => {
-      if (!elBubble) return;
-      elBubble.style.transform = `translate(calc(-50% + ${bx.toFixed(1)}px), calc(-50% + ${by.toFixed(1)}px))`;
-      elDish.style.transform   = `rotate(${(cx * 0.3).toFixed(1)}deg) rotateX(${(-cy * 0.3).toFixed(1)}deg)`;
-      elAngleVal.textContent   = angle.toFixed(1);
+      for (const c of allChords) {
+        const canvas = document.getElementById(`canvas-${c}`);
+        if (canvas) drawChord(canvas, c);
+      }
+    });
+  }
 
-      if (angle < 1.5) {
-        elStatus.className       = 'level-status ok';
-        elStatus.textContent     = '✓ La paella está nivelada';
-        elAngleDir.textContent   = 'perfectamente nivelada';
-        elBubbleCenter.style.background = '#4A7C59';
-      } else if (angle < 4) {
-        elStatus.className       = 'level-status warn';
-        elStatus.textContent     = '⚠ Ajusta ligeramente';
-        elAngleDir.textContent   = 'inclinación leve';
-        elBubbleCenter.style.background = 'var(--saffron)';
+  // Update sidebar active
+  document.querySelectorAll('#songList li').forEach(li => {
+    li.classList.toggle('active', String(li.dataset.id) === String(song.id));
+  });
+}
+
+function formatTab(tab) {
+  return tab.replace(/([eEBGDAd])\|/g, '<span class="tab-string-name">$1|</span>')
+            .replace(/\b([0-9]{1,2})\b/g, '<span class="tab-fret-num">$1</span>');
+}
+
+// ── AFINADOR ──────────────────────────────────────────────────────────────
+let tunerActive = false;
+let tunerStream = null;
+let tunerCtx = null;
+let tunerAnalyser = null;
+let tunerAnimFrame = null;
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+function freqToNote(freq) {
+  if (freq <= 0) return null;
+  const semitones = 12 * Math.log2(freq / 440);
+  const midiNote = Math.round(semitones) + 69;
+  const cents = (semitones - (midiNote - 69)) * 100;
+  const noteName = NOTE_NAMES[((midiNote % 12) + 12) % 12];
+  const octave = Math.floor(midiNote / 12) - 1;
+  return { noteName, octave, cents, freq };
+}
+
+// Autocorrelación para detectar pitch
+function detectPitch(buffer, sampleRate) {
+  const SIZE = buffer.length;
+  const MAX_SAMPLES = Math.floor(SIZE / 2);
+  let bestOffset = -1;
+  let bestCorrelation = 0;
+  let rms = 0;
+
+  for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.01) return -1; // señal demasiado débil
+
+  let lastCorrelation = 1;
+  for (let offset = 0; offset < MAX_SAMPLES; offset++) {
+    let correlation = 0;
+    for (let i = 0; i < MAX_SAMPLES; i++) {
+      correlation += Math.abs(buffer[i] - buffer[i + offset]);
+    }
+    correlation = 1 - correlation / MAX_SAMPLES;
+    if (correlation > 0.9 && correlation > lastCorrelation) {
+      if (correlation > bestCorrelation) {
+        bestCorrelation = correlation;
+        bestOffset = offset;
+      }
+    }
+    lastCorrelation = correlation;
+  }
+
+  if (bestOffset === -1) return -1;
+  return sampleRate / bestOffset;
+}
+
+async function openTuner() {
+  document.getElementById('tunerModal').classList.add('visible');
+
+  // Generar cuerdas de referencia
+  const stringsEl = document.getElementById('tunerStrings');
+  if (stringsEl && !stringsEl.children.length) {
+    [['E','82.4'],['A','110'],['D','146.8'],['G','196'],['B','246.9'],['e','329.6']].forEach(([n,f]) => {
+      stringsEl.innerHTML += `<div style="background:rgba(0,0,0,0.05);border:1px solid var(--staff-line);border-radius:6px;padding:0.3rem 0.5rem;font-size:0.7rem;text-align:center;">
+        <div style="font-weight:700;font-family:'Playfair Display',serif;">${n}</div>
+        <div style="color:var(--ink-muted);font-size:0.6rem;">${f}Hz</div>
+      </div>`;
+    });
+  }
+
+  if (tunerActive) return;
+  try {
+    tunerStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
+    tunerAnalyser = tunerCtx.createAnalyser();
+    tunerAnalyser.fftSize = 2048;
+    const source = tunerCtx.createMediaStreamSource(tunerStream);
+    source.connect(tunerAnalyser);
+    tunerActive = true;
+    document.getElementById('tnStatus').textContent = 'Escuchando…';
+    document.getElementById('tnStatus').style.color = 'var(--ink-muted)';
+    tunerLoop();
+  } catch(e) {
+    document.getElementById('tnStatus').textContent = 'Sin acceso al micrófono';
+    document.getElementById('tnStatus').style.color = 'red';
+  }
+}
+
+function tunerLoop() {
+  if (!tunerActive) return;
+  const buffer = new Float32Array(tunerAnalyser.fftSize);
+  tunerAnalyser.getFloatTimeDomainData(buffer);
+  const freq = detectPitch(buffer, tunerCtx.sampleRate);
+
+  const noteEl = document.getElementById('tnNote');
+  const octaveEl = document.getElementById('tnOctave');
+  const freqEl = document.getElementById('tnFreq');
+  const statusEl = document.getElementById('tnStatus');
+  const needle = document.getElementById('tnNeedle');
+
+  if (freq > 60 && freq < 1200) {
+    const note = freqToNote(freq);
+    if (note) {
+      noteEl.textContent = note.noteName;
+      octaveEl.textContent = `Octava ${note.octave}`;
+      freqEl.textContent = `${freq.toFixed(1)} Hz`;
+
+      // Mover aguja: cents va de -50 a +50 → posición 0% a 100%
+      const clampedCents = Math.max(-50, Math.min(50, note.cents));
+      const pct = ((clampedCents + 50) / 100) * 100;
+      needle.style.left = pct + '%';
+
+      // Color y estado
+      const absCents = Math.abs(note.cents);
+      if (absCents < 5) {
+        needle.style.background = '#22aa44';
+        statusEl.textContent = '✓ Afinado';
+        statusEl.style.color = '#22aa44';
+      } else if (absCents < 15) {
+        needle.style.background = '#e8a020';
+        statusEl.textContent = note.cents < 0 ? '↑ Sube un poco' : '↓ Baja un poco';
+        statusEl.style.color = '#e8a020';
       } else {
-        elStatus.className       = 'level-status bad';
-        elStatus.textContent     = '✗ No está nivelada';
-        elAngleDir.textContent   = 'inclinación pronunciada';
-        elBubbleCenter.style.background = 'var(--danger)';
+        needle.style.background = 'var(--accent)';
+        statusEl.textContent = note.cents < 0 ? '↑↑ Sube' : '↓↓ Baja';
+        statusEl.style.color = 'var(--accent)';
       }
-    });
+    }
+  } else {
+    noteEl.textContent = '–';
+    octaveEl.textContent = '–';
+    freqEl.textContent = '– Hz';
+    statusEl.textContent = 'Esperando señal…';
+    statusEl.style.color = 'var(--ink-muted)';
+    needle.style.left = '50%';
+    needle.style.background = 'var(--accent)';
   }
 
-  return { init, requestPermission, setZero, resetZero };
-})();
+  tunerAnimFrame = requestAnimationFrame(tunerLoop);
+}
 
+function closeTuner() {
+  document.getElementById('tunerModal').classList.remove('visible');
+  tunerActive = false;
+  if (tunerAnimFrame) cancelAnimationFrame(tunerAnimFrame);
+  if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
+  if (tunerCtx) tunerCtx.close();
+  tunerStream = null; tunerCtx = null; tunerAnalyser = null;
+}
 
-/* ── STEP TIMER ─────────────────────────────────────────────
-   Temporizador por paso de receta. Manual: el usuario decide
-   cuándo arrancarlo. Muestra cuenta atrás, barra de progreso
-   y vibra + suena al terminar (si el dispositivo lo soporta).
-──────────────────────────────────────────────────────────── */
-const StepTimer = (() => {
-  let timer      = null;
-  let totalSecs  = 0;
-  let remaining  = 0;
-  let running    = false;
+// Cerrar afinador al cerrar el modal por overlay
+document.getElementById('tunerModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeTuner();
+});
 
-  // Sonido de alerta: beep sintético con Web Audio API
-  function _beep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      [0, 0.3, 0.6].forEach(offset => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.4, ctx.currentTime + offset);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.25);
-        osc.start(ctx.currentTime + offset);
-        osc.stop(ctx.currentTime + offset + 0.25);
-      });
-    } catch(e) {}
+// ── TELEPROMPTER ──────────────────────────────────────────────────────────
+let tpRunning = false;
+let tpAnimFrame = null;
+let tpLastTime = null;
+let tpScrollPos = 0;
+let currentBpm = 70;
+let tpSpeedMultiplier = 1.0;
+
+function getTpScrollSpeed() {
+  // px por segundo: basado en BPM y multiplicador
+  // A 70 BPM velocidad base ~30px/s, escala con BPM y multiplicador
+  return (currentBpm / 70) * 30 * tpSpeedMultiplier;
+}
+
+function toggleTeleprompter() {
+  if (tpRunning) {
+    stopTeleprompter();
+  } else {
+    startTeleprompter();
   }
+}
 
-  function _vibrate() {
-    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 600]);
+function startTeleprompter() {
+  tpRunning = true;
+  tpLastTime = null;
+  const btn = document.getElementById('tpPlayBtn');
+  if (btn) btn.textContent = '⏸ Pausa';
+  tpAnimFrame = requestAnimationFrame(tpTick);
+}
+
+function stopTeleprompter() {
+  tpRunning = false;
+  if (tpAnimFrame) cancelAnimationFrame(tpAnimFrame);
+  const btn = document.getElementById('tpPlayBtn');
+  if (btn) btn.textContent = '▶ Play';
+}
+
+function resetTeleprompter() {
+  stopTeleprompter();
+  tpScrollPos = 0;
+  const main = document.querySelector('.main') || document.documentElement;
+  main.scrollTop = 0;
+}
+
+function tpTick(timestamp) {
+  if (!tpRunning) return;
+  if (!tpLastTime) tpLastTime = timestamp;
+  const delta = (timestamp - tpLastTime) / 1000;
+  tpLastTime = timestamp;
+
+  // Buscar el contenedor con scroll — .main en escritorio, body/window en móvil
+  const main = document.querySelector('.main') || document.documentElement;
+  tpScrollPos += getTpScrollSpeed() * delta;
+  main.scrollTop = tpScrollPos;
+
+  const maxScroll = main.scrollHeight - main.clientHeight;
+  if (main.scrollTop >= maxScroll - 2) {
+    stopTeleprompter();
+    return;
   }
+  tpAnimFrame = requestAnimationFrame(tpTick);
+}
 
-  function _updateUI() {
-    const el     = document.getElementById('step-timer-display');
-    const bar    = document.getElementById('step-timer-bar');
-    const state  = document.getElementById('step-timer-state');
-    const btn    = document.getElementById('step-timer-btn');
-    if (!el) return;
+function changeBpm(delta) {
+  currentBpm = Math.max(20, Math.min(240, currentBpm + delta));
+  const el = document.getElementById('bpmVal');
+  if (el) el.textContent = currentBpm;
+}
 
-    const m = Math.floor(remaining / 60);
-    const s = remaining % 60;
-    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+// ── CONTROLS ──────────────────────────────────────────────────────────────
+function changeSize(delta) {
+  const root = document.documentElement;
+  const current = parseInt(getComputedStyle(root).getPropertyValue('--font-size')) || 16;
+  const next = Math.max(12, Math.min(24, current + delta));
+  root.style.setProperty('--font-size', next + 'px');
+  document.getElementById('sizeVal').textContent = next + 'px';
+}
 
-    const pct = totalSecs > 0 ? ((totalSecs - remaining) / totalSecs) * 100 : 0;
-    if (bar) bar.style.width = pct + '%';
+function toggleChords() {
+  showChordsMode = !showChordsMode;
+  document.getElementById('btn-chords').classList.toggle('active', showChordsMode);
+  renderSong();
+}
 
-    if (remaining <= 0) {
-      el.className      = 'step-timer-display done';
-      if (state) state.textContent = '✓ Tiempo completado';
-      if (btn)   btn.textContent   = '↺ Reiniciar';
-      if (bar)   bar.style.background = 'var(--success)';
-    } else if (running) {
-      el.className      = 'step-timer-display running';
-      if (state) state.textContent = 'En marcha…';
-      if (btn)   btn.textContent   = '⏸ Pausar';
-    } else {
-      el.className      = 'step-timer-display';
-      if (state) state.textContent = 'Pausado';
-      if (btn)   btn.textContent   = '▶ Continuar';
+function toggleTab() {
+  showTabMode = !showTabMode;
+  document.getElementById('btn-tab').classList.toggle('active', showTabMode);
+  const tab = document.getElementById('tabSection');
+  if (tab) tab.classList.toggle('visible', showTabMode);
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────────────────────
+function showTooltip(e, chord) {
+  const tip = document.getElementById('chordTooltip');
+  document.getElementById('tooltipName').textContent = chord;
+  const c = document.getElementById('tooltipCanvas');
+  drawChord(c, chord);
+  tip.classList.add('visible');
+  const r = e.target.closest('.chord-diagram').getBoundingClientRect();
+  tip.style.left = Math.min(r.left, window.innerWidth - 160) + 'px';
+  tip.style.top = (r.bottom + 8) + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('chordTooltip').classList.remove('visible');
+}
+
+// ── SONG LIST ─────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('songList');
+  list.innerHTML = songs.map(s => `
+    <li data-id="${s.id}" onclick="selectSong('${s.id}')">
+      <span class="song-name">${s.title}</span>
+      <span class="song-artist">${s.artist}</span>
+    </li>`).join('');
+}
+
+function selectSong(id) {
+  stopTeleprompter();
+  tpScrollPos = 0;
+  currentSong = songs.find(s => String(s.id) === String(id));
+  transposeAmount = 0;
+  renderSong();
+  renderSidebar();
+}
+
+function deleteSong(id) {
+  if (!confirm('¿Eliminar esta canción?')) return;
+  songs = songs.filter(s => String(s.id) !== String(id));
+  deleteSongFromDB(String(id));
+  currentSong = songs[0] || null;
+  renderSidebar();
+  renderSong();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+function openAddSong() {
+  document.getElementById('addSongModal').classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('addSongModal').classList.remove('visible');
+}
+
+function saveSong() {
+  const title = document.getElementById('newTitle').value.trim();
+  const artist = document.getElementById('newArtist').value.trim();
+  const key = document.getElementById('newKey').value;
+  const lyrics = document.getElementById('newLyrics').value;
+  const tab = document.getElementById('newTab').value;
+
+  if (!title) { alert('El título es obligatorio'); return; }
+
+  const newSong = {
+    id: String(Date.now()),
+    title,
+    artist: artist || 'Desconocido',
+    key,
+    lyrics,
+    tab,
+    createdAt: Date.now()
+  };
+  songs.push(newSong);
+  saveAll(newSong);
+  currentSong = newSong;
+  renderSidebar();
+  renderSong();
+  closeModal();
+
+  ['newTitle','newArtist','newLyrics','newTab'].forEach(id => document.getElementById(id).value = '');
+}
+
+// Close modal on overlay click
+document.getElementById('addSongModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── IMPORTAR DE LA CUERDA ─────────────────────────────────────────────────
+
+function openImport() {
+  document.getElementById('importModal').classList.add('visible');
+  document.getElementById('impPreview').style.display = 'none';
+}
+
+function closeImport() {
+  document.getElementById('importModal').classList.remove('visible');
+  document.getElementById('impRaw').value = '';
+  document.getElementById('impPreviewText').textContent = '';
+  document.getElementById('impPreview').style.display = 'none';
+}
+
+/*
+  Parser de La Cuerda:
+  El formato tiene líneas de acordes (solo texto azul/mayúsculas con posiciones)
+  alternadas con líneas de letra. Los acordes están desplazados horizontalmente
+  indicando sobre qué sílaba caen.
+
+  Estrategia:
+  1. Detectar si una línea es "de acordes": contiene solo tokens que son acordes
+     válidos separados por espacios, sin letras de texto normal.
+  2. Para cada par (línea_acordes, línea_letra): calcular la posición de cada
+     acorde y encontrar la sílaba correspondiente en la línea de letra.
+  3. Insertar el acorde [X] justo antes de esa sílaba.
+*/
+
+const CHORD_RE = /^[A-G][#b]?(m|maj|min|aug|dim|sus|add|M)?[0-9]?(\/[A-G][#b]?)?$/;
+
+function isChordToken(t) {
+  return CHORD_RE.test(t.trim());
+}
+
+function isChordLine(line) {
+  if (!line.trim()) return false;
+  // La línea de acordes en La Cuerda suele tener solo acordes y espacios
+  const tokens = line.trim().split(/\s+/);
+  if (tokens.length === 0) return false;
+  // Al menos un token debe ser acorde y NINGUNO debe ser texto normal largo
+  const chordCount = tokens.filter(isChordToken).length;
+  const nonChord = tokens.filter(t => !isChordToken(t));
+  // Si hay texto que no es acorde y es largo, no es línea de acordes
+  if (nonChord.some(t => t.length > 3 && !isChordToken(t))) return false;
+  return chordCount > 0 && chordCount === tokens.length;
+}
+
+function isSectionLine(line) {
+  const t = line.trim();
+  const SECTIONS = ['intro','verso','estribillo','chorus','puente','bridge','solo','coda','outro','pre-estribillo','final','refrain'];
+  // Entre paréntesis o corchetes, o línea sola con esa palabra
+  return SECTIONS.some(s => t.toLowerCase().replace(/[\[\]()]/g,'').trim() === s);
+}
+
+function mergeChordAndLyric(chordLine, lyricLine) {
+  // Encontrar posición de cada acorde en la línea de acordes
+  const chords = [];
+  const re = /\S+/g;
+  let m;
+  while ((m = re.exec(chordLine)) !== null) {
+    if (isChordToken(m[0])) {
+      chords.push({ chord: m[0], pos: m.index });
     }
   }
 
-  // Llamado desde el botón en el HTML del paso
-  function toggle(minutes) {
-    // Si ya terminó → reiniciar
-    if (remaining <= 0 && totalSecs > 0) {
-      reset();
-      totalSecs = minutes * 60;
-      remaining = totalSecs;
-      _updateUI();
-      return;
-    }
-    // Primera pulsación → arrancar
-    if (totalSecs === 0) {
-      totalSecs = minutes * 60;
-      remaining = totalSecs;
-    }
-    if (running) {
-      // Pausar
-      clearInterval(timer); timer = null;
-      running = false;
-    } else {
-      // Arrancar / reanudar
-      running = true;
-      timer = setInterval(() => {
-        remaining--;
-        _updateUI();
-        if (remaining <= 0) {
-          clearInterval(timer); timer = null;
-          running = false;
-          _beep();
-          _vibrate();
-        }
-      }, 1000);
-    }
-    _updateUI();
-  }
+  if (chords.length === 0) return lyricLine;
 
-  // Limpia el timer al cambiar de paso
-  function reset() {
-    if (timer) { clearInterval(timer); timer = null; }
-    totalSecs = 0; remaining = 0; running = false;
-  }
+  // Insertar acordes en la línea de letra según posición de carácter
+  // Trabajamos con array de chars para mantener posiciones
+  let result = '';
+  let lyric = lyricLine;
+  let offset = 0; // cuántos chars hemos añadido (corchetes)
 
-  return { toggle, reset };
-})();
+  // Ordenar por posición
+  chords.sort((a, b) => a.pos - b.pos);
 
+  for (const { chord, pos } of chords) {
+    // La posición en la letra original (sin los corchetes añadidos)
+    // Intentamos insertar en la posición más cercana que no parta una palabra
+    let insertAt = Math.min(pos, lyric.length);
 
-/* ── SHARE ──────────────────────────────────────────────────
-   Compartir receta o lista de ingredientes.
-   Genera texto plano formateado, lo muestra en preview
-   y ofrece copiar al portapapeles o abrir en WhatsApp.
-──────────────────────────────────────────────────────────── */
-const Share = (() => {
-  let currentText = '';
-
-  function open() {
-    // Resetear a estado inicial
-    document.getElementById('share-preview').style.display  = 'none';
-    document.getElementById('share-actions').style.display  = 'none';
-    document.getElementById('share-overlay').style.display  = 'flex';
-  }
-
-  function close() {
-    document.getElementById('share-overlay').style.display = 'none';
-    currentText = '';
-  }
-
-  function closeOnBackdrop(e) {
-    if (e.target.id === 'share-overlay') close();
-  }
-
-  // Genera el texto según el modo elegido
-  function prepare(mode) {
-    const r = Recipe._current();  // getter expuesto por Recipe
-    const n = Recipe._comensales();
-    if (!r) return;
-
-    if (mode === 'ingredientes') {
-      const lines = r.ingredients.map(ing => {
-        const amt  = ing.perPerson * n;
-        const disp = amt < 1    ? (amt * 1000).toFixed(0) + ' mg'
-                   : amt >= 1000 ? (amt / 1000).toFixed(1) + ' kg'
-                   :               amt.toFixed(0) + ' ' + ing.unit;
-        return `• ${ing.name}: ${disp}`;
-      });
-      const prof  = Store.getActiveProfile();
-      const evap  = prof?.evapPerMin ?? null;
-      const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
-      const extra = evap ? Math.round(evap * r.cookMin) : 0;
-      const agua  = base + extra;
-      currentText =
-        `🍚 ${r.name} — ${n} persona${n > 1 ? 's' : ''}\n\n` +
-        `INGREDIENTES\n${lines.join('\n')}\n\n` +
-        `💧 Agua necesaria: ${agua} ml` +
-        (evap ? ` (ratio + evaporación ${prof.name})` : '') +
-        `\n\n— Maestro Arrocero`;
-    } else {
-      const steps = r.steps.map((s, i) =>
-        `${i + 1}. ${s.title} (${s.time})\n   ${s.text}`).join('\n\n');
-      currentText =
-        `🍚 ${r.name}\n⏱ ${r.time} · ${r.difficulty}\n\n` +
-        `PASOS\n${steps}\n\n— Maestro Arrocero`;
+    // Si caemos en medio de una palabra, retrocedemos al inicio de esa palabra
+    // (para no cortar "bai-lando" en dos)
+    while (insertAt > 0 && lyric[insertAt - 1] && lyric[insertAt - 1] !== ' ') {
+      // Solo retrocedemos si el acorde está muy cerca del inicio de la palabra
+      // Si la posición original ya apunta a un espacio o inicio, no mover
+      if (pos <= insertAt - 1) insertAt--;
+      else break;
     }
 
-    const preview = document.getElementById('share-preview');
-    preview.textContent = currentText;
-    preview.style.display = 'block';
-    document.getElementById('share-actions').style.display = 'flex';
-    document.getElementById('share-close-btn').style.display = 'none';
+    const tag = `[${chord}]`;
+    lyric = lyric.slice(0, insertAt) + tag + lyric.slice(insertAt);
+    // Ajustamos futuras posiciones
+    // (no necesario porque trabajamos con posición original relativa)
   }
 
-  function copy() {
-    if (!currentText) return;
-    navigator.clipboard.writeText(currentText)
-      .then(() => {
-        const btn = document.querySelector('#share-actions .btn-secondary');
-        const orig = btn.textContent;
-        btn.textContent = '✓ Copiado';
-        setTimeout(() => btn.textContent = orig, 2000);
-      })
-      .catch(() => {
-        // Fallback para móviles que no soporten clipboard API
-        const ta = document.createElement('textarea');
-        ta.value = currentText;
-        document.body.appendChild(ta);
-        ta.select(); document.execCommand('copy');
-        document.body.removeChild(ta);
-      });
-  }
+  return lyric;
+}
 
-  function whatsapp() {
-    if (!currentText) return;
-    const url = 'https://wa.me/?text=' + encodeURIComponent(currentText);
-    window.open(url, '_blank');
-  }
+function parseLaCuerda(raw) {
+  const lines = raw.split('\n');
+  const output = [];
+  let i = 0;
 
-  return { open, close, closeOnBackdrop, prepare, copy, whatsapp };
-})();
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
 
-
-/* ── SCALE ──────────────────────────────────────────────────
-   Báscula táctil experimental.
-
-   Técnica: el evento Touch expone radiusX y radiusY de cada
-   punto de contacto — el área elíptica que aplasta el objeto.
-   A mayor peso → mayor deformación → mayor área.
-
-   Calibración de 2 puntos:
-     - Punto A: objeto de peso conocido P_a → área media A_a
-     - Punto B: objeto de peso conocido P_b → área media A_b
-     - Regresión lineal: peso = m * área + b
-       donde m = (P_b - P_a) / (A_a_b - A_a)
-             b = P_a - m * A_a
-
-   Sin calibración usa valores por defecto estimados (~15 g/px²)
-   que son muy imprecisos pero dan una idea del orden de magnitud.
-──────────────────────────────────────────────────────────── */
-const Scale = (() => {
-  // Calibración: dos puntos (área, gramos)
-  const CAL_POINTS  = [
-    { label: 'Objeto ligero',  hint: 'ej. botella 500 ml llena',  grams: 500  },
-    { label: 'Objeto pesado',  hint: 'ej. paquete arroz 1 kg',    grams: 1000 },
-  ];
-  const DEFAULT_M = 15;   // g por unidad de área² (sin calibrar)
-  const DEFAULT_B = -200; // offset base sin calibrar
-
-  let calData     = Store.loadScale?.() || { points: [], m: null, b: null };
-  let taraArea    = 0;
-  let lastArea    = 0;
-  let calStep     = 0;    // 0 = esperando p1, 1 = esperando p2, 2 = completo
-  let currentTab  = 'medir';
-  let touchActive = false;
-  let areaReadings = [];  // medias durante el toque activo
-
-  // ── Conversión área → gramos
-  function areaToGrams(area) {
-    const netArea = Math.max(0, area - taraArea);
-    if (calData.m !== null) return Math.round(calData.m * netArea + calData.b);
-    return Math.round(DEFAULT_M * netArea + DEFAULT_B);
-  }
-
-  // ── Calcular área elíptica media de todos los touches
-  function touchArea(e) {
-    let total = 0;
-    for (const t of e.touches) {
-      const rx = t.radiusX || 10;
-      const ry = t.radiusY || 10;
-      total += Math.PI * rx * ry;
+    // Línea vacía
+    if (!trimmed) {
+      output.push('');
+      i++;
+      continue;
     }
-    return total;
-  }
 
-  // ── Handlers táctiles
-  function onTouchStart(e) {
-    e.preventDefault();
-    touchActive  = true;
-    areaReadings = [];
-    lastArea     = touchArea(e);
-    _updatePad(true);
-  }
-
-  function onTouchMove(e) {
-    e.preventDefault();
-    if (!touchActive) return;
-    lastArea = touchArea(e);
-    areaReadings.push(lastArea);
-    _renderReading(lastArea);
-  }
-
-  function onTouchEnd(e) {
-    e.preventDefault();
-    touchActive = false;
-    // Usar la media de las últimas lecturas para estabilidad
-    if (areaReadings.length > 3) {
-      const sorted = [...areaReadings].sort((a,b) => a-b);
-      const mid    = sorted.slice(Math.floor(sorted.length*.25), Math.floor(sorted.length*.75));
-      lastArea     = mid.reduce((s,v) => s+v, 0) / mid.length;
+    // Sección tipo (Estribillo), [Verso], etc.
+    if (isSectionLine(trimmed)) {
+      const label = trimmed.replace(/[\[\]()]/g, '').trim();
+      // Capitalizar primera letra
+      output.push('[' + label.charAt(0).toUpperCase() + label.slice(1) + ']');
+      i++;
+      continue;
     }
-    _renderReading(lastArea);
-    _updatePad(false);
-  }
 
-  function _updatePad(active) {
-    const pad  = document.getElementById('scale-pad');
-    const icon = document.getElementById('scale-pad-icon');
-    const hint = document.getElementById('scale-pad-hint');
-    if (!pad) return;
-    pad.classList.toggle('active', active);
-    if (active) {
-      icon.textContent = '📲';
-      hint.textContent = 'Manteniendo…';
-    } else {
-      icon.textContent = '🫴';
-      hint.textContent = 'Apoya aquí el objeto a pesar';
-    }
-  }
-
-  function _renderReading(area) {
-    const grams  = areaToGrams(area);
-    const el     = document.getElementById('scale-display');
-    const raw    = document.getElementById('scale-raw');
-    if (!el) return;
-    const display = grams > 0 ? grams : 0;
-    el.className  = 'scale-value' + (display > 0 ? ' has-weight' : '');
-    el.innerHTML  = `${display} <small>g</small>`;
-    if (raw) raw.textContent = `Área de contacto: ${area.toFixed(1)} px²`;
-  }
-
-  function tare() {
-    taraArea = lastArea;
-    _renderReading(0);
-  }
-
-  function reset() {
-    taraArea = 0; lastArea = 0; areaReadings = [];
-    const el = document.getElementById('scale-display');
-    if (el) { el.className = 'scale-value'; el.innerHTML = '— <small>g</small>'; }
-    const raw = document.getElementById('scale-raw');
-    if (raw) raw.textContent = 'Área de contacto: —';
-  }
-
-  // ── Calibración
-  function renderCalSteps() {
-    const container = document.getElementById('scale-cal-steps');
-    if (!container) return;
-    container.innerHTML = CAL_POINTS.map((p, i) => {
-      const done    = calData.points[i] !== undefined;
-      const current = i === calStep && !done;
-      return `
-        <div class="scale-cal-step ${done ? 'done' : current ? 'active-step' : ''}">
-          <div class="scale-cal-num">${done ? '✓' : i + 1}</div>
-          <div class="scale-cal-info">
-            <strong>${p.label} — ${p.grams} g</strong>
-            <span>${p.hint}</span>
-            ${done ? `<span style="color:var(--success);display:block">Área capturada: ${calData.points[i].area.toFixed(1)} px²</span>` : ''}
-          </div>
-        </div>`;
-    }).join('');
-
-    const btn = document.getElementById('scale-cal-btn');
-    if (!btn) return;
-    if (calStep >= CAL_POINTS.length) {
-      btn.textContent = '✓ Calibración completa';
-      btn.disabled    = true;
-      _showCalResult();
-    } else {
-      btn.textContent = `Capturar punto ${calStep + 1} (${CAL_POINTS[calStep].grams} g)`;
-      btn.disabled    = lastArea === 0;
-    }
-  }
-
-  function calAction() {
-    if (calStep >= CAL_POINTS.length) return;
-    if (lastArea === 0) { alert('Primero apoya el objeto en la zona de pesado.'); return; }
-
-    calData.points[calStep] = { grams: CAL_POINTS[calStep].grams, area: lastArea };
-    calStep++;
-
-    if (calStep >= CAL_POINTS.length) {
-      // Calcular regresión lineal de 2 puntos
-      const p1 = calData.points[0];
-      const p2 = calData.points[1];
-      calData.m = (p2.grams - p1.grams) / (p2.area - p1.area);
-      calData.b = p1.grams - calData.m * p1.area;
-      _saveCalData();
-    }
-    renderCalSteps();
-  }
-
-  function _showCalResult() {
-    const box = document.getElementById('scale-cal-result');
-    const content = document.getElementById('scale-cal-result-content');
-    if (!box || !content || calData.m === null) return;
-    box.style.display = 'block';
-    content.innerHTML = `
-      <div class="info-row"><span class="lbl">Pendiente (m)</span><span class="val">${calData.m.toFixed(3)} g/px²</span></div>
-      <div class="info-row"><span class="lbl">Offset (b)</span><span class="val">${calData.b.toFixed(1)} g</span></div>
-      <div class="info-row" style="border:none"><span class="lbl">Estado</span><span class="tag-ok">Calibrada ✓</span></div>`;
-  }
-
-  function resetCal() {
-    if (!confirm('¿Borrar la calibración?')) return;
-    calData  = { points: [], m: null, b: null };
-    calStep  = 0;
-    _saveCalData();
-    renderCalSteps();
-    const box = document.getElementById('scale-cal-result');
-    if (box) box.style.display = 'none';
-  }
-
-  function _saveCalData() {
-    try { localStorage.setItem('maestroArrocero_scale', JSON.stringify(calData)); } catch(e) {}
-  }
-
-  function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('#screen-bascula .inner-tab').forEach((t, i) =>
-      t.classList.toggle('active', (i===0&&tab==='medir')||(i===1&&tab==='calibrar')));
-    document.getElementById('scale-tab-medir').style.display    = tab === 'medir'    ? '' : 'none';
-    document.getElementById('scale-tab-calibrar').style.display = tab === 'calibrar' ? '' : 'none';
-    if (tab === 'calibrar') renderCalSteps();
-  }
-
-  function init() {
-    // Cargar calibración guardada
-    try {
-      const raw = localStorage.getItem('maestroArrocero_scale');
-      if (raw) {
-        calData = JSON.parse(raw);
-        calStep = calData.points?.length || 0;
+    // Línea de acordes seguida de línea de letra
+    if (isChordLine(line) && i + 1 < lines.length) {
+      const nextLine = lines[i + 1];
+      if (!isChordLine(nextLine) && nextLine.trim()) {
+        // Fusionar acorde + letra
+        output.push(mergeChordAndLyric(line, nextLine));
+        i += 2;
+        continue;
       }
-    } catch(e) {}
-  }
-
-  return { onTouchStart, onTouchMove, onTouchEnd, tare, reset, switchTab, calAction, resetCal, init };
-})();
-
-
-/* ── INSTRUCTIONS ───────────────────────────────────────────
-   Pantalla de guías en vídeo. Cada entrada tiene un vídeo de
-   YouTube embebido que se carga al desplegar (lazy load).
-   Para añadir un vídeo: añade un objeto al array GUIDES con
-   el youtubeId del vídeo (la parte después de ?v= en la URL).
-──────────────────────────────────────────────────────────── */
-const Instructions = (() => {
-  const GUIDES = [
-    {
-      id:        'calibracion',
-      icon:      '🧪',
-      title:     'Cómo calibrar la evaporación',
-      desc:      'Aprende a hacer la prueba de evaporación para que la app calcule el agua exacta según tu equipo y tu fuego.',
-      youtubeId: '', // ej: 'dQw4w9WgXcQ'
-    },
-    {
-      id:        'nivelador',
-      icon:      '📐',
-      title:     'Cómo usar el nivelador',
-      desc:      'Coloca el móvil correctamente sobre la paella y aprende a establecer el punto 0 para compensar superficies irregulares.',
-      youtubeId: '',
-    },
-    {
-      id:        'agua',
-      icon:      '💧',
-      title:     'El cálculo del agua',
-      desc:      'Entiende cómo funciona el ratio de arroz y cómo la calibración personal mejora los resultados de cada receta.',
-      youtubeId: '',
-    },
-  ];
-
-  let openId = null;
-
-  function render() {
-    const list = document.getElementById('instructions-list');
-    list.innerHTML = GUIDES.map(g => `
-      <div class="instruction-card" id="icard-${g.id}">
-        <div class="instruction-card-header" onclick="Instructions.toggle('${g.id}')">
-          <div class="instruction-icon">${g.icon}</div>
-          <div class="instruction-info">
-            <h3>${g.title}</h3>
-            <p>${g.desc}</p>
-          </div>
-          <div class="instruction-chevron" id="ichev-${g.id}">▼</div>
-        </div>
-        <div class="instruction-video" id="ivid-${g.id}">
-          ${g.youtubeId
-            ? `<iframe src="https://www.youtube.com/embed/${g.youtubeId}?rel=0&modestbranding=1"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen loading="lazy"></iframe>`
-            : `<div style="background:var(--surface);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--text-muted);font-size:.85rem">
-                 <span style="font-size:2rem">🎬</span>Vídeo próximamente
-               </div>`
-          }
-          <div class="instruction-desc">${g.desc}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  function toggle(id) {
-    const vid  = document.getElementById('ivid-'  + id);
-    const chev = document.getElementById('ichev-' + id);
-    const isOpen = vid.classList.contains('open');
-
-    // Cerrar el que estaba abierto
-    if (openId && openId !== id) {
-      document.getElementById('ivid-'  + openId)?.classList.remove('open');
-      document.getElementById('ichev-' + openId)?.classList.remove('open');
     }
 
-    vid.classList.toggle('open', !isOpen);
-    chev.classList.toggle('open', !isOpen);
-    openId = isOpen ? null : id;
-  }
-
-  return { render, toggle };
-})();
-
-
-/* ── APP ────────────────────────────────────────────────────
-   Punto de entrada: inicializa módulos y registra callbacks
-   de navegación. Todo lo que necesita "pasar" entre módulos
-   se coordina aquí.
-──────────────────────────────────────────────────────────── */
-/* ── HOME ───────────────────────────────────────────────────
-   Módulo del dashboard de inicio.
-   Gestiona: equipo activo, tipo de arroz, comensales y medidas.
-──────────────────────────────────────────────────────────── */
-const Home = (() => {
-  let arrozType  = 'bomba';
-  let arrozRatio = 1.5;
-  let comensales = 4;
-
-  function selectArroz(btn, type, ratio) {
-    document.querySelectorAll('.home-chip').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    arrozType  = type;
-    arrozRatio = ratio;
-    updateMedidas();
-  }
-
-  function updateComensales(v) {
-    comensales = parseInt(v);
-    document.getElementById('home-com-val').textContent = v;
-    updateMedidas();
-  }
-
-  function updateMedidas() {
-    const arroz  = comensales * 80;
-    const base   = Math.round(arroz * arrozRatio);
-    const prof   = Store.getActiveProfile();
-    const evap   = prof?.evapPerMin ?? null;
-    const extra  = evap ? Math.round(evap * 18) : 0;
-    const agua   = base + extra;
-    const aceite = comensales * 15;
-    const el = (id) => document.getElementById(id);
-    if (el('home-med-arroz')) el('home-med-arroz').textContent = arroz + 'g';
-    if (el('home-med-agua'))  el('home-med-agua').textContent  = agua  + 'ml';
-    if (el('home-med-aceite'))el('home-med-aceite').textContent= aceite + 'ml';
-  }
-
-  function renderEquip() {
-    const prof = Store.getActiveProfile();
-    const dot  = document.getElementById('home-equip-dot');
-    const name = document.getElementById('home-equip-name');
-    const meta = document.getElementById('home-equip-meta');
-    const evap = document.getElementById('home-equip-evap');
-    if (!dot) return;
-    if (!prof) {
-      dot.className  = 'home-equip-dot uncal';
-      name.textContent = 'Sin equipo configurado';
-      meta.textContent = 'Añade tu paella en la sección Agua';
-      evap.innerHTML   = '';
-    } else {
-      const calOk = prof.evapPerMin != null;
-      dot.className  = 'home-equip-dot' + (calOk ? '' : ' uncal');
-      name.textContent = prof.name;
-      meta.textContent = (prof.diam ? prof.diam + ' cm · ' : '') + (prof.burner || '');
-      evap.innerHTML   = calOk
-        ? prof.evapPerMin.toFixed(1) + ' <span>ml/min</span>'
-        : '<span style="color:var(--rice);font-size:.72rem">Sin calibrar</span>';
+    // Línea de acordes sola (sin letra debajo, p.ej. intro instrumental)
+    if (isChordLine(line)) {
+      const tokens = line.trim().split(/\s+/).filter(isChordToken);
+      output.push(tokens.map(c => `[${c}]`).join('  '));
+      i++;
+      continue;
     }
+
+    // Línea de letra sola (sin acordes encima)
+    output.push(trimmed);
+    i++;
   }
 
-  function init() {
-    renderEquip();
-    updateMedidas();
-  }
+  // Limpiar líneas vacías consecutivas
+  return output.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
 
-  return { selectArroz, updateComensales, init, renderEquip };
+function previewImport() {
+  const raw = document.getElementById('impRaw').value;
+  if (!raw.trim()) { alert('Pega primero el texto de La Cuerda'); return; }
+  const converted = parseLaCuerda(raw);
+  document.getElementById('impPreviewText').textContent = converted;
+  document.getElementById('impPreview').style.display = 'block';
+}
+
+function saveImport() {
+  const title = document.getElementById('impTitle').value.trim();
+  const artist = document.getElementById('impArtist').value.trim();
+  const key = document.getElementById('impKey').value;
+  const raw = document.getElementById('impRaw').value;
+
+  if (!title) { alert('Pon el título de la canción'); return; }
+  if (!raw.trim()) { alert('Pega el texto de La Cuerda'); return; }
+
+  const lyrics = parseLaCuerda(raw);
+
+  const newSong = {
+    id: String(Date.now()),
+    title,
+    artist: artist || 'Desconocido',
+    key,
+    lyrics,
+    tab: '',
+    createdAt: Date.now()
+  };
+
+  songs.push(newSong);
+  saveAll(newSong);
+  currentSong = newSong;
+  renderSidebar();
+  renderSong();
+  closeImport();
+
+  // Limpiar campos
+  ['impTitle','impArtist','impRaw'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+// La carga inicial la gestiona onAuthStateChanged en el módulo Firebase
+
+// ── MODO MÓVIL ────────────────────────────────────────────────────────────
+let mobileMode = false;
+
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|Touch/i.test(navigator.userAgent)
+    || window.innerWidth < 700
+    || ('ontouchstart' in window && window.innerWidth < 1024);
+}
+
+function applyMobileMode(enable) {
+  mobileMode = enable;
+  document.body.classList.toggle('mobile', enable);
+
+  // Controlar sidebar directamente — sin depender del CSS
+  const sidebar = document.getElementById('appSidebar');
+  const layout = document.getElementById('appLayout');
+  if (sidebar) sidebar.style.display = enable ? 'none' : '';
+  if (layout) layout.style.gridTemplateColumns = enable ? '1fr' : '';
+
+  const btn = document.getElementById('btn-mobile');
+  const panelBtn = document.getElementById('btn-songs-panel');
+  if (btn) {
+    btn.classList.toggle('active', enable);
+    btn.textContent = enable ? '🖥️' : '📱';
+    btn.title = enable ? 'Modo escritorio' : 'Modo móvil';
+  }
+  if (panelBtn) panelBtn.style.display = enable ? '' : 'none';
+  localStorage.setItem('cancionero_mobileMode', enable ? '1' : '0');
+  if (!enable) document.body.style.overflow = '';
+  if (currentSong) renderSong();
+}
+
+function toggleMobileMode() {
+  applyMobileMode(!mobileMode);
+}
+
+function openSongPanel() {
+  const panel = document.getElementById('mobileSongPanel');
+  const list = document.getElementById('songListMobile');
+  list.innerHTML = songs.map(s => `
+    <li data-id="${s.id}" onclick="selectSong('${s.id}');closeSongPanel();">
+      <span class="song-name">${s.title}</span>
+      <span class="song-artist">${s.artist}</span>
+    </li>`).join('');
+  list.querySelectorAll('li').forEach(li => {
+    li.classList.toggle('active', currentSong && String(li.dataset.id) === String(currentSong.id));
+  });
+  panel.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSongPanel() {
+  document.getElementById('mobileSongPanel').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+// Detectar automáticamente al cargar — pero sin renderizar todavía
+(function() {
+  const saved = localStorage.getItem('cancionero_mobileMode');
+  const shouldMobile = saved !== null ? saved === '1' : isMobileDevice();
+  if (shouldMobile) {
+    mobileMode = true;
+    document.body.classList.add('mobile');
+    // Actualizar botones cuando el DOM esté listo
+    window.addEventListener('DOMContentLoaded', () => applyMobileMode(true));
+  }
 })();
 
-
-const App = (() => {
-  function init() {
-    Theme.init();
-    Recipe.renderHome();
-    Instructions.render();
-    Scale.init();
-    Home.init();
-
-    Nav.onEnter('home', () => {
-      Home.renderEquip();
-      Home.updateMedidas();
-    });
-    Nav.onEnter('agua', () => {
-      Equipment.renderList();
-      Calibration.renderStatus();
-      Water.calc();
-    });
-    Nav.onEnter('nivel', () => { Gyro.init(); });
-    Nav.onEnter('bascula', () => { Scale.switchTab('medir'); });
-    Nav.onEnter('instrucciones', () => {});
+// Re-detectar si cambia el tamaño de ventana
+window.addEventListener('resize', () => {
+  if (localStorage.getItem('cancionero_mobileMode') === null) {
+    applyMobileMode(isMobileDevice());
   }
-
-  return { init };
-})();
-
-App.init();
-
+});
 </script>
 </body>
 </html>
