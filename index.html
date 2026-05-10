@@ -867,6 +867,37 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 .home-sug-time  { font-size: .63rem; color: rgba(255,255,255,.45); }
 .home-sug-btn   { background: rgba(200,134,74,.85); border-radius: 4px; padding: 3px 10px; font-size: .65rem; color: #fff; font-weight: 600; }
 
+/* ── HERO RECETA ──────────────────────────────────────────── */
+.recipe-hero {
+  width: calc(100% + 2rem); margin: 0 -1rem 1.25rem;
+  height: 200px; position: relative; overflow: hidden;
+  background: #1a1008;
+}
+.recipe-hero img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 40%;
+  display: block; filter: brightness(.72);
+}
+.recipe-hero-emoji {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; opacity: .3;
+}
+.recipe-hero-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20,12,4,.97) 18%, transparent 70%);
+}
+.recipe-hero-ct {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: .875rem 1rem;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.recipe-hero-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem; color: #fff; font-weight: 700; line-height: 1.15;
+}
+.recipe-hero-meta { font-size: .7rem; color: rgba(255,255,255,.5); margin-top: 3px; }
+
 </style>
 </head>
 <body>
@@ -916,7 +947,20 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 </div>
 
 <!-- PANTALLA: RECETA -->
-<div id="screen-recipe" class="screen">
+<div id="screen-recipe" class="screen" style="padding-top:0">
+  <!-- Hero receta -->
+  <div class="recipe-hero" id="recipe-hero">
+    <img id="recipe-hero-img" src="" alt="" style="display:none">
+    <div class="recipe-hero-emoji" id="recipe-hero-emoji"></div>
+    <div class="recipe-hero-grad"></div>
+    <div class="recipe-hero-ct">
+      <div>
+        <div class="recipe-hero-name" id="recipe-hero-name">—</div>
+        <div class="recipe-hero-meta" id="recipe-hero-meta"></div>
+      </div>
+      <a id="recipe-reel-hero" class="reel-btn" href="#" target="_blank" style="display:none;flex-shrink:0">▶ Reel</a>
+    </div>
+  </div>
   <div class="inner-tabs">
     <button class="inner-tab active" onclick="Recipe.switchTab('guia')">Guía paso a paso</button>
     <button class="inner-tab"        onclick="Recipe.switchTab('ingredientes')">Ingredientes</button>
@@ -931,7 +975,6 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
         <div class="comensales-badge" id="comensales-badge">4 personas</div>
-        <a id="recipe-reel-btn" class="reel-btn" href="#" target="_blank" style="display:none">▶ Instagram</a>
       </div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
@@ -1726,8 +1769,27 @@ const Recipe = (() => {
   // ── Abrir una receta (va directamente a ingredientes)
   function open(id) {
     currentRecipe = Data.getRecipe(id);
+    if (!currentRecipe) {
+      alert('🍚 Receta próximamente...');
+      return;
+    }
     currentStep   = 0;
     comensales    = 4;
+
+    // Hero
+    var heroImg   = document.getElementById('recipe-hero-img');
+    var heroEmoji = document.getElementById('recipe-hero-emoji');
+    var heroName  = document.getElementById('recipe-hero-name');
+    var heroMeta  = document.getElementById('recipe-hero-meta');
+    var heroReel  = document.getElementById('recipe-reel-hero');
+    var imgSrc    = IMG['sug_' + currentRecipe.id] || '';
+    if (imgSrc) { heroImg.src = imgSrc; heroImg.style.display = 'block'; heroEmoji.textContent = ''; }
+    else        { heroImg.style.display = 'none'; heroEmoji.textContent = currentRecipe.emoji; }
+    heroName.textContent = currentRecipe.name;
+    heroMeta.textContent = currentRecipe.difficulty + ' · ' + currentRecipe.time;
+    if (currentRecipe.reelUrl) { heroReel.href = currentRecipe.reelUrl; heroReel.style.display = ''; }
+    else { heroReel.style.display = 'none'; }
+
     document.getElementById('recipe-title-step').textContent = currentRecipe.name;
     document.getElementById('recipe-subtitle-step').textContent = '⏱ ' + currentRecipe.time;
     document.getElementById('comensal-slider').value = 4;
@@ -1820,11 +1882,14 @@ const Recipe = (() => {
 
   // ── Tabs internos
   function switchTab(tab) {
-    document.querySelectorAll('.inner-tab').forEach((t, i) =>
-      t.classList.toggle('active', (i === 0 && tab === 'guia') || (i === 1 && tab === 'ingredientes')));
+    var screen = document.getElementById('screen-recipe');
+    if (screen) screen.querySelectorAll('.inner-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('onclick').includes("'" + tab + "'"));
+    });
     document.getElementById('tab-guia').style.display          = tab === 'guia'         ? '' : 'none';
     document.getElementById('tab-ingredientes').style.display  = tab === 'ingredientes' ? '' : 'none';
     if (tab === 'guia') renderStep();
+    if (tab === 'ingredientes') renderIngredients();
   }
 
   // Getters para módulos externos (Share)
