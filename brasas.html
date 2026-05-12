@@ -517,7 +517,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 <div id="screen-inicio" class="screen active">
 
   <div class="home-hero" onclick="Nav.goToRecipe('parrillada')">
-    <div class="home-hero-placeholder">🥩🔥</div>
+    <img src="img/brasas/parrillada.jpg" alt="Parrillada Completa Asado">
     <div class="home-hero-grad"></div>
     <div class="home-hero-ct">
       <div>
@@ -729,6 +729,33 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 
 <!-- ════════════════ JAVASCRIPT ════════════════ -->
 <script>
+
+/* ── IMÁGENES ──────────────────────────────────────────────── */
+const IMGS = {
+  recipes: {
+    'parrillada':      'img/brasas/parrillada.jpg',
+    'ribeye':          'img/brasas/ribeye.jpg',
+    'pollo-humo':      'img/brasas/pollo-humo.jpg',
+    'picanha':         'img/brasas/picanha.jpg',
+    'chuleton':        'img/chuleton.jpg',
+    'costillas-bbq':   null,
+    'secreto-iberico': 'img/brasas/secreto-iberico.jpg',
+    'cordero-brasas':  null,
+    'alitas-ahumadas': null,
+    'entrecot-lena':   'img/brasas/entrecot-lena.jpg',
+    'pinchos-morunos': 'img/brasas/pinchos-morunos.jpg',
+    'churrasco':       null,
+  },
+  categories: {
+    'todos':   null,
+    'vacuno':  'img/brasas/cat-vacuno.jpg',
+    'cerdo':   'img/brasas/cat-cerdo.jpg',
+    'aves':    'img/brasas/cat-aves.jpg',
+    'cordero': 'img/brasas/cat-cordero.jpg',
+    'alinos':  'img/brasas/cat-alinos.jpg',
+    'guias':   'img/brasas/cat-lena.jpg',
+  }
+};
 
 /* ── THEME ─────────────────────────────────────────────────── */
 const Theme = (() => {
@@ -1142,19 +1169,27 @@ const Brasas = (() => {
     // Categorías
     const cats = document.getElementById('home-cats');
     if (cats) {
-      cats.innerHTML = DATA.categories.map((c, i) =>
-        `<div class="home-cat${i===0?' active':''}" onclick="Brasas.filterCat('${c.id}')">
-          <div class="home-cat-circle">${c.emoji}</div>
+      cats.innerHTML = DATA.categories.map((c, i) => {
+        const img = IMGS.categories[c.id];
+        const inner = img
+          ? `<img src="${img}" alt="${c.label}">`
+          : c.emoji;
+        return `<div class="home-cat${i===0?' active':''}" onclick="Brasas.filterCat('${c.id}')">
+          <div class="home-cat-circle">${inner}</div>
           <div class="home-cat-name">${c.label}</div>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
     }
     // Sugeridas
     const sug = document.getElementById('home-sug-list');
     if (sug) {
-      sug.innerHTML = DATA.recipes.filter(r => r.sugerida).map(r =>
-        `<div class="home-sug-card" onclick="Brasas.openRecipe('${r.id}')">
-          <div class="home-sug-placeholder">${r.emoji}</div>
+      sug.innerHTML = DATA.recipes.filter(r => r.sugerida).map(r => {
+        const img = IMGS.recipes[r.id];
+        const bg = img
+          ? `<img src="${img}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.72)">`
+          : `<div class="home-sug-placeholder">${r.emoji}</div>`;
+        return `<div class="home-sug-card" onclick="Brasas.openRecipe('${r.id}')">
+          ${bg}
           <div class="home-sug-overlay">
             <div class="home-sug-info">
               <h4>${r.name}</h4>
@@ -1165,8 +1200,8 @@ const Brasas = (() => {
               <button class="home-sug-btn">Ver →</button>
             </div>
           </div>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
     }
   }
 
@@ -1174,16 +1209,20 @@ const Brasas = (() => {
     const el = document.getElementById('recipes-grid');
     if (!el) return;
     const list = filter && filter !== 'todos' ? DATA.recipes.filter(r => r.category === filter) : DATA.recipes;
-    el.innerHTML = list.map(r =>
-      `<div class="recipe-card" onclick="Brasas.openRecipe('${r.id}')">
-        <div class="recipe-card-thumb">${r.emoji}</div>
+    el.innerHTML = list.map(r => {
+      const img = IMGS.recipes[r.id];
+      const thumb = img
+        ? `<img src="${img}" alt="${r.name}">`
+        : r.emoji;
+      return `<div class="recipe-card" onclick="Brasas.openRecipe('${r.id}')">
+        <div class="recipe-card-thumb">${thumb}</div>
         <div class="recipe-card-body">
           <h3>${r.name}</h3>
           <div class="recipe-card-meta">★ ${r.rating} · ${r.time}</div>
           <span class="difficulty">${r.difficulty}</span>
         </div>
-      </div>`
-    ).join('');
+      </div>`;
+    }).join('');
   }
 
   function renderPills() {
@@ -1234,7 +1273,19 @@ const Brasas = (() => {
     document.getElementById('recipe-time').textContent   = r.time;
     document.getElementById('recipe-diff').textContent   = r.difficulty;
     document.getElementById('recipe-desc').textContent   = r.desc;
-    document.getElementById('recipe-hero-ph').textContent = r.emoji;
+    const ph = document.getElementById('recipe-hero-ph');
+    const recipeImg = IMGS.recipes[r.id];
+    if (recipeImg) {
+      ph.style.opacity = '1';
+      ph.style.background = 'none';
+      ph.style.fontSize = '0';
+      ph.innerHTML = `<img src="${recipeImg}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.7)">`;
+    } else {
+      ph.style.opacity = '.3';
+      ph.style.background = 'linear-gradient(135deg, #4A2208, #1A0800)';
+      ph.style.fontSize = '4.5rem';
+      ph.textContent = r.emoji;
+    }
 
     switchTab('guia');
     renderStep();
