@@ -224,7 +224,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 /* ── 5. HOME HERO ─────────────────────────────────────────── */
 .home-hero {
   width: calc(100% + 2rem);
-  margin: -1.5rem -1rem 1.25rem;
+  margin: 0 -1rem 1.25rem;
   height: 220px;
   position: relative;
   overflow: hidden;
@@ -485,7 +485,6 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 
 /* ── 13. RESPONSIVO ───────────────────────────────────────── */
 @media (min-width: 680px) {
-  .home-sug-list { grid-template-columns: 1fr 1fr; display: grid; }
 }
 @media (min-width: 500px) {
   .recipe-grid { grid-template-columns: repeat(3, 1fr); }
@@ -559,7 +558,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 </div>
 
 <!-- ══════════════ DETALLE RECETA ══════════════ -->
-<div id="screen-recipe" class="screen" style="padding-top:0">
+<div id="screen-recipe" class="screen">
 
   <div class="recipe-hero" id="recipe-hero-img">
     <div class="recipe-hero-placeholder" id="recipe-hero-ph"></div>
