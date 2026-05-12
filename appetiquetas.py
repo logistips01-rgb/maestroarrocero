@@ -276,6 +276,56 @@ header[data-testid="stHeader"] { background: #ECF0F1 !important; border-bottom: 
 /* Expanders */
 [data-testid="stExpander"] { background: white !important; border: 1px solid #D5D8DC !important; border-radius: 8px !important; }
 
+/* Form labels → uppercase pequeño como el mockup */
+.stTextInput label, .stTextArea label, .stSelectbox label,
+.stDateInput label, .stFileUploader label {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #7F8C8D !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Inputs con borde fino */
+.stTextInput input, .stTextArea textarea {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  background: white !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus {
+  border-color: #E74C3C !important;
+  box-shadow: 0 0 0 2px rgba(231,76,60,0.15) !important;
+}
+
+/* Selectbox borde fino */
+.stSelectbox > div > div {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Date input */
+.stDateInput input {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Botón submit rojo */
+[data-testid="stFormSubmitButton"] button {
+  background: #E74C3C !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 10px !important;
+}
+[data-testid="stFormSubmitButton"] button:hover {
+  background: #C0392B !important;
+}
+
 /* Divider */
 hr { border-color: #D5D8DC !important; }
 </style>
