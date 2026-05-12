@@ -748,26 +748,6 @@ const Theme = (() => {
   return { toggle, init };
 })();
 
-/* ── NAV ───────────────────────────────────────────────────── */
-const Nav = (() => {
-  let _prev = 'inicio';
-  function goTo(screen) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + screen)?.classList.add('active');
-    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('btab-' + screen)?.classList.add('active');
-    _prev = screen;
-    window.scrollTo(0, 0);
-  }
-  function goToRecipe(id) {
-    Brasas.openRecipe(id);
-  }
-  function back() {
-    Brasas.goBack();
-  }
-  return { goTo, goToRecipe, back };
-})();
-
 /* ── DATA ──────────────────────────────────────────────────── */
 const DATA = {
 
