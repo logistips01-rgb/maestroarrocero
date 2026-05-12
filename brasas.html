@@ -1092,18 +1092,18 @@ const DATA = {
   ],
 
   cortes: [
-    { name: 'Chuletón / Rib-eye', emoji: '🥩', desc: '5–7 cm. Grasa intramuscular alta. Solo sal.', dificultad: 'medio', temp: '55–60 °C' },
-    { name: 'T-Bone / Porterhouse', emoji: '🍖', desc: 'Solomillo + entrecot con hueso. Técnica por zonas.', dificultad: 'medio', temp: '57–62 °C' },
-    { name: 'Picanha (Tapa de cuadril)', emoji: '🔥', desc: 'Con capa de grasa. Protagonista del churrasco.', dificultad: 'facil', temp: '55–58 °C' },
-    { name: 'Entrecot (Ribeye sin hueso)', emoji: '🥩', desc: '2–3 cm. Versátil, rápido, muy jugoso.', dificultad: 'facil', temp: '55–63 °C' },
-    { name: 'Vacío (Flank Steak)', emoji: '🥩', desc: 'Fibra marcada. Cortar siempre en contra de la fibra.', dificultad: 'medio', temp: '57–62 °C' },
-    { name: 'Costillas baby back', emoji: '🍖', desc: 'Técnica 3-2-1. Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85–90 °C' },
-    { name: 'Tira de asado', emoji: '🍖', desc: 'Costilla de res corte transversal. Asado argentino.', dificultad: 'medio', temp: '70–75 °C' },
-    { name: 'Secreto Ibérico', emoji: '🐷', desc: 'Entre paleta y costillar. Grasa excelente. 15 min.', dificultad: 'facil', temp: '65–68 °C' },
-    { name: 'Pluma Ibérica', emoji: '🐷', desc: 'Cuello del cerdo ibérico. Muy tierna. Fuego medio.', dificultad: 'facil', temp: '63–67 °C' },
-    { name: 'Pechuga de pollo', emoji: '🍗', desc: 'Aplana para grosor uniforme. Marinada obligatoria.', dificultad: 'medio', temp: '74–77 °C' },
-    { name: 'Muslo / Contramuslo', emoji: '🍗', desc: 'Más perdonador. Calor indirecto + directo final.', dificultad: 'facil', temp: '80–85 °C' },
-    { name: 'Costillas de cordero', emoji: '🐑', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5–6 min/cara.', dificultad: 'facil', temp: '62–65 °C' },
+    { name: 'Chuletón / Rib-eye',       emoji: '🥩', desc: '5–7 cm. Grasa intramuscular alta. Solo sal.',           dificultad: 'medio',   temp: '55–60 °C', recipeId: 'chuleton'       },
+    { name: 'T-Bone / Porterhouse',      emoji: '🍖', desc: 'Solomillo + entrecot con hueso. Técnica por zonas.',    dificultad: 'medio',   temp: '57–62 °C', recipeId: 'parrillada'     },
+    { name: 'Picanha (Tapa de cuadril)', emoji: '🔥', desc: 'Con capa de grasa. Protagonista del churrasco.',        dificultad: 'facil',   temp: '55–58 °C', recipeId: 'picanha'        },
+    { name: 'Entrecot (Ribeye sin hueso)',emoji: '🥩', desc: '2–3 cm. Versátil, rápido, muy jugoso.',                dificultad: 'facil',   temp: '55–63 °C', recipeId: 'ribeye'         },
+    { name: 'Vacío (Flank Steak)',       emoji: '🥩', desc: 'Fibra marcada. Cortar siempre en contra de la fibra.',  dificultad: 'medio',   temp: '57–62 °C', recipeId: 'churrasco'      },
+    { name: 'Costillas baby back',       emoji: '🍖', desc: 'Técnica 3-2-1. Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85–90 °C', recipeId: 'costillas-bbq'  },
+    { name: 'Tira de asado',             emoji: '🍖', desc: 'Costilla de res corte transversal. Asado argentino.',   dificultad: 'medio',   temp: '70–75 °C', recipeId: 'churrasco'      },
+    { name: 'Secreto Ibérico',           emoji: '🐷', desc: 'Entre paleta y costillar. Grasa excelente. 15 min.',    dificultad: 'facil',   temp: '65–68 °C', recipeId: 'secreto-iberico'},
+    { name: 'Pluma Ibérica',             emoji: '🐷', desc: 'Cuello del cerdo ibérico. Muy tierna. Fuego medio.',    dificultad: 'facil',   temp: '63–67 °C', recipeId: null             },
+    { name: 'Pechuga de pollo',          emoji: '🍗', desc: 'Aplana para grosor uniforme. Marinada obligatoria.',    dificultad: 'medio',   temp: '74–77 °C', recipeId: 'pollo-humo'     },
+    { name: 'Muslo / Contramuslo',       emoji: '🍗', desc: 'Más perdonador. Calor indirecto + directo final.',      dificultad: 'facil',   temp: '80–85 °C', recipeId: 'alitas-ahumadas'},
+    { name: 'Costillas de cordero',      emoji: '🐑', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5–6 min/cara.',dificultad: 'facil',   temp: '62–65 °C', recipeId: 'cordero-brasas' },
   ],
 
   categories: [
@@ -1337,17 +1337,24 @@ const Brasas = (() => {
     if (!el) return;
     const map = { facil: 'badge-facil', medio: 'badge-medio', dificil: 'badge-dificil' };
     const lbl = { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil' };
-    el.innerHTML = DATA.cortes.map(c =>
-      `<div class="corte-card">
+    el.innerHTML = DATA.cortes.map(c => {
+      const clickable = c.recipeId
+        ? `onclick="Brasas.openRecipe('${c.recipeId}')" style="cursor:pointer"`
+        : '';
+      const recipeLink = c.recipeId
+        ? `<div style="font-size:.72rem;color:var(--rice);margin-top:3px;font-weight:500">Ver receta →</div>`
+        : '';
+      return `<div class="corte-card" ${clickable}>
         <div class="corte-emoji">${c.emoji}</div>
         <div class="corte-info">
           <h4>${c.name}</h4>
           <div class="note">${c.desc}</div>
           <div class="corte-temp">Temp. objetivo: ${c.temp}</div>
+          ${recipeLink}
         </div>
         <div class="corte-badge ${map[c.dificultad]}">${lbl[c.dificultad]}</div>
-      </div>`
-    ).join('');
+      </div>`;
+    }).join('');
   }
 
   function init() {
