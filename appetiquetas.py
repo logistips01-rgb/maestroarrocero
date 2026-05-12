@@ -2148,16 +2148,24 @@ elif menu == "🏷️ Etiquetas":
                 if dias_num is not None and estado != "Activo":
                     dias_badge_html = f'<span style="background:#FDEDEC;color:#C0392B;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:600;">{dias_num} días</span>'
 
+                import html as _html
                 reg_por = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
                 fecha_reg = cambio.get('fecha_registro','')[:10]
+                _ref      = _html.escape(str(cambio.get('referencia','')))
+                _motivo   = _html.escape(str(cambio.get('motivo','')))
+                _desc     = _html.escape(str(cambio.get('descripcion','—')))
+                _obs      = _html.escape(str(cambio.get('observaciones','—')))
+                _farr     = _html.escape(str(cambio.get('fecha_arranque','—')))
+                _ref_nueva= _html.escape(str(cambio.get('ref_nueva','')))
+                _nota_g   = _html.escape(str(cambio.get('nota_gestion','')))
 
                 with st.container(border=True):
                     # ── Cabecera de la tarjeta ──
                     st.markdown(f"""
 <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
   <div>
-    <div style="font-size:14px;font-weight:600;color:#2C3E50;line-height:1.3;">{cambio.get('referencia','')}</div>
-    <div style="font-size:12px;color:#7F8C8D;margin-top:2px;">{cambio.get('motivo','')} · Registrado por {reg_por} · {fecha_reg}</div>
+    <div style="font-size:14px;font-weight:600;color:#2C3E50;line-height:1.3;">{_ref}</div>
+    <div style="font-size:12px;color:#7F8C8D;margin-top:2px;">{_motivo} · Registrado por {reg_por} · {fecha_reg}</div>
   </div>
   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:12px;">
     {dias_badge_html}
@@ -2172,26 +2180,26 @@ elif menu == "🏷️ Etiquetas":
                         ref_nueva_html = f"""
   <div>
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Ref. nueva etiqueta</div>
-    <div style="font-size:13px;font-weight:600;color:#2980B9;">{cambio.get('ref_nueva','—')}</div>
+    <div style="font-size:13px;font-weight:600;color:#2980B9;">{_ref_nueva}</div>
   </div>""" if cambio.get('ref_nueva') else ''
                         nota_html = f"""
   <div>
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Nota gestión</div>
-    <div style="font-size:13px;color:#2C3E50;">{cambio.get('nota_gestion','')}</div>
+    <div style="font-size:13px;color:#2C3E50;">{_nota_g}</div>
   </div>""" if cambio.get("nota_gestion") else ''
                         st.markdown(f"""
 <div style="display:flex;flex-direction:column;gap:8px;">
   <div>
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Descripción</div>
-    <div style="font-size:13px;color:#2C3E50;">{cambio.get('descripcion','—')}</div>
+    <div style="font-size:13px;color:#2C3E50;">{_desc}</div>
   </div>
   <div>
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Observaciones</div>
-    <div style="font-size:13px;color:#2C3E50;">{cambio.get('observaciones','—')}</div>
+    <div style="font-size:13px;color:#2C3E50;">{_obs}</div>
   </div>
   <div>
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Fecha arranque</div>
-    <div style="font-size:13px;font-weight:600;color:{fecha_color};">{cambio.get('fecha_arranque','—')}</div>
+    <div style="font-size:13px;font-weight:600;color:{fecha_color};">{_farr}</div>
   </div>
   {ref_nueva_html}
   {nota_html}
