@@ -8,31 +8,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 
-/* ── 1. VARIABLES ─────────────────────────────────────────── */
+/* ── 1. VARIABLES Y RESET ─────────────────────────────────── */
 :root {
-  --fire:        #D4781A;
-  --fire-dark:   #9E4F08;
-  --fire-light:  #FFE8CC;
-  --ember:       #E8A020;
-  --smoke:       #8A7060;
-  --charcoal:    #2A1F14;
-  --ash:         #4A3828;
+  --rice:        #C8864A;
+  --rice-dark:   #8B5A2B;
+  --rice-light:  #F5E6D3;
+  --water:       #3A7CA5;
+  --water-light: #EAF4FB;
+  --saffron:     #E8A020;
+  --success:     #4A7C59;
+  --danger:      #b5372a;
   --r:           12px;
 
-  --bg:          #1A1005;
-  --surface:     #231610;
-  --surface2:    #2E1E0F;
-  --text:        #F0EBE3;
-  --text-muted:  #A08878;
-  --border:      rgba(212,120,26,0.15);
-  --nav-bg:      #0F0A04;
-  --card-bg:     rgba(255,255,255,0.04);
-  --input-bg:    rgba(255,255,255,0.07);
-  --hero-overlay: linear-gradient(to top, rgba(15,8,2,0.92) 0%, rgba(15,8,2,0.45) 60%, transparent 100%);
+  --bg:          #C8BFB0;
+  --surface:     #BEB5A5;
+  --text:        #2A1F14;
+  --text-muted:  #7A6555;
+  --border:      rgba(139,90,43,0.15);
+  --nav-bg:      #2A1F14;
+  --nav-text:    #ffffff;
+  --bottom-bg:   #B8AF9F;
+  --bottom-border: rgba(139,90,43,0.15);
+  --card-bg:     rgba(255,255,255,.45);
+  --input-bg:    #ffffff;
+  --result-bg:   #FFF8F0;
+}
+
+body.dark {
+  --bg:           #0F1923;
+  --surface:      #151E28;
+  --text:         #F0EBE3;
+  --text-muted:   #8A9BAC;
+  --border:       rgba(255,255,255,0.08);
+  --nav-bg:       #0A1018;
+  --nav-text:     #ffffff;
+  --bottom-bg:    #0A1018;
+  --bottom-border: rgba(255,255,255,0.07);
+  --card-bg:      rgba(255,255,255,0.04);
+  --input-bg:     rgba(255,255,255,0.06);
+  --result-bg:    rgba(255,255,255,0.04);
+  --rice-light:   rgba(200,134,74,0.15);
+  --rice-dark:    #E8A020;
+  --water-light:  rgba(58,124,165,0.15);
+  --success:      #6BCF8A;
+}
+
+body, nav, .bottom-nav, .screen, .recipe-card, .step-card,
+.result-box, .profile-card, input, select, .inner-tab, .btn-ghost {
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -41,9 +67,10 @@ body {
   overflow-x: hidden;
 }
 
-/* ── 2. TOP NAV ─────────────────────────────────────────── */
+/* ── 2. NAVEGACIÓN ────────────────────────────────────────── */
 nav {
   background: var(--nav-bg);
+  color: var(--nav-text);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,7 +79,6 @@ nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--border);
 }
 .nav-logo {
   font-family: 'Playfair Display', serif;
@@ -60,666 +86,409 @@ nav {
   letter-spacing: .03em;
   display: flex;
   align-items: center;
-  gap: 7px;
-  color: var(--text);
+  gap: 6px;
 }
-.nav-logo span { color: var(--ember); }
-.back-btn {
-  background: rgba(255,255,255,0.07);
-  border: none;
-  color: var(--text-muted);
-  font-size: .8rem;
-  padding: 5px 12px;
+.nav-logo span { color: var(--saffron); }
+
+.theme-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,.2);
   border-radius: 20px;
+  padding: 4px 10px;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  text-decoration: none;
+  font-size: .75rem;
+  color: rgba(255,255,255,.75);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  transition: all .2s;
+  white-space: nowrap;
 }
-.back-btn:hover { color: var(--text); background: rgba(255,255,255,0.12); }
+.theme-toggle:hover { border-color: rgba(255,255,255,.5); color: #fff; }
+.theme-toggle .tt-icon { font-size: .95rem; }
 
-/* ── 3. BOTTOM NAV ──────────────────────────────────────── */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
-  background: var(--nav-bg);
-  border-top: 1px solid var(--border);
+  bottom: 0; left: 0; right: 0;
+  height: 54px;
+  padding: 6px 10px;
+  gap: 8px;
+  background: var(--bottom-bg);
+  border-top: 1px solid var(--bottom-border);
   display: flex;
+  align-items: stretch;
   z-index: 100;
-  max-width: 680px;
-  margin: 0 auto;
+  box-shadow: 0 -4px 16px rgba(0,0,0,.1);
 }
 @media (min-width: 680px) {
-  .bottom-nav { left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .bottom-nav { max-width: 680px; left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 }
 .bottom-tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
+  cursor: pointer;
+  padding: 6px 4px;
   color: var(--text-muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: .72rem;
+  font-size: .78rem;
   font-weight: 500;
-  letter-spacing: .04em;
+  letter-spacing: .02em;
   text-transform: uppercase;
-  padding: 10px 4px 14px;
-  cursor: pointer;
-  transition: color .2s;
+  border-radius: 8px;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
 }
-.bottom-tab.active { color: var(--fire); }
-.bottom-tab:hover { color: var(--text); }
+.bottom-tab:hover { color: var(--rice); }
+.bottom-tab.active {
+  color: var(--rice);
+  background: rgba(200,134,74,.12);
+  border: .5px solid rgba(200,134,74,.25);
+  font-weight: 700;
+}
 
-/* ── 4. LAYOUT ──────────────────────────────────────────── */
-.container {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 1rem 90px;
-}
-.screen { display: none; }
+/* ── 3. PANTALLAS ─────────────────────────────────────────── */
+.screen { display: none; padding: 1.5rem 1rem 5rem; max-width: 680px; margin: 0 auto; }
 .screen.active { display: block; }
 
-/* ── 5. TYPOGRAPHY ──────────────────────────────────────── */
-.section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  margin: 1.4rem 0 1rem;
-  color: var(--text);
-}
-.section-title span { color: var(--fire); }
-.tag {
-  display: inline-block;
-  font-size: .7rem;
-  font-weight: 500;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--ember);
-  margin-bottom: .4rem;
-}
-.note {
-  font-size: .83rem;
-  color: var(--text-muted);
-  line-height: 1.55;
-}
-.stars { color: var(--ember); font-size: .85rem; }
+/* ── 4. COMPONENTES REUTILIZABLES ─────────────────────────── */
+.section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.1rem; }
+.section-title span { color: var(--rice); }
 
-/* ── 6. HERO ────────────────────────────────────────────── */
-.home-hero {
-  position: relative;
-  border-radius: var(--r);
-  overflow: hidden;
-  cursor: pointer;
-  margin-bottom: 1.4rem;
-  aspect-ratio: 16/9;
-  background: linear-gradient(135deg, #3D1A05 0%, #1A0A02 100%);
-}
-.home-hero-img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  opacity: .75;
-}
-.hero-gradient-bg {
-  width: 100%; height: 100%;
-  background: linear-gradient(135deg, #6B2D08 0%, #3D1205 40%, #1A0500 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hero-food-icon { font-size: 4rem; opacity: .6; }
-.home-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--hero-overlay);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.2rem;
-}
-.home-hero-overlay h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.55rem;
-  line-height: 1.2;
-  margin: .3rem 0 .5rem;
-}
-.hero-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-}
-.hero-meta-left { display: flex; align-items: center; gap: .5rem; font-size: .82rem; color: rgba(240,235,227,.75); }
-.hero-btn {
-  background: var(--fire);
-  color: #fff;
-  border: none;
-  padding: 7px 16px;
-  border-radius: 20px;
-  font-size: .82rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: 'DM Sans', sans-serif;
-}
-
-/* ── 7. CATEGORY CIRCLES ────────────────────────────────── */
-.home-cats {
-  display: flex;
-  gap: .85rem;
-  overflow-x: auto;
-  padding-bottom: .5rem;
-  margin-bottom: 1.4rem;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.home-cats::-webkit-scrollbar { display: none; }
-.home-cat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .4rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.home-cat-circle {
-  width: 66px; height: 66px;
-  border-radius: 50%;
-  border: 2.5px solid rgba(212,120,26,.25);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  background: var(--surface);
-  transition: border-color .2s, transform .18s;
-}
-.home-cat.active .home-cat-circle,
-.home-cat:hover .home-cat-circle {
-  border-color: var(--fire);
-  transform: scale(1.06);
-}
-.home-cat-name {
-  font-size: .7rem;
-  color: var(--text-muted);
-  text-align: center;
-  max-width: 66px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.home-cat.active .home-cat-name { color: var(--fire); }
-
-/* ── 8. SUGGESTED LIST ──────────────────────────────────── */
-.sug-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.35rem;
-  margin-bottom: .9rem;
-}
-.sug-title span { color: var(--fire); font-style: italic; }
-.sug-list { display: flex; flex-direction: column; gap: .7rem; }
-.sug-card {
-  position: relative;
-  border-radius: var(--r);
-  overflow: hidden;
-  height: 90px;
-  cursor: pointer;
-  display: flex;
-  align-items: flex-end;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-.sug-card-bg {
-  position: absolute;
-  inset: 0;
-  opacity: .45;
-}
-.sug-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(10,5,1,.95) 45%, rgba(10,5,1,.3) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
+label { display: block; font-size: .83rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+input[type=number], input[type=text], select {
   width: 100%;
-}
-.sug-card-info h4 {
-  font-weight: 600;
-  font-size: .97rem;
-  margin-bottom: 2px;
-}
-.sug-card-meta { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--text-muted); }
-.sug-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: .35rem; flex-shrink: 0; }
-.sug-time { font-size: .75rem; color: var(--text-muted); }
-.sug-btn {
-  background: var(--fire);
-  color: #fff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-size: .78rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-}
-
-/* ── 9. RECIPE GRID ─────────────────────────────────────── */
-.recipes-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .75rem;
-  margin-top: .5rem;
-}
-@media (min-width: 500px) { .recipes-grid { grid-template-columns: repeat(3, 1fr); } }
-.recipe-card {
-  background: var(--surface);
+  padding: 9px 12px;
   border: 1px solid var(--border);
-  border-radius: var(--r);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform .18s, border-color .2s;
-}
-.recipe-card:hover { transform: translateY(-2px); border-color: var(--fire); }
-.recipe-card-thumb {
-  aspect-ratio: 4/3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-}
-.recipe-card-body { padding: .65rem .75rem .8rem; }
-.recipe-card-body h4 { font-size: .88rem; font-weight: 600; line-height: 1.25; margin-bottom: .3rem; }
-.recipe-card-meta { display: flex; align-items: center; justify-content: space-between; font-size: .72rem; color: var(--text-muted); }
-
-/* ── 10. FILTER PILLS ───────────────────────────────────── */
-.filter-row {
-  display: flex;
-  gap: .5rem;
-  overflow-x: auto;
-  padding-bottom: .4rem;
-  margin-bottom: .75rem;
-  scrollbar-width: none;
-}
-.filter-row::-webkit-scrollbar { display: none; }
-.filter-pill {
-  flex-shrink: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: .77rem;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  transition: all .18s;
-}
-.filter-pill.active {
-  background: var(--fire);
-  border-color: var(--fire);
-  color: #fff;
-}
-
-/* ── 11. RECIPE DETAIL ──────────────────────────────────── */
-.recipe-header {
-  position: relative;
-  border-radius: var(--r);
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  margin-bottom: .5rem;
-  background: var(--surface);
-}
-.recipe-header-bg {
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4.5rem;
-}
-.recipe-header-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(10,5,1,.92) 0%, transparent 55%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1rem;
-  gap: .3rem;
-}
-.recipe-header-overlay h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.45rem;
-  line-height: 1.2;
-}
-.recipe-detail-meta { display: flex; align-items: center; gap: .6rem; font-size: .8rem; color: rgba(240,235,227,.75); flex-wrap: wrap; }
-.recipe-detail-meta span::before { content: "·"; margin-right: .6rem; }
-.recipe-detail-meta span:first-child::before { content: ""; margin: 0; }
-.recipe-desc { font-size: .88rem; color: var(--text-muted); margin: .6rem 0 .9rem; line-height: 1.5; }
-.back-recipe-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: .83rem;
-  cursor: pointer;
-  padding: .5rem 0;
-  font-family: 'DM Sans', sans-serif;
-}
-.back-recipe-btn:hover { color: var(--fire); }
-
-/* ── 12. INNER TABS ─────────────────────────────────────── */
-.inner-tabs {
-  display: flex;
-  gap: 0;
-  background: var(--surface);
   border-radius: 8px;
-  padding: 3px;
-  margin-bottom: 1rem;
-  border: 1px solid var(--border);
-}
-.inner-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  color: var(--text-muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: .82rem;
-  font-weight: 500;
-  padding: 8px 4px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all .18s;
+  font-size: .93rem;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: .875rem;
 }
-.inner-tab.active {
-  background: var(--fire);
-  color: #fff;
-}
+input:focus, select:focus { border-color: var(--rice); }
+input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875rem; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; }
+.slider-row span { min-width: 28px; font-weight: 500; color: var(--rice); font-size: 1.05rem; }
 
-/* ── 13. STEP DISPLAY ───────────────────────────────────── */
-.step-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: .75rem;
-  margin-bottom: .9rem;
-}
-.step-header h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; }
-.comensales-badge {
-  background: var(--fire);
-  color: #fff;
-  font-size: .78rem;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 12px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.progress-bar {
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin-bottom: 1rem;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--fire);
-  border-radius: 2px;
-  transition: width .35s ease;
-}
-.step-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 1.2rem;
-  margin-bottom: .9rem;
-}
-.step-num {
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--fire);
-  margin-bottom: .35rem;
-}
-.step-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .5rem; }
-.step-card p { font-size: .88rem; line-height: 1.6; color: var(--text-muted); }
-.step-time-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(212,120,26,.12);
-  border: 1px solid rgba(212,120,26,.25);
-  color: var(--fire);
-  font-size: .75rem;
-  font-weight: 500;
-  padding: 3px 10px;
-  border-radius: 12px;
-  margin-top: .6rem;
-}
-.step-ing {
-  margin-top: .7rem;
-  font-size: .78rem;
-  color: var(--smoke);
-  border-top: 1px solid var(--border);
-  padding-top: .6rem;
-  line-height: 1.5;
-}
-.step-ing strong { color: var(--text-muted); }
-.step-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-  margin-top: .5rem;
-}
-.step-counter { font-size: .82rem; color: var(--text-muted); white-space: nowrap; }
-
-/* ── 14. BUTTONS ────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .4rem;
-  background: var(--fire);
+  gap: 6px;
+  background: var(--rice);
   color: #fff;
   border: none;
-  padding: 10px 18px;
   border-radius: 8px;
+  padding: 11px 20px;
   font-family: 'DM Sans', sans-serif;
   font-size: .88rem;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity .18s, transform .12s;
+  transition: background .2s;
 }
-.btn:hover { opacity: .9; }
-.btn:active { transform: scale(.97); }
-.btn-secondary {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-.btn-ghost {
-  background: none;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-}
-.btn-full { width: 100%; }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:hover         { background: var(--rice-dark); }
+.btn:disabled      { opacity: .4; cursor: not-allowed; }
+.btn-sm            { padding: 6px 12px; font-size: .78rem; }
+.btn-full          { width: 100%; }
+.btn-secondary     { background: transparent; color: var(--rice); border: 1.5px solid var(--rice); }
+.btn-secondary:hover { background: var(--rice-light); }
+.btn-ghost         { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover   { background: var(--surface); }
 
-/* ── 15. INGREDIENTS TAB ────────────────────────────────── */
-.ing-list { list-style: none; }
-.ing-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: .6rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: .88rem;
-}
-.ing-list li:last-child { border-bottom: none; }
-.ing-qty {
-  font-weight: 600;
-  color: var(--fire);
-  white-space: nowrap;
-  margin-left: .75rem;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-}
-.slider-row input[type=range] {
-  flex: 1;
-  accent-color: var(--fire);
+.result-box { background: var(--result-bg); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-top: .875rem; }
+.result-box h4 { font-size: .75rem; color: var(--text-muted); margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .08em; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+.note { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
+
+.inner-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.inner-tab {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: .8rem;
   cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-muted);
+  transition: all .15s;
 }
-.slider-row span {
-  font-weight: 600;
-  color: var(--fire);
-  min-width: 20px;
-  text-align: center;
-}
-.divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+.inner-tab.active { border-color: var(--rice); background: var(--rice-light); color: var(--rice-dark); }
 
-/* ── 16. TÉCNICAS / ALIÑOS CARDS ────────────────────────── */
-.content-section { margin-bottom: 1.5rem; }
-.content-section-title {
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--fire);
-  margin-bottom: .7rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
+/* ── 5. HOME HERO ─────────────────────────────────────────── */
+.home-hero {
+  width: calc(100% + 2rem);
+  margin: -1.5rem -1rem 1.25rem;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #2a1a0a;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.content-section-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.home-hero img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 40%;
+  display: block; filter: brightness(.78);
 }
-.alino-card {
-  background: var(--surface);
+.home-hero-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; opacity: .35;
+  background: linear-gradient(135deg, #4A2208 0%, #1A0800 100%);
+}
+.home-hero-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(46,41,37,.97) 20%, rgba(46,41,37,.1) 70%, transparent 100%);
+}
+.home-hero-ct {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1rem 1.1rem .9rem;
+}
+.home-hero-eyebrow { font-size: .68rem; color: var(--saffron); letter-spacing: .12em; text-transform: uppercase; margin-bottom: .3rem; }
+.home-hero-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; font-weight: 700; line-height: 1.15; margin-bottom: .4rem; }
+.home-hero-row { display: flex; align-items: center; gap: .6rem; }
+.home-hero-stars { font-size: .75rem; color: var(--saffron); }
+.home-hero-time  { font-size: .72rem; color: rgba(255,255,255,.5); }
+.home-hero-btn   { margin-left: auto; background: var(--rice); border-radius: 5px; padding: 5px 12px; font-size: .72rem; color: #fff; font-weight: 600; }
+
+/* ── 6. CATEGORÍAS CÍRCULO ────────────────────────────────── */
+.home-cats { display: flex; gap: .75rem; overflow-x: auto; padding-bottom: .5rem; margin-bottom: 1.2rem; scrollbar-width: none; }
+.home-cats::-webkit-scrollbar { display: none; }
+.home-cat { display: flex; flex-direction: column; align-items: center; gap: .35rem; cursor: pointer; flex-shrink: 0; }
+.home-cat-circle {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  background: var(--card-bg);
+  transition: border-color .2s, transform .15s;
+}
+.home-cat-circle img { width: 100%; height: 100%; object-fit: cover; }
+.home-cat.active .home-cat-circle,
+.home-cat:hover  .home-cat-circle { border-color: var(--rice); transform: scale(1.06); }
+.home-cat-name { font-size: .67rem; color: var(--text-muted); max-width: 64px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-cat.active .home-cat-name { color: var(--rice); font-weight: 600; }
+
+/* ── 7. SUGERIDAS ─────────────────────────────────────────── */
+.home-sug-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; margin-bottom: .85rem; }
+.home-sug-title em { color: var(--rice); font-style: italic; }
+.home-sug-list { display: flex; flex-direction: column; gap: .65rem; }
+.home-sug-card {
+  position: relative;
+  height: 88px;
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  background: #2a1a0a;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-sug-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.72); }
+.home-sug-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 1.5rem;
+  font-size: 2.8rem;
+  opacity: .3;
+  background: linear-gradient(135deg, #3A1A06, #1A0800);
+}
+.home-sug-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, rgba(42,26,10,.96) 45%, rgba(42,26,10,.2) 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1rem;
+}
+.home-sug-info h4 { font-size: .95rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
+.home-sug-meta { display: flex; align-items: center; gap: .35rem; font-size: .75rem; color: rgba(255,255,255,.55); }
+.home-sug-stars { color: var(--saffron); }
+.home-sug-right { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; flex-shrink: 0; }
+.home-sug-time { font-size: .72rem; color: rgba(255,255,255,.45); }
+.home-sug-btn { background: var(--rice); color: #fff; border-radius: 5px; padding: 5px 12px; font-size: .72rem; font-weight: 600; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* ── 8. PANTALLA RECETAS (GRID) ───────────────────────────── */
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: .875rem; }
+.recipe-card {
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 1rem 1.1rem;
-  margin-bottom: .6rem;
+  overflow: hidden;
   cursor: pointer;
-  transition: border-color .18s;
+  transition: transform .15s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
 }
-.alino-card:hover { border-color: var(--fire); }
-.alino-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(42,31,20,.1); }
+.recipe-card-thumb {
+  aspect-ratio: 4/3;
+  background: #2a1a0a;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
 }
-.alino-card-header h4 { font-size: .95rem; font-weight: 600; }
-.alino-icon { font-size: 1.3rem; }
-.alino-desc { font-size: .82rem; color: var(--text-muted); margin-top: .35rem; line-height: 1.5; }
-.alino-body { margin-top: .75rem; display: none; }
+.recipe-card-thumb img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.85); display: block; }
+.recipe-card-body { padding: .75rem .875rem .875rem; }
+.recipe-card-body h3 { font-size: .9rem; font-weight: 500; margin-bottom: .2rem; line-height: 1.3; }
+.recipe-card-meta { font-size: .74rem; color: var(--text-muted); margin-top: .15rem; }
+.recipe-card .difficulty {
+  display: inline-block; margin-top: .4rem;
+  font-size: .68rem; padding: 2px 8px;
+  border-radius: 20px; background: var(--rice-light); color: var(--rice-dark);
+}
+
+/* Filtros pill */
+.filter-row { display: flex; gap: .45rem; overflow-x: auto; padding-bottom: .4rem; margin-bottom: .9rem; scrollbar-width: none; }
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-pill {
+  flex-shrink: 0; background: var(--card-bg);
+  border: 1px solid var(--border); color: var(--text-muted);
+  padding: 5px 14px; border-radius: 20px; font-size: .76rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s;
+}
+.filter-pill.active { background: var(--rice); border-color: var(--rice); color: #fff; }
+
+/* ── 9. PANTALLA RECETA DETALLE ───────────────────────────── */
+.recipe-hero {
+  width: calc(100% + 2rem);
+  margin: -1.5rem -1rem .9rem;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  background: #2a1a0a;
+}
+.recipe-hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.7); }
+.recipe-hero-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4.5rem; opacity: .3;
+  background: linear-gradient(135deg, #4A2208, #1A0800);
+}
+.recipe-hero-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(42,26,10,.95) 0%, transparent 60%);
+}
+.recipe-hero-ct {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: .9rem 1rem;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: .5rem;
+}
+.recipe-hero-ct h1 { font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #fff; line-height: 1.2; }
+.recipe-hero-tag { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron); margin-bottom: .25rem; }
+.recipe-hero-meta { font-size: .75rem; color: rgba(255,255,255,.55); margin-top: .2rem; }
+.recipe-hero-meta span::before { content: "·"; margin: 0 .4rem; }
+.recipe-hero-meta span:first-child::before { content: ""; margin: 0; }
+.recipe-desc { font-size: .86rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+.back-btn-recipe {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: none;
+  color: var(--text-muted); font-size: .82rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  padding: .3rem 0 .75rem; margin-top: .5rem;
+}
+.back-btn-recipe:hover { color: var(--rice); }
+
+/* ── 10. STEP DISPLAY ─────────────────────────────────────── */
+.step-header {
+  display: flex; align-items: flex-start; gap: .875rem;
+  margin-bottom: 1.25rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1rem;
+}
+.step-header h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+.comensales-badge { margin-left: auto; background: var(--rice-light); color: var(--rice-dark); font-size: .75rem; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 1.25rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--rice); border-radius: 2px; transition: width .4s ease; }
+.step-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 1rem; }
+.step-inner { display: flex; }
+.step-num { background: var(--rice); color: #fff; font-family: 'Playfair Display', serif; font-size: 1.4rem; width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-body { padding: .875rem; flex: 1; }
+.step-body h3 { font-size: .93rem; font-weight: 500; margin-bottom: .2rem; }
+.step-body p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
+.step-timing { font-size: .75rem; background: var(--rice-light); color: var(--rice-dark); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: .4rem; }
+.step-ingredients { background: var(--rice-light); border-top: 1px solid var(--border); padding: .65rem .875rem; font-size: .82rem; color: var(--rice-dark); line-height: 1.7; }
+.step-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1.1rem; }
+.step-counter { flex: 1; text-align: center; font-size: .82rem; color: var(--text-muted); }
+.ing-list { list-style: none; }
+.ing-list li { display: flex; justify-content: space-between; align-items: baseline; padding: .55rem 0; border-bottom: 1px solid var(--border); font-size: .88rem; }
+.ing-list li:last-child { border-bottom: none; }
+.ing-qty { font-weight: 600; color: var(--rice); white-space: nowrap; margin-left: .5rem; }
+
+/* ── 11. TÉCNICAS / ALIÑOS ────────────────────────────────── */
+.content-section { margin-bottom: 1.6rem; }
+.subsection-label {
+  font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--rice);
+  margin-bottom: .7rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.subsection-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.alino-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1rem; margin-bottom: .6rem;
+  cursor: pointer; transition: border-color .15s;
+}
+.alino-card:hover { border-color: var(--rice); }
+.alino-header { display: flex; justify-content: space-between; align-items: center; }
+.alino-header h4 { font-size: .93rem; font-weight: 600; }
+.alino-icon { font-size: 1.2rem; }
+.alino-desc { font-size: .8rem; color: var(--text-muted); margin-top: .3rem; line-height: 1.5; }
+.alino-body { display: none; margin-top: .8rem; border-top: 1px solid var(--border); padding-top: .75rem; }
 .alino-body.open { display: block; }
-.alino-ing { font-size: .82rem; line-height: 1.7; }
-.alino-ing li { color: var(--text-muted); list-style: disc; margin-left: 1.1rem; }
-.alino-steps { font-size: .82rem; color: var(--text-muted); line-height: 1.65; margin-top: .6rem; border-top: 1px solid var(--border); padding-top: .6rem; }
+.alino-body ul { margin: .35rem 0 0 1rem; }
+.alino-body li { font-size: .82rem; color: var(--text-muted); line-height: 1.7; }
+.alino-prep { font-size: .82rem; color: var(--text-muted); line-height: 1.65; margin-top: .6rem; }
+.alino-prep strong { color: var(--rice-dark); }
 
 .corte-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: .9rem 1rem;
-  margin-bottom: .55rem;
-  display: flex;
-  align-items: center;
-  gap: .85rem;
-  cursor: pointer;
-  transition: border-color .18s;
-}
-.corte-card:hover { border-color: var(--fire); }
-.corte-emoji { font-size: 1.9rem; flex-shrink: 0; }
-.corte-info h4 { font-size: .93rem; font-weight: 600; }
-.corte-info .note { margin-top: 2px; }
-.corte-badge {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-size: .7rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 12px;
-}
-.badge-easy { background: rgba(74,124,89,.2); color: #6BCF8A; }
-.badge-medium { background: rgba(232,160,32,.15); color: var(--ember); }
-.badge-hard { background: rgba(181,55,42,.15); color: #E06060; }
-
-/* ── 17. GUÍAS ──────────────────────────────────────────── */
-.guia-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 1.1rem;
-  margin-bottom: .7rem;
-}
-.guia-card h4 {
-  font-size: 1rem;
-  font-weight: 600;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r); padding: .85rem 1rem;
   margin-bottom: .5rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
+  display: flex; align-items: center; gap: .8rem;
 }
-.guia-card p { font-size: .85rem; color: var(--text-muted); line-height: 1.65; }
-.guia-card ul { margin: .5rem 0 0 1rem; }
-.guia-card li { font-size: .85rem; color: var(--text-muted); line-height: 1.7; }
+.corte-emoji { font-size: 1.8rem; flex-shrink: 0; }
+.corte-info { flex: 1; }
+.corte-info h4 { font-size: .9rem; font-weight: 600; }
+.corte-temp { font-size: .75rem; color: var(--rice); margin-top: 2px; }
+.corte-badge {
+  flex-shrink: 0; font-size: .68rem; font-weight: 600;
+  padding: 2px 9px; border-radius: 20px;
+}
+.badge-facil   { background: var(--rice-light); color: var(--rice-dark); }
+.badge-medio   { background: rgba(232,160,32,.15); color: #B07810; }
+.badge-dificil { background: rgba(181,55,42,.12); color: var(--danger); }
+
+/* ── 12. GUÍAS ────────────────────────────────────────────── */
+.guia-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; margin-bottom: .7rem; }
+.guia-card h4 { font-size: .95rem; font-weight: 600; margin-bottom: .5rem; }
+.guia-card p, .guia-card li { font-size: .84rem; color: var(--text-muted); line-height: 1.65; }
+.guia-card ul { margin: .4rem 0 0 1rem; }
+.guia-card li { margin-bottom: .1rem; }
+
+.combust-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .6rem; }
+.combust-col { background: var(--result-bg); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; }
+.combust-col h5 { font-size: .85rem; font-weight: 600; margin-bottom: .35rem; }
+.combust-col ul { margin-left: .8rem; }
+.combust-col li { font-size: .78rem; color: var(--text-muted); line-height: 1.6; }
+
 .temp-table { width: 100%; border-collapse: collapse; margin-top: .6rem; font-size: .82rem; }
-.temp-table th {
-  text-align: left;
-  color: var(--text-muted);
-  font-weight: 500;
-  padding: .35rem .5rem;
-  border-bottom: 1px solid var(--border);
-}
-.temp-table td { padding: .4rem .5rem; border-bottom: 1px solid rgba(255,255,255,.04); }
-.temp-table td:last-child { color: var(--fire); font-weight: 600; }
-.dot-raw     { color: #E06060; }
-.dot-poco    { color: #E88030; }
-.dot-punto   { color: #E8A020; }
-.dot-pasado  { color: #A0A0A0; }
-.combust-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .6rem;
-  margin-top: .6rem;
-}
-.combust-col {
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: .75rem;
-}
-.combust-col h5 { font-size: .88rem; font-weight: 600; margin-bottom: .4rem; }
-.combust-col ul { margin-left: .9rem; }
-.combust-col li { font-size: .8rem; color: var(--text-muted); line-height: 1.6; }
+.temp-table th { text-align: left; color: var(--text-muted); font-weight: 500; padding: .35rem .5rem; border-bottom: 1px solid var(--border); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+.temp-table td { padding: .4rem .5rem; border-bottom: 1px solid var(--border); }
+.temp-table tr:last-child td { border-bottom: none; }
+.temp-table td:last-child { color: var(--rice); font-weight: 600; }
 
-/* ── 18. SCROLLBAR ──────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-/* ── 19. ANIMATIONS ─────────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── 13. RESPONSIVO ───────────────────────────────────────── */
+@media (min-width: 680px) {
+  .home-sug-list { grid-template-columns: 1fr 1fr; display: grid; }
 }
-.screen.active { animation: fadeUp .22s ease; }
-
-/* ── 20. RESPONSIVE ─────────────────────────────────────── */
 @media (min-width: 500px) {
-  .sug-list { display: grid; grid-template-columns: 1fr 1fr; }
+  .recipe-grid { grid-template-columns: repeat(3, 1fr); }
   .combust-row { grid-template-columns: 1fr 1fr; }
 }
 
@@ -727,257 +496,289 @@ nav {
 </head>
 <body>
 
-<!-- TOP NAV -->
+<!-- NAVEGACIÓN SUPERIOR -->
 <nav>
   <div class="nav-logo">🔥 Maestro <span>Brasas</span></div>
-  <a class="back-btn" href="index.html">← Arrocero</a>
+  <button class="theme-toggle" onclick="Theme.toggle()">
+    <span class="tt-icon" id="theme-icon">🌙</span>
+    <span id="theme-label">Oscuro</span>
+  </button>
 </nav>
 
-<!-- BOTTOM NAV -->
+<!-- NAVEGACIÓN INFERIOR -->
 <div class="bottom-nav">
-  <button class="bottom-tab active" id="btab-inicio"  onclick="Nav.goTo('inicio')">Inicio</button>
-  <button class="bottom-tab"        id="btab-recetas" onclick="Nav.goTo('recetas')">Recetas</button>
+  <button class="bottom-tab active" id="btab-inicio"   onclick="Nav.goTo('inicio')">Inicio</button>
+  <button class="bottom-tab"        id="btab-recetas"  onclick="Nav.goTo('recetas')">Recetas</button>
   <button class="bottom-tab"        id="btab-tecnicas" onclick="Nav.goTo('tecnicas')">Técnicas</button>
-  <button class="bottom-tab"        id="btab-guias"   onclick="Nav.goTo('guias')">Guías</button>
+  <button class="bottom-tab"        id="btab-guias"    onclick="Nav.goTo('guias')">Guías</button>
 </div>
 
-<!-- ══════════════════ PANTALLA: INICIO ══════════════════ -->
+<!-- ══════════════ INICIO ══════════════ -->
 <div id="screen-inicio" class="screen active">
-  <div class="container">
 
-    <!-- HERO -->
-    <div class="home-hero" onclick="Brasas.openRecipe('parrillada')">
-      <div class="hero-gradient-bg">
-        <span class="hero-food-icon">🥩🔥</span>
-      </div>
-      <div class="home-hero-overlay">
-        <div class="tag">Técnica destacada</div>
-        <h2>Parrillada Completa Asado</h2>
-        <div class="hero-meta">
-          <div class="hero-meta-left">
-            <span class="stars">★</span> 4.9 &nbsp;·&nbsp; 90 min &nbsp;·&nbsp; Media
-          </div>
-          <button class="hero-btn">Ver técnica →</button>
+  <div class="home-hero" onclick="Nav.goToRecipe('parrillada')">
+    <div class="home-hero-placeholder">🥩🔥</div>
+    <div class="home-hero-grad"></div>
+    <div class="home-hero-ct">
+      <div>
+        <div class="home-hero-eyebrow">Técnica destacada</div>
+        <div class="home-hero-name">Parrillada Completa Asado</div>
+        <div class="home-hero-row">
+          <span class="home-hero-stars">★★★★★</span>
+          <span class="home-hero-time">4.9 · 90 min · Media</span>
+          <span class="home-hero-btn">Ver técnica →</span>
         </div>
       </div>
     </div>
-
-    <!-- CATEGORÍAS -->
-    <div class="home-cats" id="home-cats">
-      <!-- rendered by JS -->
-    </div>
-
-    <!-- SUGERIDAS -->
-    <div class="sug-title">Sugeridas <span>para ti</span></div>
-    <div class="sug-list" id="sug-list">
-      <!-- rendered by JS -->
-    </div>
-
   </div>
+
+  <div class="home-cats" id="home-cats"></div>
+
+  <div class="home-sug-title">Sugeridas <em>para ti</em></div>
+  <div class="home-sug-list" id="home-sug-list"></div>
+
+  <!-- Volver a Maestro Arrocero -->
+  <a href="index.html" style="text-decoration:none;display:block;margin-top:1.5rem">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r);">
+      <span style="font-size:1.5rem">🍳</span>
+      <div>
+        <div style="font-size:.83rem;font-weight:600">Volver a Maestro Arrocero</div>
+        <div class="note">Recetas de arroz, calculadora de agua y más</div>
+      </div>
+      <span style="margin-left:auto;color:var(--text-muted);font-size:.85rem">→</span>
+    </div>
+  </a>
+
 </div>
 
-<!-- ══════════════════ PANTALLA: RECETAS ══════════════════ -->
+<!-- ══════════════ RECETAS ══════════════ -->
 <div id="screen-recetas" class="screen">
-  <div class="container">
-    <h2 class="section-title">Todas las <span>recetas</span></h2>
-    <div class="filter-row" id="filter-row">
-      <!-- rendered by JS -->
-    </div>
-    <div class="recipes-grid" id="recipes-grid">
-      <!-- rendered by JS -->
-    </div>
-  </div>
+  <h2 class="section-title">Todas las <span>recetas</span></h2>
+  <div class="filter-row" id="filter-row"></div>
+  <div class="recipe-grid" id="recipes-grid"></div>
 </div>
 
-<!-- ══════════════════ PANTALLA: RECIPE DETAIL ══════════════════ -->
-<div id="screen-recipe" class="screen">
-  <div class="container">
-    <button class="back-recipe-btn" onclick="Brasas.goBack()">← Volver</button>
-    <div class="recipe-header">
-      <div class="recipe-header-bg" id="recipe-header-bg"></div>
-      <div class="recipe-header-overlay">
-        <div class="tag" id="recipe-tag">—</div>
+<!-- ══════════════ DETALLE RECETA ══════════════ -->
+<div id="screen-recipe" class="screen" style="padding-top:0">
+
+  <div class="recipe-hero" id="recipe-hero-img">
+    <div class="recipe-hero-placeholder" id="recipe-hero-ph"></div>
+    <div class="recipe-hero-grad"></div>
+    <div class="recipe-hero-ct">
+      <div>
+        <div class="recipe-hero-tag" id="recipe-tag">—</div>
         <h1 id="recipe-name">—</h1>
-        <div class="recipe-detail-meta">
+        <div class="recipe-hero-meta">
           <span id="recipe-rating">—</span>
           <span id="recipe-time">—</span>
           <span id="recipe-diff">—</span>
         </div>
       </div>
     </div>
-    <p class="recipe-desc" id="recipe-desc">—</p>
+  </div>
 
-    <div class="inner-tabs">
-      <button class="inner-tab active" onclick="Brasas.switchTab('guia')">Guía paso a paso</button>
-      <button class="inner-tab"        onclick="Brasas.switchTab('ingredientes')">Ingredientes</button>
+  <button class="back-btn-recipe" onclick="Nav.back()">← Volver</button>
+  <p class="recipe-desc" id="recipe-desc">—</p>
+
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="Brasas.switchTab('guia')">Guía paso a paso</button>
+    <button class="inner-tab"        onclick="Brasas.switchTab('ingredientes')">Ingredientes</button>
+  </div>
+
+  <!-- Tab: guía -->
+  <div id="tab-guia">
+    <div class="step-header">
+      <div>
+        <h2 id="step-recipe-name">—</h2>
+        <div class="note" id="step-subtitle"></div>
+      </div>
+      <div class="comensales-badge" id="comensales-badge">4 personas</div>
     </div>
-
-    <!-- Tab guía -->
-    <div id="tab-guia">
-      <div class="step-header">
-        <div>
-          <h2 id="step-title">—</h2>
-          <div class="note" id="step-subtitle"></div>
-        </div>
-        <div class="comensales-badge" id="comensales-badge">4 personas</div>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
-      <div id="step-display"></div>
-      <div class="step-nav">
-        <button class="btn btn-secondary" id="btn-prev" onclick="Brasas.changeStep(-1)">← Anterior</button>
-        <div class="step-counter" id="step-counter">Paso 1 de —</div>
-        <button class="btn" id="btn-next" onclick="Brasas.changeStep(1)">Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- Tab ingredientes -->
-    <div id="tab-ingredientes" style="display:none">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap;">
-        <div class="note">Comensales:</div>
-        <div class="slider-row" style="flex:1;min-width:160px;">
-          <input type="range" min="1" max="20" value="4" id="comensal-slider" oninput="Brasas.updateComensales(this.value)">
-          <span id="comensal-val">4</span>
-        </div>
-      </div>
-      <ul class="ing-list" id="ing-list"></ul>
-      <hr class="divider">
-      <div style="display:flex;gap:.6rem;">
-        <button class="btn btn-secondary" style="flex:1" onclick="Brasas.switchTab('guia')">Empezar a cocinar →</button>
-      </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
+    <div id="step-display"></div>
+    <div class="step-nav">
+      <button class="btn btn-secondary" id="btn-prev" onclick="Brasas.changeStep(-1)">← Anterior</button>
+      <div class="step-counter" id="step-counter">Paso 1 de —</div>
+      <button class="btn" id="btn-next" onclick="Brasas.changeStep(1)">Siguiente →</button>
     </div>
   </div>
+
+  <!-- Tab: ingredientes -->
+  <div id="tab-ingredientes" style="display:none">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap;">
+      <div class="note">Comensales:</div>
+      <div class="slider-row" style="flex:1;min-width:160px;">
+        <input type="range" min="1" max="20" value="4" id="comensal-slider" oninput="Brasas.updateComensales(this.value)">
+        <span id="comensal-val">4</span>
+      </div>
+    </div>
+    <ul class="ing-list" id="ing-list"></ul>
+    <hr class="divider">
+    <button class="btn btn-full" onclick="Brasas.switchTab('guia')">Empezar a cocinar →</button>
+  </div>
+
 </div>
 
-<!-- ══════════════════ PANTALLA: TÉCNICAS ══════════════════ -->
+<!-- ══════════════ TÉCNICAS ══════════════ -->
 <div id="screen-tecnicas" class="screen">
-  <div class="container">
-    <h2 class="section-title">Técnicas & <span>Aliños</span></h2>
+  <h2 class="section-title">Técnicas & <span>Aliños</span></h2>
 
-    <!-- ALIÑOS -->
-    <div class="content-section">
-      <div class="content-section-title">🧄 Aliños y marinadas</div>
-      <div id="alinos-list"><!-- rendered by JS --></div>
-    </div>
+  <div class="content-section">
+    <div class="subsection-label">🧄 Aliños y marinadas</div>
+    <div id="alinos-list"></div>
+  </div>
 
-    <!-- CORTES -->
-    <div class="content-section">
-      <div class="content-section-title">🥩 Cortes de carne</div>
-      <div id="cortes-list"><!-- rendered by JS --></div>
-    </div>
+  <div class="content-section">
+    <div class="subsection-label">🥩 Cortes de carne</div>
+    <div id="cortes-list"></div>
   </div>
 </div>
 
-<!-- ══════════════════ PANTALLA: GUÍAS ══════════════════ -->
+<!-- ══════════════ GUÍAS ══════════════ -->
 <div id="screen-guias" class="screen">
-  <div class="container">
-    <h2 class="section-title">Guías de <span>brasa</span></h2>
+  <h2 class="section-title">Guías de <span>brasa</span></h2>
 
-    <div class="content-section">
-      <div class="content-section-title">🔥 Combustible: carbón vs leña</div>
-      <div class="guia-card">
-        <h4>¿Cuál usar y cuándo?</h4>
-        <div class="combust-row">
-          <div class="combust-col">
-            <h5>⬛ Carbón</h5>
-            <ul>
-              <li>Quebracho: alta temperatura, larga duración</li>
-              <li>Briquetas: temperatura uniforme, ideal para principiantes</li>
-              <li>Vegetal (marabú): calor intenso, poco humo</li>
-              <li>Carbón de coco: muy limpio, duración prolongada</li>
-            </ul>
-          </div>
-          <div class="combust-col">
-            <h5>🪵 Leña</h5>
-            <ul>
-              <li>Encina: la mejor para carne, aroma suave</li>
-              <li>Roble: combustión lenta, sabor intenso</li>
-              <li>Manzano/cerezo: suave, ideal para aves</li>
-              <li>Haya: neutra y limpia, buen calor</li>
-            </ul>
-          </div>
+  <div class="content-section">
+    <div class="subsection-label">🔥 Carbón vs Leña</div>
+    <div class="guia-card">
+      <h4>¿Cuál usar y cuándo?</h4>
+      <div class="combust-row">
+        <div class="combust-col">
+          <h5>⬛ Carbón</h5>
+          <ul>
+            <li>Quebracho: alta temperatura, larga duración, poco humo</li>
+            <li>Briquetas: calor uniforme, ideal para principiantes</li>
+            <li>Vegetal (marabú): muy intenso, duración media</li>
+            <li>Carbón de coco: limpio, muy larga duración</li>
+          </ul>
         </div>
-        <p style="margin-top:.75rem">Consejo: usa carbón como base para el calor y añade trozos de leña aromática para dar sabor. Nunca uses madera de pino o maderas resinosas.</p>
+        <div class="combust-col">
+          <h5>🪵 Leña</h5>
+          <ul>
+            <li>Encina: la mejor para carne, aroma suave</li>
+            <li>Roble: combustión lenta, sabor intenso</li>
+            <li>Manzano / cerezo: suave, ideal para aves</li>
+            <li>Haya: neutra y limpia, buen calor</li>
+          </ul>
+        </div>
       </div>
+      <p style="margin-top:.75rem">Truco: usa carbón de base para el calor y añade pequeños trozos de leña aromática para dar sabor. Nunca uses pino ni maderas resinosas.</p>
     </div>
-
-    <div class="content-section">
-      <div class="content-section-title">🌡️ Control de temperatura</div>
-      <div class="guia-card">
-        <h4>🖐 La prueba de la mano</h4>
-        <p>Coloca la mano a 10 cm de la parrilla y cuenta los segundos que puedes aguantar:</p>
-        <ul style="margin:.5rem 0 0 1rem">
-          <li><strong>1-2 s:</strong> Fuego muy alto (+260°C) — sellar</li>
-          <li><strong>3-4 s:</strong> Fuego alto (230°C) — chuletones</li>
-          <li><strong>5-6 s:</strong> Fuego medio (200°C) — pollos, costillas</li>
-          <li><strong>7-8 s:</strong> Fuego bajo (160°C) — cocciones largas, ahumados</li>
-        </ul>
-      </div>
-      <div class="guia-card">
-        <h4>📐 Zonas de calor</h4>
-        <p>Organiza siempre la parrilla en dos zonas: <strong>zona caliente directa</strong> (para sellar y dorar) y <strong>zona indirecta fría</strong> (para terminar la cocción sin quemar). Acumula todo el carbón en un lado y deja el otro libre.</p>
-      </div>
-    </div>
-
-    <div class="content-section">
-      <div class="content-section-title">🥩 Puntos de cocción</div>
-      <div class="guia-card">
-        <h4>🌡️ Temperatura interna (con termómetro)</h4>
-        <table class="temp-table">
-          <thead><tr><th>Punto</th><th>Aspecto</th><th>Temp. interna</th></tr></thead>
-          <tbody>
-            <tr><td class="dot-raw"><strong>Crudo (Blue)</strong></td><td>Centro frío, rojo intenso</td><td>45–50 °C</td></tr>
-            <tr><td class="dot-poco"><strong>Poco hecho</strong></td><td>Rojo en centro, jugoso</td><td>52–57 °C</td></tr>
-            <tr><td class="dot-punto"><strong>Al punto</strong></td><td>Rosa, muy jugoso</td><td>57–63 °C</td></tr>
-            <tr><td><strong>Medio</strong></td><td>Ligeramente rosa</td><td>63–68 °C</td></tr>
-            <tr><td class="dot-pasado"><strong>Muy hecho</strong></td><td>Gris, firme</td><td>+71 °C</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="content-section">
-      <div class="content-section-title">⏱ Consejos generales</div>
-      <div class="guia-card">
-        <h4>✅ Antes de asar</h4>
-        <ul>
-          <li>Saca la carne del frío 30–60 min antes (según grosor)</li>
-          <li>Seca bien la superficie con papel: mejor corteza</li>
-          <li>Sala con sal gruesa justo antes de poner o 40 min antes (nunca en el intermedio)</li>
-          <li>Precalienta la parrilla siempre antes de poner la carne</li>
-        </ul>
-      </div>
-      <div class="guia-card">
-        <h4>⏸ El reposo es obligatorio</h4>
-        <p>Después de sacar la carne del fuego, déjala reposar sobre una tabla (no fría) entre <strong>5 y 15 minutos</strong> tapada con papel de aluminio. Así los jugos se redistribuyen y el resultado es mucho más tierno y sabroso.</p>
-      </div>
-      <div class="guia-card">
-        <h4>🔪 Siempre en contra de la fibra</h4>
-        <p>Corta la carne siempre <strong>perpendicular a las fibras musculares</strong>. Si cortas en la misma dirección, el bocado será duro. Este truco es especialmente importante en cortes como el chuletón, el flank steak o las costillas deshuesadas.</p>
-      </div>
-    </div>
-
   </div>
+
+  <div class="content-section">
+    <div class="subsection-label">🌡️ Control de temperatura</div>
+    <div class="guia-card">
+      <h4>🖐 La prueba de la mano</h4>
+      <p>Coloca la mano a 10 cm de la parrilla y cuenta los segundos que aguantas:</p>
+      <ul style="margin:.4rem 0 0 1rem">
+        <li><strong>1–2 s</strong> → Muy alto (+260 °C) — sellar chuletones</li>
+        <li><strong>3–4 s</strong> → Alto (230 °C) — ribeye, secreto</li>
+        <li><strong>5–6 s</strong> → Medio (200 °C) — pollo entero, costillas</li>
+        <li><strong>7–8 s</strong> → Bajo (160 °C) — cocciones largas, ahumados</li>
+      </ul>
+    </div>
+    <div class="guia-card">
+      <h4>📐 Zonas de calor (siempre dos)</h4>
+      <p>Organiza la parrilla con <strong>zona directa caliente</strong> (sellar y dorar) y <strong>zona indirecta fría</strong> (terminar sin quemar). Acumula todo el carbón en un lado y deja el otro libre.</p>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="subsection-label">🥩 Puntos de cocción</div>
+    <div class="guia-card">
+      <h4>🌡️ Temperatura interna (termómetro)</h4>
+      <table class="temp-table">
+        <thead>
+          <tr><th>Punto</th><th>Aspecto</th><th>Temp.</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Crudo (Blue)</strong></td><td>Centro frío, rojo intenso</td><td>45–50 °C</td></tr>
+          <tr><td><strong>Poco hecho</strong></td><td>Rojo en el centro, muy jugoso</td><td>52–57 °C</td></tr>
+          <tr><td><strong>Al punto ✓</strong></td><td>Rosa, jugoso</td><td>57–63 °C</td></tr>
+          <tr><td><strong>Medio</strong></td><td>Ligeramente rosado</td><td>63–68 °C</td></tr>
+          <tr><td><strong>Muy hecho</strong></td><td>Gris, firme</td><td>+71 °C</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="subsection-label">✅ Consejos esenciales</div>
+    <div class="guia-card">
+      <h4>Antes de asar</h4>
+      <ul>
+        <li>Saca la carne del frío 30–60 min antes (según grosor)</li>
+        <li>Seca bien la superficie con papel: mejor corteza de Maillard</li>
+        <li>Sala con sal gruesa justo antes de poner o 40 min antes (nunca en el intermedio)</li>
+        <li>Precalienta siempre la parrilla antes de poner la carne</li>
+      </ul>
+    </div>
+    <div class="guia-card">
+      <h4>⏸ El reposo es obligatorio</h4>
+      <p>Después de sacar del fuego, reposa la carne sobre una tabla 5–15 min tapada con papel de aluminio sin apretar. Los jugos se redistribuyen y el resultado es mucho más tierno.</p>
+    </div>
+    <div class="guia-card">
+      <h4>🔪 Siempre en contra de la fibra</h4>
+      <p>Corta la carne siempre <strong>perpendicular a las fibras musculares</strong>. Clave en vacío, chuletón, tira de asado y costillas deshuesadas.</p>
+    </div>
+  </div>
+
 </div>
 
 
-<!-- ════════════════════ JAVASCRIPT ════════════════════════ -->
+<!-- ════════════════ JAVASCRIPT ════════════════ -->
 <script>
 
-/* ── DATOS ──────────────────────────────────────────────────── */
+/* ── THEME ─────────────────────────────────────────────────── */
+const Theme = (() => {
+  const KEY = 'maestroBrasas_theme';
+  function get() {
+    const saved = localStorage.getItem(KEY);
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function apply(t) {
+    document.body.classList.toggle('dark', t === 'dark');
+    document.getElementById('theme-icon').textContent  = t === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-label').textContent = t === 'dark' ? 'Claro' : 'Oscuro';
+  }
+  function toggle() { const t = get() === 'dark' ? 'light' : 'dark'; localStorage.setItem(KEY, t); apply(t); }
+  function init()   { apply(get()); }
+  return { toggle, init };
+})();
+
+/* ── NAV ───────────────────────────────────────────────────── */
+const Nav = (() => {
+  let _prev = 'inicio';
+  function goTo(screen) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screen)?.classList.add('active');
+    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('btab-' + screen)?.classList.add('active');
+    _prev = screen;
+    window.scrollTo(0, 0);
+  }
+  function goToRecipe(id) {
+    Brasas.openRecipe(id);
+  }
+  function back() {
+    Brasas.goBack();
+  }
+  return { goTo, goToRecipe, back };
+})();
+
+/* ── DATA ──────────────────────────────────────────────────── */
 const DATA = {
 
-  /* ---- RECETAS ------------------------------------------- */
   recipes: [
     {
       id: 'parrillada',
       name: 'Parrillada Completa Asado',
-      emoji: '🥩🔥',
+      emoji: '🥩',
       tag: 'Técnica destacada',
-      rating: 4.9,
-      time: '90 min',
-      difficulty: 'Media',
-      category: 'vacuno',
-      sugerida: true,
+      rating: 4.9, time: '90 min', difficulty: 'Media',
+      category: 'vacuno', sugerida: true,
       desc: 'La parrillada definitiva: T-Bone, chorizos, morcillas y tiras de costilla en una sola sesión de carbón. Coordinación de tiempos y zonas de calor para que todo llegue a punto.',
       ingredients: [
         { name: 'T-Bone (2,5 cm grosor)', perPerson: 350, unit: 'g' },
@@ -988,14 +789,14 @@ const DATA = {
         { name: 'Aceite de oliva virgen', perPerson: 10, unit: 'ml' },
       ],
       steps: [
-        { title: 'Preparar las brasas', time: '25 min', text: 'Llena el encendedor de chimenea con carbón quebracho hasta el borde. Enciéndelo con pastillas de encendido sin parafina y espera 20-25 min hasta que el carbón esté cubierto de ceniza blanca y brillante por dentro. Distribuye ⅔ del carbón en zona caliente y ⅓ en zona fría.', ingredients: 'Carbón quebracho, pastillas de encendido' },
-        { title: 'Sacar la carne del frío', time: '30 min', text: 'Saca toda la carne del refrigerador 30 minutos antes de cocinar. Sécala con papel de cocina para eliminar la humedad superficial. Esto garantiza un sellado perfecto en lugar de un "hervido" sobre la parrilla.', ingredients: 'T-Bone, chorizo, morcilla, costilla' },
-        { title: 'Precalentar la parrilla', time: '5 min', text: 'Coloca la parrilla sobre las brasas y precaliéntala 5 minutos. Límpiala con una bola de papel de aluminio o cepillo de acero. Pasa un trozo de grasa o tapa con papel impregnado en aceite para evitar que se pegue.', ingredients: 'Aceite de oliva' },
-        { title: 'Embutidos primero (fuego indirecto)', time: '15 min', text: 'Los chorizos y morcillas van primero, a fuego indirecto o en zona poco intensa. Deben cocinarse lentamente durante 12-15 min, girándolos cada 3 min. No los piques: los jugos deben quedar dentro. Cuando están firmes y con color, retira a zona de reposo.', ingredients: 'Chorizo, morcilla' },
-        { title: 'Costillas (fuego medio-indirecto)', time: '20 min', text: 'Las costillas van sobre zona media durante 18-20 min. Gíralas una sola vez a mitad de cocción. Sazona con sal gruesa justo al ponerlas. Para saber que están, la carne se retira ligeramente del hueso.', ingredients: 'Costilla de ternera, sal gruesa' },
-        { title: 'T-Bone: el protagonista', time: '8 min', text: 'El T-Bone es el último en ir al fuego (fuego muy alto). Sala con sal gruesa en ambas caras justo antes. Colócalo en la zona caliente directa. 3-4 min por cada lado sin moverlo para conseguir las marcas de parrilla. En carne de 2,5 cm quedará al punto (57-63°C). Usa termómetro si tienes.', ingredients: 'T-Bone, sal gruesa' },
-        { title: 'Reposo obligatorio', time: '7 min', text: 'Retira el T-Bone y toda la carne al mismo tiempo. Colócalos juntos sobre una tabla de madera y cúbrelos con papel de aluminio sin apretar. Reposa 5-7 min. Los jugos se redistribuyen y la temperatura interna sube 2-3°C más.', ingredients: '—' },
-        { title: 'Servir y presentar', time: '—', text: 'Sirve la parrillada en la tabla directamente. Corta el T-Bone en el hueso (solomillo por un lado, entrecot por el otro). Acompañar con chimichurri y pan de masa madre tostado en las últimas brasas.', ingredients: 'Chimichurri, pan de masa madre' },
+        { title: 'Preparar las brasas', time: '25 min', text: 'Llena el encendedor de chimenea con carbón quebracho hasta el borde. Enciéndelo con pastillas de encendido sin parafina y espera 20–25 min hasta que el carbón esté cubierto de ceniza blanca y brillante por dentro. Distribuye ⅔ en zona caliente y ⅓ en zona fría.', ing: 'Carbón quebracho, pastillas de encendido' },
+        { title: 'Sacar la carne del frío', time: '30 min', text: 'Saca toda la carne del refrigerador 30 minutos antes. Sécala con papel de cocina para eliminar la humedad superficial. La humedad impide una buena costra de Maillard.', ing: 'T-Bone, chorizo, morcilla, costilla' },
+        { title: 'Precalentar la parrilla', time: '5 min', text: 'Coloca la parrilla sobre las brasas y precaliéntala 5 minutos. Límpiala con cepillo de acero. Pasa papel impregnado en aceite para evitar que se pegue.', ing: 'Aceite de oliva' },
+        { title: 'Embutidos primero — fuego indirecto', time: '15 min', text: 'Chorizos y morcillas van a fuego indirecto o zona poco intensa. 12–15 min girándolos cada 3 min. No los piques: los jugos deben quedar dentro. Cuando están firmes y con color, retira a zona de reposo.', ing: 'Chorizo, morcilla' },
+        { title: 'Costillas — fuego medio-indirecto', time: '20 min', text: 'Las costillas van sobre zona media durante 18–20 min. Gíralas una sola vez a mitad. Sazona con sal gruesa al ponerlas. Están listas cuando la carne se retira ligeramente del hueso.', ing: 'Costilla de ternera, sal gruesa' },
+        { title: 'T-Bone: el protagonista', time: '8 min', text: 'El T-Bone es el último. Sal gruesa en ambas caras justo antes. Zona caliente directa. 3–4 min por cada cara sin moverlo. En 2,5 cm quedará al punto (57–63 °C). Usa termómetro si tienes.', ing: 'T-Bone, sal gruesa' },
+        { title: 'Reposo obligatorio', time: '7 min', text: 'Retira toda la carne a la vez. Colócala en tabla de madera y cúbrela con papel de aluminio sin apretar. Reposa 5–7 min. Los jugos se redistribuyen y la temperatura interna sube 2–3 °C más.', ing: '—' },
+        { title: 'Servir en tabla', time: '—', text: 'Sirve la parrillada en la tabla directamente. Corta el T-Bone en el hueso (solomillo por un lado, entrecot por el otro). Acompaña con chimichurri y pan tostado en las últimas brasas.', ing: 'Chimichurri, pan de masa madre' },
       ]
     },
     {
@@ -1003,12 +804,9 @@ const DATA = {
       name: 'Ribeye a la Brasa Directa',
       emoji: '🥩',
       tag: 'Clásico',
-      rating: 4.8,
-      time: '40 min',
-      difficulty: 'Fácil',
-      category: 'vacuno',
-      sugerida: true,
-      desc: 'El ribeye, también llamado entrecot, es la pieza perfecta para iniciarse en la brasa. Su grasa intramuscular lo protege y le da un sabor excepcional.',
+      rating: 4.8, time: '40 min', difficulty: 'Fácil',
+      category: 'vacuno', sugerida: true,
+      desc: 'El ribeye es la pieza perfecta para iniciarse en la brasa. Su grasa intramuscular lo protege y le da un sabor excepcional. Solo necesitas sal gruesa y buenas brasas.',
       ingredients: [
         { name: 'Ribeye (3 cm grosor)', perPerson: 300, unit: 'g' },
         { name: 'Sal gruesa marina', perPerson: 6, unit: 'g' },
@@ -1018,12 +816,12 @@ const DATA = {
         { name: 'Pimienta negra', perPerson: 2, unit: 'g' },
       ],
       steps: [
-        { title: 'Templar la carne', time: '45 min', text: 'Saca el ribeye del refrigerador 45 min antes. Para un corte de 3 cm de grosor es imprescindible. Sécalo con papel absorbente. La humedad superficial es el enemigo de una buena costra.', ingredients: 'Ribeye' },
-        { title: 'Preparar brasas de fuego alto', time: '20 min', text: 'Necesitas brasas muy calientes para el ribeye. El carbón debe estar completamente encendido, con zona directa e intensa. La parrilla debe estar muy caliente: al acercar la mano a 10 cm debes poder aguantar solo 1-2 segundos.', ingredients: 'Carbón' },
-        { title: 'Sellar la primera cara', time: '3 min', text: 'Sala el ribeye con sal gruesa justo antes de ponerlo. Colócalo en la zona más caliente. No lo muevas ni toques durante 3 minutos para conseguir la costra de Maillard. Verás que los bordes empiezan a cocinarse hacia arriba.', ingredients: 'Ribeye, sal gruesa' },
-        { title: 'Girar y sellar la otra cara', time: '3 min', text: 'Gira solo una vez. Otros 3 minutos en la zona caliente. Si tienes un corte de 3 cm esto dará un punto entre poco hecho y al punto (55-58°C). Para grosor mayor, añade 1-2 min por cara.', ingredients: '—' },
-        { title: 'Mantequilla de ajo y tomillo', time: '2 min', text: 'Mueve el filete a zona indirecta. Añade por encima la mantequilla, el ajo aplastado y el tomillo. Con una cuchara, baña la carne con la mantequilla derretida durante 1-2 min (basting). Esto potencia el sabor enormemente.', ingredients: 'Mantequilla, ajo, tomillo' },
-        { title: 'Reposo en tabla', time: '5 min', text: 'Retira a tabla de madera y deja reposar 5 min tapado con papel de aluminio. Pimenta justo antes de servir. Nunca antes, ya que la pimienta se quema sobre la brasa directa.', ingredients: 'Pimienta negra' },
+        { title: 'Templar la carne', time: '45 min', text: 'Saca el ribeye del refrigerador 45 min antes. Para un corte de 3 cm es imprescindible. Sécalo con papel absorbente. La humedad superficial es el enemigo de una buena costra.', ing: 'Ribeye' },
+        { title: 'Brasas muy calientes', time: '20 min', text: 'Necesitas brasas muy calientes. La parrilla debe estar muy caliente: al acercar la mano a 10 cm solo puedes aguantar 1–2 segundos. Precalienta la parrilla 10 min sobre las brasas.', ing: 'Carbón' },
+        { title: 'Primera cara — sin tocar', time: '3 min', text: 'Sal gruesa justo antes de poner. Zona más caliente de la parrilla. No lo muevas ni toques durante 3 min para conseguir la costra Maillard perfecta.', ing: 'Ribeye, sal gruesa' },
+        { title: 'Girar y segunda cara', time: '3 min', text: 'Gira solo una vez. Otros 3 min. Para un corte de 3 cm tendrás un punto entre poco hecho y al punto (55–58 °C). Para grosor mayor, añade 1–2 min por cara.', ing: '—' },
+        { title: 'Basting de mantequilla', time: '2 min', text: 'Mueve a zona indirecta. Añade mantequilla, ajo aplastado y tomillo. Con una cuchara, baña la carne con la mantequilla derretida durante 1–2 min. Potencia el sabor enormemente.', ing: 'Mantequilla, ajo, tomillo' },
+        { title: 'Reposo y pimienta', time: '5 min', text: 'Retira a tabla de madera y reposa 5 min tapado con aluminio. Pimenta justo antes de servir — nunca antes, la pimienta se quema sobre brasa directa.', ing: 'Pimienta negra' },
       ]
     },
     {
@@ -1031,12 +829,9 @@ const DATA = {
       name: 'Pollo Entero al Humo',
       emoji: '🍗',
       tag: 'Ahumado',
-      rating: 4.7,
-      time: '120 min',
-      difficulty: 'Media',
-      category: 'aves',
-      sugerida: true,
-      desc: 'Pollo ahumado lentamente con leña de manzano y carbón. La técnica de calor indirecto garantiza una piel crujiente y una carne jugosa hasta el hueso.',
+      rating: 4.7, time: '120 min', difficulty: 'Media',
+      category: 'aves', sugerida: true,
+      desc: 'Pollo ahumado lentamente con chips de leña de manzano. Calor indirecto para piel crujiente y carne jugosa hasta el hueso.',
       ingredients: [
         { name: 'Pollo entero', perPerson: 500, unit: 'g' },
         { name: 'Sal gruesa', perPerson: 12, unit: 'g' },
@@ -1044,17 +839,17 @@ const DATA = {
         { name: 'Ajo en polvo', perPerson: 2, unit: 'g' },
         { name: 'Cebolla en polvo', perPerson: 2, unit: 'g' },
         { name: 'Aceite de oliva', perPerson: 20, unit: 'ml' },
-        { name: 'Leña de manzano (chips)', perPerson: 50, unit: 'g' },
+        { name: 'Chips de madera de manzano', perPerson: 50, unit: 'g' },
         { name: 'Limón', perPerson: 0.25, unit: 'ud' },
       ],
       steps: [
-        { title: 'Dry rub y marinado', time: '60 min', text: 'Mezcla sal, pimentón, ajo y cebolla en polvo. Seca bien el pollo con papel. Frota con aceite y aplica el dry rub por toda la superficie, incluyendo bajo la piel de la pechuga separándola con los dedos. Deja reposar al menos 1 hora en frío (mejor toda la noche).', ingredients: 'Pollo, sal, pimentón, ajo en polvo, cebolla en polvo, aceite' },
-        { title: 'Preparar la barbacoa para calor indirecto', time: '25 min', text: 'Enciende el carbón y ponlo todo en un lado de la barbacoa. El pollo irá en el otro lado, sin calor directo bajo él. La temperatura objetivo de la barbacoa es 160-180°C. Pon la tapa si tienes barbacoa con tapa.', ingredients: 'Carbón' },
-        { title: 'Añadir la leña de ahumado', time: '2 min', text: 'Remoja los chips de leña de manzano en agua durante 30 min, escúrrelos y échalos directamente sobre el carbón encendido. Generarán humo aromático durante 20-30 min. Puedes añadir más durante la cocción.', ingredients: 'Chips de madera de manzano' },
-        { title: 'Colocar el pollo', time: '—', text: 'Coloca el pollo en la zona sin carbón, con la pechuga hacia arriba. Mete el limón cortado en cuartos dentro de la cavidad. Cierra la tapa si puedes o improvisa un domo con papel de aluminio. Temperatura interior objetivo: 165°C.', ingredients: 'Pollo, limón' },
-        { title: 'Cocción lenta con humo', time: '75 min', text: 'Deja cocinar a 160-180°C durante 1h 15min aprox. A los 45 min, gira el pollo 180° para que se cocine parejo. Cada 30 min, añade carbón si hace falta para mantener temperatura. No abras demasiado para conservar el humo.', ingredients: '—' },
-        { title: 'Crujiente final', time: '10 min', text: 'A los 65-70 min, mueve el pollo a la zona de calor directo durante 8-10 min, con cuidado de no quemar la piel. Esto consigue el crujiente final. La temperatura interna del muslo debe llegar a 82-85°C.', ingredients: '—' },
-        { title: 'Reposo y trinchado', time: '10 min', text: 'Retira el pollo y deja reposar 10 min. El reposo es especialmente importante en aves. Trincha: separa primero los muslos y contramuslos, luego las pechugas. El hueso debe salir limpio.', ingredients: '—' },
+        { title: 'Dry rub y marinado', time: '60 min', text: 'Mezcla sal, pimentón, ajo y cebolla en polvo. Seca bien el pollo. Frota con aceite y aplica el dry rub por toda la superficie, incluyendo bajo la piel de la pechuga. Reposa al menos 1 hora en frío.', ing: 'Pollo, sal, pimentón, ajo en polvo, cebolla en polvo, aceite' },
+        { title: 'Barbacoa para calor indirecto', time: '25 min', text: 'Enciende el carbón y ponlo todo en un lado. El pollo irá en el lado sin carbón. Temperatura objetivo de la barbacoa: 160–180 °C. Pon tapa si tienes.', ing: 'Carbón' },
+        { title: 'Chips de leña', time: '2 min', text: 'Remoja los chips 30 min en agua, escúrrelos y échalos sobre el carbón encendido. Generarán humo aromático durante 20–30 min. Puedes añadir más durante la cocción.', ing: 'Chips de madera de manzano' },
+        { title: 'Colocar el pollo', time: '—', text: 'Coloca el pollo en zona sin carbón, pechuga arriba. Mete el limón en cuartos dentro de la cavidad. Cierra la tapa o improvisa un domo con aluminio.', ing: 'Pollo, limón' },
+        { title: 'Cocción lenta con humo', time: '75 min', text: 'Cocina a 160–180 °C durante 1 h 15 min. A los 45 min gira el pollo 180°. Cada 30 min añade carbón si baja la temperatura. No abras demasiado para conservar el humo.', ing: '—' },
+        { title: 'Crujiente final', time: '10 min', text: 'Mueve el pollo a la zona de calor directo 8–10 min. Consigue el crujiente final. Temperatura interna del muslo: 82–85 °C.', ing: '—' },
+        { title: 'Reposo y trinchado', time: '10 min', text: 'Reposa 10 min. Trincha: separa primero muslos y contramuslos, luego pechugas. El hueso debe salir limpio.', ing: '—' },
       ]
     },
     {
@@ -1062,23 +857,20 @@ const DATA = {
       name: 'Picanha al Carbón',
       emoji: '🔥',
       tag: 'Brasileño',
-      rating: 4.8,
-      time: '35 min',
-      difficulty: 'Fácil',
-      category: 'vacuno',
-      sugerida: false,
-      desc: 'La pieza reina del churrasco brasileño. La picanha se cocina entera con su capa de grasa y se sirve cortada en finas lonchas. Solo necesita sal gruesa.',
+      rating: 4.8, time: '35 min', difficulty: 'Fácil',
+      category: 'vacuno', sugerida: false,
+      desc: 'La pieza reina del churrasco. Se cocina entera con su capa de grasa y se sirve en lonchas finas. Solo necesita sal gruesa.',
       ingredients: [
         { name: 'Picanha (pieza entera)', perPerson: 400, unit: 'g' },
         { name: 'Sal gruesa', perPerson: 10, unit: 'g' },
       ],
       steps: [
-        { title: 'La pieza y su grasa', time: '30 min', text: 'La picanha se reconoce por su capa de grasa exterior de 1-2 cm. NUNCA la retires antes de cocinar: es lo que le da todo su sabor y la protege. Saca del frío 30 min antes. No hagas cortes en la grasa.', ingredients: 'Picanha' },
-        { title: 'Solo sal gruesa, nada más', time: '5 min', text: 'La picanha no necesita marinada ni especias. La sal gruesa es todo. Aplica generosamente por ambas caras y también en los laterales. La sal gruesa forma una costra que se cae parcialmente al cocinar.', ingredients: 'Sal gruesa' },
-        { title: 'Primero por el lado de la grasa', time: '8 min', text: 'Pon la picanha con la grasa hacia abajo en la zona caliente directa. Deja 6-8 min sin tocar. La grasa se irá fundiendo y regando la carne. Puede haber llamaradas — normal. Mueve a zona fría si el fuego es excesivo.', ingredients: '—' },
-        { title: 'Voltear y sellar la carne', time: '5 min', text: 'Gira la picanha y sella el lado de la carne durante 4-5 min a fuego alto. Buscamos un exterior bien dorado con interior rosado.', ingredients: '—' },
-        { title: 'Terminar a fuego indirecto', time: '8 min', text: 'Mueve a zona indirecta. Temperatura objetivo interna: 57-60°C para al punto. Si la pieza es muy gruesa puede necesitar 10-12 min más. Usa termómetro si tienes.', ingredients: '—' },
-        { title: 'Cortar en lonchas', time: '7 min', text: 'Reposa 5 min. Corta en lonchas finas de 1 cm en contra de la fibra, incluyendo la grasa. Sirve inmediatamente. En la tradición brasileña, se sirven las lonchas directamente del cuchillo al plato.', ingredients: '—' },
+        { title: 'La grasa no se retira', time: '30 min', text: 'La picanha tiene una capa de grasa de 1–2 cm. NUNCA la retires antes de cocinar: es lo que le da todo su sabor. Saca del frío 30 min antes. No hagas cortes en la grasa.', ing: 'Picanha' },
+        { title: 'Solo sal gruesa', time: '5 min', text: 'La picanha no necesita marinada. Aplica sal gruesa generosamente por ambas caras y laterales.', ing: 'Sal gruesa' },
+        { title: 'Primero el lado de la grasa', time: '8 min', text: 'Pon la picanha con la grasa hacia abajo en zona caliente directa. 6–8 min sin tocar. La grasa se fundirá y regará la carne. Puede haber llamaradas — mueve a zona fría si es excesivo.', ing: '—' },
+        { title: 'Voltear y sellar', time: '5 min', text: 'Gira y sella el lado de la carne 4–5 min a fuego alto. Buscamos exterior bien dorado con interior rosado.', ing: '—' },
+        { title: 'Terminar a fuego indirecto', time: '8 min', text: 'Mueve a zona indirecta. Temperatura interna objetivo: 57–60 °C para al punto.', ing: '—' },
+        { title: 'Cortar en lonchas', time: '7 min', text: 'Reposa 5 min. Corta en lonchas finas de 1 cm en contra de la fibra, incluyendo la grasa. Sirve inmediatamente.', ing: '—' },
       ]
     },
     {
@@ -1086,23 +878,20 @@ const DATA = {
       name: 'Chuletón de Vaca Vieja',
       emoji: '🍖',
       tag: 'Premium',
-      rating: 4.9,
-      time: '25 min',
-      difficulty: 'Media',
-      category: 'vacuno',
-      sugerida: false,
-      desc: 'El chuletón de vaca vieja es la cumbre de la brasa. Madurado y con grasa amarilla, exige brasas perfectas y respeto por el producto. Solo sal, brasa y reposo.',
+      rating: 4.9, time: '25 min', difficulty: 'Media',
+      category: 'vacuno', sugerida: false,
+      desc: 'La cumbre de la brasa. Madurado y con grasa amarilla, exige brasas perfectas y respeto por el producto. Solo sal, brasa y reposo.',
       ingredients: [
-        { name: 'Chuletón vaca vieja (5-6 cm)', perPerson: 500, unit: 'g' },
+        { name: 'Chuletón vaca vieja (5–6 cm)', perPerson: 500, unit: 'g' },
         { name: 'Sal gruesa de Añana o Maldon', perPerson: 8, unit: 'g' },
       ],
       steps: [
-        { title: 'El producto manda', time: '60 min', text: 'Un chuletón de vaca vieja de calidad no necesita nada más que sal y brasa. Sácalo del frío 1 hora antes (es una pieza gruesa). Sécalo muy bien. El hueso debe estar limpio de sangre.', ingredients: 'Chuletón' },
-        { title: 'Brasas de quebracho, muy altas', time: '25 min', text: 'Para un chuletón de 5-6 cm necesitas brasas muy intensas de quebracho. El carbón debe ser abundante y estar completamente encendido. La parrilla a la altura mínima sobre las brasas (5-7 cm). Precalienta la parrilla 10 min.', ingredients: 'Carbón quebracho' },
-        { title: 'Sal y primera cara — sin tocar', time: '5 min', text: 'Sala el chuletón con sal gruesa de calidad justo antes de poner. En la zona más caliente, 4-5 min sin mover. El ruido de la grasa es normal y bueno. Buscamos la costra de Maillard perfecta.', ingredients: 'Chuletón, sal gruesa' },
-        { title: 'Segunda cara', time: '5 min', text: 'Gira una sola vez. Otras 4-5 min en zona muy caliente. Para una pieza de 5-6 cm, a este punto la temperatura interna estará en torno a 48-52°C (crudo a poco hecho). Tenemos que acabar a fuego indirecto.', ingredients: '—' },
-        { title: 'Terminar a calor indirecto o en pie', time: '6 min', text: 'Coloca el chuletón en pie sobre el hueso (el hueso actúa como soporte) en zona indirecta, o tumbado en zona fría. 5-6 min más. Temperatura objetivo: 55-60°C para poco hecho al punto, que es lo ideal para esta carne.', ingredients: '—' },
-        { title: 'Reposo largo y sal final', time: '10 min', text: 'Reposa en tabla de madera 8-10 min. Tapado con aluminio, NO sin apretar. Cuando lo vayas a servir, añade unas escamas de sal Maldon por encima. Corta en lonchas en la tabla. El cocinero come el hueso.', ingredients: 'Sal Maldon' },
+        { title: 'El producto manda', time: '60 min', text: 'Un chuletón de vaca vieja no necesita nada más que sal y brasa. Sácalo del frío 1 hora antes (pieza gruesa). Sécalo muy bien. El hueso debe estar limpio.', ing: 'Chuletón' },
+        { title: 'Brasas de quebracho muy altas', time: '25 min', text: 'Para 5–6 cm necesitas brasas muy intensas de quebracho. Carbón abundante y completamente encendido. Parrilla a la altura mínima (5–7 cm). Precalienta 10 min.', ing: 'Carbón quebracho' },
+        { title: 'Sal y primera cara — sin tocar', time: '5 min', text: 'Sala justo antes de poner. Zona más caliente. 4–5 min sin mover. El ruido de la grasa es normal y bueno.', ing: 'Chuletón, sal gruesa' },
+        { title: 'Segunda cara', time: '5 min', text: 'Gira una sola vez. Otras 4–5 min. Para 5–6 cm la temperatura interna estará en 48–52 °C. Toca terminar a indirecto.', ing: '—' },
+        { title: 'Terminar en pie sobre el hueso', time: '6 min', text: 'Coloca el chuletón en pie sobre el hueso en zona indirecta. 5–6 min más. Temperatura objetivo: 55–60 °C (poco hecho al punto, ideal para esta carne).', ing: '—' },
+        { title: 'Reposo largo y sal Maldon', time: '10 min', text: 'Reposa en tabla de madera 8–10 min tapado con aluminio. Al servir añade escamas de sal Maldon por encima. Corta en lonchas en la tabla.', ing: 'Sal Maldon' },
       ]
     },
     {
@@ -1110,12 +899,9 @@ const DATA = {
       name: 'Costillas Baby Back BBQ',
       emoji: '🍖',
       tag: 'Lento y bajo',
-      rating: 4.7,
-      time: '180 min',
-      difficulty: 'Media-alta',
-      category: 'cerdo',
-      sugerida: false,
-      desc: 'Costillas de cerdo cocinadas con la técnica 3-2-1: 3 horas a fuego bajo con humo, 2 horas envueltas en aluminio y 1 hora final con salsa BBQ. El resultado es carne que se cae del hueso.',
+      rating: 4.7, time: '180 min', difficulty: 'Media-alta',
+      category: 'cerdo', sugerida: false,
+      desc: 'Técnica 3-2-1: 3 h a fuego bajo con humo, 2 h envueltas en aluminio y 1 h con salsa BBQ. Carne que se cae del hueso.',
       ingredients: [
         { name: 'Costillas baby back', perPerson: 400, unit: 'g' },
         { name: 'Sal', perPerson: 8, unit: 'g' },
@@ -1128,12 +914,12 @@ const DATA = {
         { name: 'Miel', perPerson: 15, unit: 'ml' },
       ],
       steps: [
-        { title: 'Retirar la membrana', time: '5 min', text: 'En la cara interior de las costillas hay una membrana plateada que impide que el condimento penetre. Métele un cuchillo de palo por debajo, levanta y tira con papel de cocina para hacer agarre. Se retira de un tirón.', ingredients: 'Costillas' },
-        { title: 'Dry rub casero', time: '30 min (reposo)', text: 'Mezcla sal, pimentón ahumado, ajo en polvo, azúcar moreno y pimienta. Aplica generosamente por ambas caras de las costillas. Masajea para que penetre. Reposa mínimo 30 min (mejor en frío toda la noche).', ingredients: 'Sal, pimentón, ajo en polvo, azúcar moreno, pimienta' },
-        { title: 'Fase 1: 3 horas a 110°C con humo', time: '180 min', text: 'Prepara la barbacoa para calor indirecto a 110-120°C. Añade chips de madera de manzano o cerezo. Coloca las costillas con el hueso hacia abajo en zona fría. Tapa. 3 horas sin abrir. Mantén temperatura constante añadiendo carbón si baja.', ingredients: 'Costillas, chips de madera' },
-        { title: 'Fase 2: 2 horas envueltas', time: '120 min', text: 'Saca las costillas. Pon cada rack sobre papel de aluminio grande. Añade encima mantequilla en trozos y miel. Envuelve herméticamente con doble capa de aluminio. Vuelve a la barbacoa a 110°C durante 2 horas. Este paso hace que la carne se separe del hueso.', ingredients: 'Mantequilla, miel' },
-        { title: 'Fase 3: 1 hora con salsa BBQ', time: '60 min', text: 'Abre el aluminio con cuidado (habrá vapor caliente). Unta las costillas con salsa BBQ por ambas caras. Devuelve a la barbacoa SIN aluminio durante 45-60 min a 120°C. La salsa caramelizará y formará una costra brillante y pegajosa.', ingredients: 'Salsa BBQ' },
-        { title: 'Reposo y corte', time: '10 min', text: 'Reposa 10 min. Corta entre hueso y hueso para servir costillas individuales. La carne debe separarse del hueso con muy poca presión — ese es el indicador de éxito.', ingredients: '—' },
+        { title: 'Retirar la membrana', time: '5 min', text: 'En la cara interior hay una membrana plateada que impide que el condimento penetre. Mete un cuchillo de palo por debajo, levanta y tira con papel de cocina. Se retira de un tirón.', ing: 'Costillas' },
+        { title: 'Dry rub casero', time: '30 min', text: 'Mezcla sal, pimentón, ajo en polvo, azúcar moreno y pimienta. Aplica generosamente por ambas caras. Masajea para que penetre. Reposa mínimo 30 min.', ing: 'Sal, pimentón, ajo, azúcar, pimienta' },
+        { title: 'Fase 1 — 3 horas con humo a 110 °C', time: '180 min', text: 'Barbacoa para calor indirecto a 110–120 °C. Añade chips de manzano o cerezo. Coloca las costillas con el hueso hacia abajo. Tapa y no abras durante 3 horas.', ing: 'Chips de madera' },
+        { title: 'Fase 2 — 2 horas envueltas', time: '120 min', text: 'Saca las costillas. Ponlas sobre aluminio, añade mantequilla y miel encima. Envuelve herméticamente. Vuelve a 110 °C durante 2 horas. Este paso separa la carne del hueso.', ing: 'Mantequilla, miel' },
+        { title: 'Fase 3 — 1 hora con salsa BBQ', time: '60 min', text: 'Abre el aluminio con cuidado. Unta con salsa BBQ por ambas caras. De vuelta a la barbacoa SIN aluminio a 120 °C durante 45–60 min. La salsa caramelizará.', ing: 'Salsa BBQ' },
+        { title: 'Reposo y corte', time: '10 min', text: 'Reposa 10 min. Corta entre hueso y hueso. La carne debe separarse del hueso con muy poca presión.', ing: '—' },
       ]
     },
     {
@@ -1141,23 +927,20 @@ const DATA = {
       name: 'Secreto Ibérico a la Brasa',
       emoji: '🐷',
       tag: 'Ibérico',
-      rating: 4.9,
-      time: '15 min',
-      difficulty: 'Fácil',
-      category: 'cerdo',
-      sugerida: false,
-      desc: 'El secreto ibérico es la pieza más codiciada del cerdo. Escondida entre la paleta y el costillar, tiene una infiltración de grasa excepcional. Es rápido de hacer y difícil de mejorar.',
+      rating: 4.9, time: '15 min', difficulty: 'Fácil',
+      category: 'cerdo', sugerida: false,
+      desc: 'La pieza más codiciada del cerdo ibérico. Escondida entre la paleta y el costillar, con grasa infiltrada excepcional. Rápido y difícil de mejorar.',
       ingredients: [
         { name: 'Secreto ibérico', perPerson: 280, unit: 'g' },
         { name: 'Sal gruesa', perPerson: 5, unit: 'g' },
         { name: 'Aceite de oliva virgen extra', perPerson: 8, unit: 'ml' },
       ],
       steps: [
-        { title: 'Temperatura ambiente', time: '20 min', text: 'El secreto ibérico es una pieza fina (2-3 cm). Necesita solo 20 min fuera del frío. Sécala con papel. Su grasa infiltrada hará el trabajo durante la cocción.', ingredients: 'Secreto ibérico' },
-        { title: 'Brasas altas y limpias', time: '20 min', text: 'Necesitas brasas altas pero sin llama. La grasa del secreto puede provocar llamaradas — ten un spray de agua a mano o zona indirecta para escapar. Parrilla muy caliente y limpia.', ingredients: 'Carbón' },
-        { title: 'Untar con aceite y sal al poner', time: '—', text: 'Unta el secreto con un poco de aceite de oliva virgen justo antes de poner (evita que se pegue) y sala con sal gruesa en el momento. En la zona caliente directa.', ingredients: 'Secreto, aceite, sal gruesa' },
-        { title: '3 min por cada cara', time: '6 min', text: 'El secreto ibérico necesita fuego rápido e intenso: 3 min por cara en zona caliente. Gira una sola vez. La grasa se habrá fundido parcialmente y el exterior estará dorado con veteado visible.', ingredients: '—' },
-        { title: 'Reposo y corte', time: '3 min', text: 'Reposa 3-4 min. Corta en diagonal en lonchas de 1,5 cm aproximadamente. El interior debe estar ligeramente rosado — el cerdo ibérico de bellota puede comerse así perfectamente. Temperatura interna: 65-68°C.', ingredients: '—' },
+        { title: 'Temperatura ambiente', time: '20 min', text: 'El secreto es una pieza fina (2–3 cm). Solo 20 min fuera del frío. Sécala con papel. Su grasa infiltrada hará el trabajo durante la cocción.', ing: 'Secreto ibérico' },
+        { title: 'Brasas altas y limpias', time: '20 min', text: 'Necesitas brasas altas pero sin llama. La grasa del secreto puede provocar llamaradas — ten zona indirecta lista para escapar. Parrilla muy caliente y limpia.', ing: 'Carbón' },
+        { title: 'Aceite, sal y al fuego', time: '—', text: 'Unta el secreto con aceite de oliva virgen justo antes de poner. Sala con sal gruesa. En zona caliente directa.', ing: 'Secreto, aceite, sal gruesa' },
+        { title: '3 min por cada cara', time: '6 min', text: 'Fuego rápido e intenso: 3 min por cara. Gira una sola vez. La grasa se habrá fundido parcialmente y el exterior estará dorado.', ing: '—' },
+        { title: 'Reposo y corte en diagonal', time: '3 min', text: 'Reposa 3–4 min. Corta en diagonal en lonchas de 1,5 cm. El interior debe estar ligeramente rosado — temperatura interna: 65–68 °C.', ing: '—' },
       ]
     },
     {
@@ -1165,28 +948,25 @@ const DATA = {
       name: 'Costillas de Cordero a las Brasas',
       emoji: '🐑',
       tag: 'Mediterráneo',
-      rating: 4.8,
-      time: '45 min',
-      difficulty: 'Fácil',
-      category: 'cordero',
-      sugerida: false,
-      desc: 'Las costillas de cordero son perfectas para la brasa: pequeñas, tiernas y con un sabor incomparable. Una marinada de ajo, romero y limón las lleva al siguiente nivel.',
+      rating: 4.8, time: '45 min', difficulty: 'Fácil',
+      category: 'cordero', sugerida: false,
+      desc: 'Pequeñas, tiernas e incomparables. Marinadas con ajo, romero y limón, quedan mejor al punto con el interior rosado.',
       ingredients: [
         { name: 'Costillas de cordero', perPerson: 350, unit: 'g' },
         { name: 'Ajo', perPerson: 1.5, unit: 'dientes' },
         { name: 'Romero fresco', perPerson: 1, unit: 'ramita' },
-        { name: 'Limón (zumo)', perPerson: 0.3, unit: 'ud' },
+        { name: 'Zumo de limón', perPerson: 0.3, unit: 'ud' },
         { name: 'Aceite de oliva', perPerson: 20, unit: 'ml' },
         { name: 'Sal gruesa', perPerson: 6, unit: 'g' },
         { name: 'Orégano seco', perPerson: 1, unit: 'g' },
       ],
       steps: [
-        { title: 'Marinada de ajo y hierbas', time: '120 min', text: 'Machaca el ajo con el dorso del cuchillo. Mezcla con aceite, zumo de limón, hojas de romero y orégano. Baña las costillas con la marinada y deja en frío al menos 2 horas (mejor 4-6h). La acidez del limón ablanda las fibras.', ingredients: 'Ajo, romero, limón, aceite, orégano' },
-        { title: 'Preparar las brasas', time: '20 min', text: 'Las costillas de cordero se cocinan con brasas medias-altas. No necesitan el fuego intenso del chuletón. Zona caliente para sellar y zona fría para terminar.', ingredients: 'Carbón' },
-        { title: 'Escurrir y secar la marinada', time: '2 min', text: 'Escurre bien las costillas de la marinada. Elimina los trozos de ajo y hierbas (se quemarán). Sécalas con papel. Sala justo antes de poner.', ingredients: 'Sal gruesa' },
-        { title: 'Sellar en zona caliente', time: '5 min', text: 'Coloca las costillas en zona caliente, 2-3 min por cara. Las costillas son pequeñas y se hacen rápido. Busca el dorado pero no las quemes.', ingredients: '—' },
-        { title: 'Terminar a fuego medio', time: '8 min', text: 'Mueve a zona de calor medio e indirecto. 6-8 min más. Las costillas de cordero quedan mejor al punto o ligeramente poco hechas: interiores rosadas. Temperatura interna: 62-65°C.', ingredients: '—' },
-        { title: 'Servir con limón', time: '3 min', text: 'Reposa 3-4 min. Sirve con gajos de limón y pan de pita o pan de panadería para aprovechar los jugos de la tabla.', ingredients: 'Limón' },
+        { title: 'Marinada de ajo y hierbas', time: '120 min', text: 'Machaca el ajo. Mezcla con aceite, limón, romero y orégano. Baña las costillas y deja en frío al menos 2 horas. La acidez del limón ablanda las fibras.', ing: 'Ajo, romero, limón, aceite, orégano' },
+        { title: 'Preparar brasas medias-altas', time: '20 min', text: 'Las costillas de cordero no necesitan el fuego intenso del chuletón. Zona caliente para sellar y zona fría para terminar.', ing: 'Carbón' },
+        { title: 'Escurrir y secar', time: '2 min', text: 'Escurre bien las costillas de la marinada y retira los trozos de ajo y hierbas (se quemarán). Sécalas. Sala justo antes de poner.', ing: 'Sal gruesa' },
+        { title: 'Sellar en zona caliente', time: '5 min', text: 'En zona caliente, 2–3 min por cara. Las costillas son pequeñas y se hacen rápido. Busca el dorado sin quemarlas.', ing: '—' },
+        { title: 'Terminar a fuego medio', time: '8 min', text: 'Zona de calor medio-indirecto. 6–8 min más. Temperatura interna: 62–65 °C. El interior rosado es lo ideal.', ing: '—' },
+        { title: 'Servir con gajos de limón', time: '3 min', text: 'Reposa 3–4 min. Sirve con gajos de limón y pan para aprovechar los jugos de la tabla.', ing: 'Limón' },
       ]
     },
     {
@@ -1194,12 +974,9 @@ const DATA = {
       name: 'Alitas de Pollo Ahumadas',
       emoji: '🍗',
       tag: 'Ahumado',
-      rating: 4.5,
-      time: '60 min',
-      difficulty: 'Fácil',
-      category: 'aves',
-      sugerida: false,
-      desc: 'Alitas de pollo con un dry rub picante-dulce, ahumadas a fuego lento y finalizadas a fuego alto para conseguir piel crujiente con interior jugoso.',
+      rating: 4.5, time: '60 min', difficulty: 'Fácil',
+      category: 'aves', sugerida: false,
+      desc: 'Dry rub picante-dulce, ahumado lento y crujiente final a fuego directo. Piel caramelizada e interior jugoso.',
       ingredients: [
         { name: 'Alitas de pollo', perPerson: 350, unit: 'g' },
         { name: 'Pimentón ahumado', perPerson: 4, unit: 'g' },
@@ -1210,11 +987,11 @@ const DATA = {
         { name: 'Aceite de oliva', perPerson: 10, unit: 'ml' },
       ],
       steps: [
-        { title: 'Dry rub picante-dulce', time: '30 min', text: 'Mezcla pimentón, sal, ajo, cayena y azúcar moreno. Frota las alitas con aceite y aplica el dry rub. Deja reposar 30 min o en frío toda la noche. El azúcar moreno caramelizará en la brasa.', ingredients: 'Pimentón, sal, ajo, cayena, azúcar, aceite' },
-        { title: 'Barbacoa a fuego medio con humo', time: '20 min', text: 'Prepara la barbacoa para calor indirecto a 150-160°C. Añade chips de leña de cerezo o manzano. Coloca las alitas en zona indirecta con la tapa puesta.', ingredients: 'Chips de madera' },
-        { title: 'Cocción lenta', time: '35 min', text: 'Cocina a fuego indirecto 35-40 min. Las alitas irán cocinándose suavemente con el humo. A mitad de tiempo, gíralas. La piel comenzará a dorarse pero sin crujiente todavía.', ingredients: '—' },
-        { title: 'Crujiente a fuego directo', time: '8 min', text: 'Mueve todas las alitas a la zona de calor directo alto. 3-4 min por cara. La piel crujirá y caramelizará con el azúcar del dry rub. Vigila que no se quemen.', ingredients: '—' },
-        { title: 'Servir', time: '—', text: 'Sirve inmediatamente. Las alitas no necesitan reposo por su pequeño tamaño. Acompaña con salsa de yogur con limón o salsa buffalo casera.', ingredients: '—' },
+        { title: 'Dry rub picante-dulce', time: '30 min', text: 'Mezcla pimentón, sal, ajo, cayena y azúcar. Frota las alitas con aceite y aplica el rub. Reposa 30 min o en frío toda la noche. El azúcar caramelizará en la brasa.', ing: 'Pimentón, sal, ajo, cayena, azúcar, aceite' },
+        { title: 'Barbacoa a fuego medio con humo', time: '20 min', text: 'Calor indirecto a 150–160 °C. Añade chips de cerezo o manzano. Alitas en zona indirecta con tapa.', ing: 'Chips de madera' },
+        { title: 'Cocción lenta', time: '35 min', text: 'Fuego indirecto 35–40 min. A mitad de tiempo, gíralas. La piel comenzará a dorarse pero sin crujiente todavía.', ing: '—' },
+        { title: 'Crujiente a fuego directo', time: '8 min', text: 'Mueve a zona caliente directa. 3–4 min por cara. La piel crujirá y el azúcar caramelizará. Vigila que no se quemen.', ing: '—' },
+        { title: 'Servir inmediatamente', time: '—', text: 'Las alitas no necesitan reposo. Sirve inmediatamente con salsa de yogur y limón o salsa buffalo casera.', ing: '—' },
       ]
     },
     {
@@ -1222,12 +999,9 @@ const DATA = {
       name: 'Entrecot a la Leña',
       emoji: '🥩',
       tag: 'Leña de encina',
-      rating: 4.6,
-      time: '20 min',
-      difficulty: 'Media',
-      category: 'vacuno',
-      sugerida: false,
-      desc: 'La leña de encina es la preferida en los asadores tradicionales. Aporta un calor seco y uniforme con un aroma suave que no interfiere con el sabor de la carne.',
+      rating: 4.6, time: '20 min', difficulty: 'Media',
+      category: 'vacuno', sugerida: false,
+      desc: 'La leña de encina es la preferida en los asadores tradicionales. Calor seco y uniforme con aroma suave que no tapa el sabor de la carne.',
       ingredients: [
         { name: 'Entrecot (2 cm grosor)', perPerson: 280, unit: 'g' },
         { name: 'Sal gruesa', perPerson: 5, unit: 'g' },
@@ -1235,11 +1009,11 @@ const DATA = {
         { name: 'Aceite de oliva virgen extra', perPerson: 5, unit: 'ml' },
       ],
       steps: [
-        { title: 'Brasas de leña de encina', time: '40 min', text: 'La leña de encina necesita más tiempo para hacer buenas brasas que el carbón. Enciende un buen fuego, añade los troncos de encina y espera a que se conviertan en brasas grises. No pongas la carne sobre llama viva — solo brasas.', ingredients: 'Leña de encina' },
-        { title: 'Altura correcta de la parrilla', time: '—', text: 'En la brasa de leña, la altura de la parrilla es clave. Para un entrecot de 2 cm: parrilla a unos 10-12 cm de las brasas. Esto permite un calor intenso pero controlado.', ingredients: '—' },
-        { title: 'Sal gruesa y directo a las brasas', time: '3 min', text: 'Sala el entrecot. A diferencia de la barbacoa de carbón, sobre leña de encina puedes poner la carne directamente sin aceite. El calor de la encina es seco y uniforme. 2-3 min sin tocar.', ingredients: 'Entrecot, sal gruesa' },
-        { title: 'Giro y segunda cara', time: '2 min', text: 'Gira el entrecot una sola vez. 2 min más para conseguir un punto poco hecho a al punto (temperatura interna 55-58°C). Para un entrecot de 2 cm, esto es suficiente.', ingredients: '—' },
-        { title: 'Reposo y acabado', time: '4 min', text: 'Reposa 4 min en tabla. Añade un chorrito de aceite de oliva virgen extra en crudo y unas escamas de sal Maldon. La combinación del aceite con los jugos de la carne es el verdadero asador tradicional.', ingredients: 'Aceite de oliva, sal Maldon' },
+        { title: 'Brasas de leña de encina', time: '40 min', text: 'La leña de encina necesita más tiempo para hacer buenas brasas que el carbón. Espera a que los troncos se conviertan en brasas grises. Nunca pongas la carne sobre llama viva.', ing: 'Leña de encina' },
+        { title: 'Altura de la parrilla', time: '—', text: 'Para un entrecot de 2 cm: parrilla a 10–12 cm de las brasas. Calor intenso pero controlado.', ing: '—' },
+        { title: 'Directo sobre la encina', time: '3 min', text: 'Sala el entrecot y ponlo sobre la parrilla. Sobre leña de encina puedes prescindir del aceite. El calor es seco y uniforme. 2–3 min sin tocar.', ing: 'Entrecot, sal gruesa' },
+        { title: 'Giro y segunda cara', time: '2 min', text: 'Gira una vez. 2 min más para un punto poco hecho a al punto (55–58 °C). Para 2 cm, es suficiente.', ing: '—' },
+        { title: 'Aceite en crudo y sal Maldon', time: '4 min', text: 'Reposa 4 min. Añade un chorrito de aceite de oliva virgen en crudo y unas escamas de Maldon. La combinación con los jugos de la carne es el auténtico asador tradicional.', ing: 'Aceite de oliva, sal Maldon' },
       ]
     },
     {
@@ -1247,12 +1021,9 @@ const DATA = {
       name: 'Pinchos Morunos',
       emoji: '🍢',
       tag: 'Brocheta',
-      rating: 4.6,
-      time: '30 min',
-      difficulty: 'Fácil',
-      category: 'cerdo',
-      sugerida: false,
-      desc: 'Los pinchos morunos son una de las tapas de brasa más populares. Cerdo o cordero marinado en una mezcla de especias norteafricanas: comino, cúrcuma y pimentón.',
+      rating: 4.6, time: '30 min', difficulty: 'Fácil',
+      category: 'cerdo', sugerida: false,
+      desc: 'Cerdo marinado en especias norteafricanas: comino, cúrcuma y pimentón. Una de las tapas de brasa más populares.',
       ingredients: [
         { name: 'Aguja o secreto de cerdo', perPerson: 200, unit: 'g' },
         { name: 'Comino molido', perPerson: 2, unit: 'g' },
@@ -1262,14 +1033,13 @@ const DATA = {
         { name: 'Aceite de oliva', perPerson: 15, unit: 'ml' },
         { name: 'Zumo de limón', perPerson: 10, unit: 'ml' },
         { name: 'Sal', perPerson: 4, unit: 'g' },
-        { name: 'Pimienta negra', perPerson: 1, unit: 'g' },
       ],
       steps: [
-        { title: 'Cortar y marinar', time: '60 min', text: 'Corta la carne en dados de 2-3 cm. Mezcla comino, pimentón, cúrcuma, ajo machacado, aceite, limón, sal y pimienta. Marina la carne en esta mezcla al menos 1 hora en frío. Cuanto más tiempo, mejor penetra el sabor.', ingredients: 'Cerdo, comino, pimentón, cúrcuma, ajo, aceite, limón, sal, pimienta' },
-        { title: 'Montar en brochetas', time: '5 min', text: 'Si usas brochetas de madera, remójalas en agua 30 min para que no se quemen. Ensarta los dados de carne dejando un pequeño espacio entre ellos para que el calor penetre por todos lados. 4-5 trozos por brocheta.', ingredients: '—' },
-        { title: 'Brasas medias-altas', time: '20 min', text: 'Prepara brasas medias-altas. Los pinchos se cocinan rápido y necesitan calor uniforme. Coloca las brochetas sobre la parrilla con las puntas alejadas del carbón.', ingredients: 'Carbón' },
-        { title: 'Cocción girando constantemente', time: '10 min', text: 'Los pinchos se cocinan 8-10 min girando cada 2 min para que se doren uniformemente por todos lados. Busca el exterior caramelizado con el interior jugoso. El cerdo debe llegar a 68-70°C interno.', ingredients: '—' },
-        { title: 'Servir en pan', time: '—', text: 'Sirve los pinchos en pan de pitta o de pueblo tostado en las brasas. Un chorrito de limón y perejil fresco picado los termina. Esencia del pincho moruno tradicional.', ingredients: 'Pan, limón, perejil' },
+        { title: 'Cortar y marinar', time: '60 min', text: 'Corta la carne en dados de 2–3 cm. Mezcla comino, pimentón, cúrcuma, ajo machacado, aceite, limón y sal. Marina la carne al menos 1 hora en frío.', ing: 'Cerdo, comino, pimentón, cúrcuma, ajo, aceite, limón, sal' },
+        { title: 'Montar en brochetas', time: '5 min', text: 'Remoja las brochetas de madera en agua 30 min. Ensarta los dados dejando pequeño espacio entre ellos. 4–5 trozos por brocheta.', ing: '—' },
+        { title: 'Brasas medias-altas', time: '20 min', text: 'Los pinchos se cocinan rápido y necesitan calor uniforme.', ing: 'Carbón' },
+        { title: 'Girar cada 2 minutos', time: '10 min', text: 'Cocina 8–10 min girando cada 2 min para que se doren uniformemente. Exterior caramelizado, interior jugoso. Temperatura interna: 68–70 °C.', ing: '—' },
+        { title: 'Servir en pan', time: '—', text: 'Sirve en pan de pitta o de pueblo tostado en las brasas. Un chorrito de limón y perejil fresco los termina.', ing: 'Pan, limón, perejil' },
       ]
     },
     {
@@ -1277,207 +1047,142 @@ const DATA = {
       name: 'Churrasco Argentino',
       emoji: '🇦🇷',
       tag: 'Argentino',
-      rating: 4.7,
-      time: '50 min',
-      difficulty: 'Media',
-      category: 'vacuno',
-      sugerida: true,
-      desc: 'El asado argentino es una filosofía. Tira de asado, vacío y chorizo criollo sobre las brasas con chimichurri. Lento, sin prisas, con conversación.',
+      rating: 4.7, time: '50 min', difficulty: 'Media',
+      category: 'vacuno', sugerida: true,
+      desc: 'El asado argentino es una filosofía: tira de asado, vacío y chorizo criollo a las brasas con chimichurri. Lento, sin prisas.',
       ingredients: [
-        { name: 'Tira de asado (costilla corte transversal)', perPerson: 350, unit: 'g' },
+        { name: 'Tira de asado', perPerson: 350, unit: 'g' },
         { name: 'Vacío (flank steak)', perPerson: 250, unit: 'g' },
         { name: 'Chorizo criollo', perPerson: 100, unit: 'g' },
         { name: 'Sal gruesa', perPerson: 8, unit: 'g' },
         { name: 'Chimichurri', perPerson: 30, unit: 'ml' },
       ],
       steps: [
-        { title: 'La paciencia del asado argentino', time: '30 min', text: 'El asado argentino no se hace con prisas. Usa carbón abundante y deja que se estabilice. La parrilla a fuego medio-alto. No hay zona caliente y fría: toda la parrilla a temperatura uniforme y constante, a unos 15-20 cm de las brasas.', ingredients: 'Carbón quebracho o briquetas' },
-        { title: 'Chorizo criollo: el aperitivo', time: '15 min', text: 'El chorizo criollo va primero, a fuego medio. Nunca lo piques — pierde los jugos. Cocina 12-15 min girando cada 3 min. Cuando pinchado sale jugos claros, está listo. Se sirve como entrada mientras el resto se hace.', ingredients: 'Chorizo criollo' },
-        { title: 'Tira de asado con el hueso abajo', time: '20 min', text: 'La tira de asado va con el hueso hacia abajo primero, durante 15-20 min. El hueso conduce el calor al interior. Sin apresurarse — la tira de asado necesita su tiempo.', ingredients: 'Tira de asado, sal gruesa' },
-        { title: 'Voltear la tira de asado', time: '15 min', text: 'Gira la tira de asado. Otros 15 min con la carne hacia abajo. A este punto, la grasa se habrá fundido y el exterior tendrá un color caoba. La carne se despegará fácilmente del hueso.', ingredients: '—' },
-        { title: 'El vacío: rápido y al punto', time: '8 min', text: 'El vacío (flank) se pone al final: 4 min por cara a fuego algo más alto. Está listo cuando el exterior está dorado pero el interior todavía rosado. Si lo pasas de cocción se vuelve duro.', ingredients: 'Vacío, sal gruesa' },
-        { title: 'Cortar el vacío en contra de la fibra', time: '5 min', text: 'El vacío tiene fibras muy marcadas. Córtalo siempre perpendicular a las fibras en lonchas de 1,5 cm. Si cortas en paralelo, estará duro. Sirve todo con chimichurri abundante y pan criollo.', ingredients: 'Chimichurri, pan' },
+        { title: 'La filosofía del asado argentino', time: '30 min', text: 'El asado argentino no se hace con prisas. Carbón abundante, parrilla a fuego medio-alto uniforme, a 15–20 cm de las brasas. Temperatura constante, no hay zonas.', ing: 'Carbón quebracho o briquetas' },
+        { title: 'Chorizo criollo: el aperitivo', time: '15 min', text: 'El chorizo va primero a fuego medio. Nunca lo piques. 12–15 min girando cada 3 min. Se sirve como aperitivo mientras el resto se hace.', ing: 'Chorizo criollo' },
+        { title: 'Tira de asado con el hueso abajo', time: '20 min', text: 'La tira de asado va con el hueso hacia abajo primero durante 15–20 min. El hueso conduce el calor al interior. Sin apresurarse.', ing: 'Tira de asado, sal gruesa' },
+        { title: 'Voltear la tira de asado', time: '15 min', text: 'Gira la tira. Otros 15 min con la carne hacia abajo. La grasa se habrá fundido y el exterior tendrá un color caoba.', ing: '—' },
+        { title: 'El vacío: rápido y al punto', time: '8 min', text: 'El vacío se pone al final: 4 min por cara a fuego algo más alto. Listo cuando el exterior está dorado pero el interior todavía rosado. Si lo pasas se vuelve duro.', ing: 'Vacío, sal gruesa' },
+        { title: 'Cortar en contra de la fibra', time: '5 min', text: 'El vacío tiene fibras muy marcadas. Córtalo siempre perpendicular. Sirve todo con chimichurri y pan criollo.', ing: 'Chimichurri, pan' },
       ]
     },
   ],
 
-  /* ---- ALIÑOS -------------------------------------------- */
   alinos: [
     {
       id: 'chimichurri',
       name: 'Chimichurri Clásico',
       emoji: '🌿',
       desc: 'La salsa argentina por excelencia. Imprescindible para cualquier parrillada.',
-      ingredientes: [
-        'Perejil fresco picado fino: 1 taza',
-        'Ajo: 4 dientes bien picados',
-        'Orégano seco: 1 cucharadita',
-        'Pimentón dulce: 1 cucharadita',
-        'Cayena molida: ½ cucharadita (opcional)',
-        'Vinagre de vino tinto: 3 cucharadas',
-        'Aceite de oliva virgen extra: ½ taza',
-        'Sal gruesa: 1 cucharadita',
-        'Agua caliente: 2 cucharadas',
-      ],
-      preparacion: 'Mezcla todos los ingredientes en un bol. Añade primero el agua caliente sobre el orégano para hidratarlo. Deja reposar al menos 1 hora para que los sabores se integren. Aguanta 2 semanas en frío. No usar batidora — debe quedar con textura.',
+      ingredientes: ['Perejil fresco picado fino: 1 taza', 'Ajo: 4 dientes bien picados', 'Orégano seco: 1 cucharadita', 'Pimentón dulce: 1 cucharadita', 'Cayena: ½ cucharadita (opcional)', 'Vinagre de vino tinto: 3 cucharadas', 'Aceite de oliva virgen extra: ½ taza', 'Sal gruesa: 1 cucharadita', 'Agua caliente: 2 cucharadas'],
+      preparacion: 'Mezcla todos los ingredientes. Añade primero el agua caliente sobre el orégano para hidratarlo. Deja reposar al menos 1 hora. Aguanta 2 semanas en frío. No uses batidora — debe quedar con textura.',
     },
     {
       id: 'mojo-picon',
       name: 'Mojo Picón Canario',
       emoji: '🌶️',
-      desc: 'El mojo picón canario es perfecto para carne a la brasa y papas arrugadas.',
-      ingredientes: [
-        'Guindillas rojas secas: 4 ud',
-        'Ajo: 4 dientes',
-        'Pimentón picante: 2 cucharaditas',
-        'Comino en grano: 1 cucharadita',
-        'Vinagre de vino: 3 cucharadas',
-        'Aceite de oliva virgen extra: ½ taza',
-        'Sal gruesa: 1 cucharadita',
-        'Pan duro: 1 rebanada (opcional, para espesar)',
-      ],
-      preparacion: 'Remoja las guindillas en agua caliente 20 min. Escurre y quita las semillas si quieres menos picante. Tritura ajo, guindillas, pimentón y comino en mortero o procesador. Añade el pan remojado si quieres más cuerpo. Incorpora el vinagre y finalmente el aceite en hilo fino. Sazona.',
+      desc: 'Perfecto para carne a la brasa y papas arrugadas.',
+      ingredientes: ['Guindillas rojas secas: 4 ud', 'Ajo: 4 dientes', 'Pimentón picante: 2 cucharaditas', 'Comino en grano: 1 cucharadita', 'Vinagre de vino: 3 cucharadas', 'Aceite de oliva virgen extra: ½ taza', 'Sal gruesa: 1 cucharadita', 'Pan duro: 1 rebanada (opcional, para espesar)'],
+      preparacion: 'Remoja las guindillas en agua caliente 20 min. Escurre y quita las semillas si quieres menos picante. Tritura ajo, guindillas, pimentón y comino. Añade el pan si quieres más cuerpo. Incorpora el vinagre y el aceite en hilo fino.',
     },
     {
-      id: 'aliño-ajo-hierbas',
-      name: 'Aliño de Ajo y Hierbas',
+      id: 'aliño-hierbas',
+      name: 'Aliño Mediterráneo de Hierbas',
       emoji: '🧄',
-      desc: 'Marinada mediterránea ideal para pollo, cordero y verduras.',
-      ingredientes: [
-        'Ajo: 5 dientes laminados',
-        'Romero fresco: 2 ramitas',
-        'Tomillo fresco: 3 ramitas',
-        'Orégano fresco: 1 ramita',
-        'Ralladura de 1 limón',
-        'Zumo de ½ limón',
-        'Aceite de oliva: ¾ taza',
-        'Sal gruesa: 1 cucharadita',
-        'Pimienta negra molida: ½ cucharadita',
-      ],
-      preparacion: 'Mezcla en un bol. Ideal para marinar entre 4-12 horas en frío. Para aves, mete la marinada también bajo la piel. Para vegetales, 30 min es suficiente. Esta marinada también puede usarse como salsa de acompañamiento calentándola ligeramente.',
+      desc: 'Ideal para pollo, cordero y verduras a la brasa.',
+      ingredientes: ['Ajo: 5 dientes laminados', 'Romero fresco: 2 ramitas', 'Tomillo fresco: 3 ramitas', 'Orégano fresco: 1 ramita', 'Ralladura de 1 limón', 'Zumo de ½ limón', 'Aceite de oliva: ¾ taza', 'Sal gruesa: 1 cucharadita', 'Pimienta negra: ½ cucharadita'],
+      preparacion: 'Mezcla en un bol. Ideal para marinar 4–12 horas en frío. Para aves mete la marinada también bajo la piel. Para vegetales, 30 min es suficiente.',
     },
     {
-      id: 'dry-rub-bbq',
+      id: 'dry-rub',
       name: 'Dry Rub BBQ Casero',
       emoji: '🌶️',
-      desc: 'Mezcla seca de especias para costillas, alitas y cerdo. Sin líquidos, máximo sabor.',
-      ingredientes: [
-        'Sal: 3 cucharadas',
-        'Azúcar moreno: 2 cucharadas',
-        'Pimentón dulce: 2 cucharadas',
-        'Pimentón ahumado: 1 cucharada',
-        'Ajo en polvo: 1 cucharada',
-        'Cebolla en polvo: 1 cucharada',
-        'Comino molido: 1 cucharadita',
-        'Pimienta negra: 1 cucharadita',
-        'Cayena molida: ½ cucharadita',
-        'Orégano seco: 1 cucharadita',
-      ],
-      preparacion: 'Mezcla todos los ingredientes y guarda en un bote hermético. Aguanta meses. Aplica directamente sobre la carne bien seca: 2-3 cucharadas por kg de carne. Masajea para que penetre. Deja reposar mínimo 1 hora antes de asar, mejor toda la noche en frío.',
+      desc: 'Mezcla seca para costillas, alitas y cerdo. Sin líquidos, máximo sabor.',
+      ingredientes: ['Sal: 3 cucharadas', 'Azúcar moreno: 2 cucharadas', 'Pimentón dulce: 2 cucharadas', 'Pimentón ahumado: 1 cucharada', 'Ajo en polvo: 1 cucharada', 'Cebolla en polvo: 1 cucharada', 'Comino molido: 1 cucharadita', 'Pimienta negra: 1 cucharadita', 'Cayena: ½ cucharadita', 'Orégano seco: 1 cucharadita'],
+      preparacion: 'Mezcla todo y guarda en bote hermético (dura meses). Aplica 2–3 cucharadas por kg de carne bien seca. Masajea para que penetre. Reposa mínimo 1 hora antes de asar.',
     },
     {
-      id: 'marinada-soja-jengibre',
+      id: 'soja-jengibre',
       name: 'Marinada Soja y Jengibre',
       emoji: '🫚',
-      desc: 'Inspiración asiática para pollo, cerdo y costillas. El umami potencia el sabor.',
-      ingredientes: [
-        'Salsa de soja: 4 cucharadas',
-        'Miel: 2 cucharadas',
-        'Jengibre fresco rallado: 1 cucharada',
-        'Ajo: 3 dientes machacados',
-        'Aceite de sésamo: 1 cucharadita',
-        'Zumo de limón o naranja: 2 cucharadas',
-        'Sriracha o cayena (opcional): al gusto',
-      ],
-      preparacion: 'Mezcla todo en un bol. Marina la carne entre 2-8 horas. Ideal para alitas, muslos de pollo, costillas de cerdo y salmón a la brasa. Antes de asar, deja escurrir bien la marinada para evitar que se queme (el azúcar de la miel se quema rápido). Puedes usar el resto de la marinada hervida como glaseado al final.',
+      desc: 'Inspiración asiática para pollo, cerdo y costillas. El umami potencia todo.',
+      ingredientes: ['Salsa de soja: 4 cucharadas', 'Miel: 2 cucharadas', 'Jengibre fresco rallado: 1 cucharada', 'Ajo: 3 dientes machacados', 'Aceite de sésamo: 1 cucharadita', 'Zumo de limón o naranja: 2 cucharadas', 'Sriracha (opcional): al gusto'],
+      preparacion: 'Mezcla todo. Marina 2–8 horas. Deja escurrir bien antes de asar — el azúcar de la miel se quema rápido. Puedes hervir el resto de la marinada y usarla como glaseado al final.',
     },
   ],
 
-  /* ---- CORTES -------------------------------------------- */
   cortes: [
-    { name: 'Chuletón / Rib-eye', emoji: '🥩', desc: '5-7 cm. Grasa intramuscular alta. El más sabroso. Solo sal.', dificultad: 'medio', temp: '55-60°C' },
-    { name: 'T-Bone / Porterhouse', emoji: '🍖', desc: 'Incluye solomillo y entrecot separados por el hueso. Técnica por zonas.', dificultad: 'medio', temp: '57-62°C' },
-    { name: 'Picanha (Tapa de cuadril)', emoji: '🔥', desc: 'Con capa de grasa. Protagonista del churrasco. Solo sal gruesa.', dificultad: 'facil', temp: '55-58°C' },
-    { name: 'Entrecot (Ribeye sin hueso)', emoji: '🥩', desc: '2-3 cm. Versátil, rápido, muy jugoso. Fuego directo alto.', dificultad: 'facil', temp: '55-63°C' },
-    { name: 'Vacío (Flank Steak)', emoji: '🥩', desc: 'Fibra marcada. Rápido. Cortar siempre en contra de la fibra.', dificultad: 'medio', temp: '57-62°C' },
-    { name: 'Costillas baby back', emoji: '🍖', desc: 'Técnica 3-2-1 (horas). Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85-90°C (internal)' },
-    { name: 'Tira de asado', emoji: '🍖', desc: 'Costilla de res cortada transversal. Asado argentino. Paciencia.', dificultad: 'medio', temp: '70-75°C' },
-    { name: 'Secreto Ibérico', emoji: '🐷', desc: 'Entre paleta y costillar. Grasa excelente. Solo sal. 15 min.', dificultad: 'facil', temp: '65-68°C' },
-    { name: 'Pluma Ibérica', emoji: '🐷', desc: 'Del cuello del cerdo. Más tierna que el secreto. Fuego medio.', dificultad: 'facil', temp: '63-67°C' },
-    { name: 'Pechuga de pollo', emoji: '🍗', desc: 'Aplana para grosor uniforme. Marinada obligatoria para jugosidad.', dificultad: 'medio', temp: '74-77°C' },
-    { name: 'Muslo / Contramuslo', emoji: '🍗', desc: 'Más perdonador que la pechuga. Calor indirecto + directo final.', dificultad: 'facil', temp: '80-85°C' },
-    { name: 'Costillas de cordero', emoji: '🐑', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5-6 min por cara.', dificultad: 'facil', temp: '62-65°C' },
+    { name: 'Chuletón / Rib-eye', emoji: '🥩', desc: '5–7 cm. Grasa intramuscular alta. Solo sal.', dificultad: 'medio', temp: '55–60 °C' },
+    { name: 'T-Bone / Porterhouse', emoji: '🍖', desc: 'Solomillo + entrecot con hueso. Técnica por zonas.', dificultad: 'medio', temp: '57–62 °C' },
+    { name: 'Picanha (Tapa de cuadril)', emoji: '🔥', desc: 'Con capa de grasa. Protagonista del churrasco.', dificultad: 'facil', temp: '55–58 °C' },
+    { name: 'Entrecot (Ribeye sin hueso)', emoji: '🥩', desc: '2–3 cm. Versátil, rápido, muy jugoso.', dificultad: 'facil', temp: '55–63 °C' },
+    { name: 'Vacío (Flank Steak)', emoji: '🥩', desc: 'Fibra marcada. Cortar siempre en contra de la fibra.', dificultad: 'medio', temp: '57–62 °C' },
+    { name: 'Costillas baby back', emoji: '🍖', desc: 'Técnica 3-2-1. Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85–90 °C' },
+    { name: 'Tira de asado', emoji: '🍖', desc: 'Costilla de res corte transversal. Asado argentino.', dificultad: 'medio', temp: '70–75 °C' },
+    { name: 'Secreto Ibérico', emoji: '🐷', desc: 'Entre paleta y costillar. Grasa excelente. 15 min.', dificultad: 'facil', temp: '65–68 °C' },
+    { name: 'Pluma Ibérica', emoji: '🐷', desc: 'Cuello del cerdo ibérico. Muy tierna. Fuego medio.', dificultad: 'facil', temp: '63–67 °C' },
+    { name: 'Pechuga de pollo', emoji: '🍗', desc: 'Aplana para grosor uniforme. Marinada obligatoria.', dificultad: 'medio', temp: '74–77 °C' },
+    { name: 'Muslo / Contramuslo', emoji: '🍗', desc: 'Más perdonador. Calor indirecto + directo final.', dificultad: 'facil', temp: '80–85 °C' },
+    { name: 'Costillas de cordero', emoji: '🐑', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5–6 min/cara.', dificultad: 'facil', temp: '62–65 °C' },
   ],
 
-  /* ---- CATEGORÍAS (circles en home) ---------------------- */
   categories: [
-    { id: 'todos',   label: 'Todos',     emoji: '🔥' },
-    { id: 'vacuno',  label: 'Vacuno',    emoji: '🥩' },
-    { id: 'cerdo',   label: 'Cerdo',     emoji: '🐷' },
-    { id: 'aves',    label: 'Aves',      emoji: '🍗' },
-    { id: 'cordero', label: 'Cordero',   emoji: '🐑' },
-    { id: 'carbon',  label: 'Carbón',    emoji: '⬛' },
-    { id: 'lena',    label: 'Leña',      emoji: '🪵' },
-    { id: 'alinos',  label: 'Aliños',    emoji: '🌿' },
+    { id: 'todos',   label: 'Todos',    emoji: '🔥' },
+    { id: 'vacuno',  label: 'Vacuno',   emoji: '🥩' },
+    { id: 'cerdo',   label: 'Cerdo',    emoji: '🐷' },
+    { id: 'aves',    label: 'Aves',     emoji: '🍗' },
+    { id: 'cordero', label: 'Cordero',  emoji: '🐑' },
+    { id: 'alinos',  label: 'Aliños',   emoji: '🌿' },
+    { id: 'guias',   label: 'Guías',    emoji: '📖' },
   ],
 };
 
-/* ── NAV ─────────────────────────────────────────────────────── */
+/* ── NAV ───────────────────────────────────────────────────── */
 const Nav = (() => {
-  let prevScreen = 'inicio';
+  let _prev = 'inicio';
   function goTo(screen) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + screen)?.classList.add('active');
     document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-    const tab = document.getElementById('btab-' + screen);
-    if (tab) tab.classList.add('active');
-    prevScreen = screen;
+    document.getElementById('btab-' + screen)?.classList.add('active');
+    _prev = screen;
     window.scrollTo(0, 0);
   }
-  function goToRecipe() {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('screen-recipe').classList.add('active');
-    window.scrollTo(0, 0);
-  }
-  function getPrev() { return prevScreen; }
-  return { goTo, goToRecipe, getPrev };
+  function goToRecipe(id) { Brasas.openRecipe(id); }
+  function back() { Brasas.goBack(); }
+  function prev() { return _prev; }
+  return { goTo, goToRecipe, back, prev };
 })();
 
-/* ── BRASAS (Recipe logic) ───────────────────────────────────── */
+/* ── BRASAS ────────────────────────────────────────────────── */
 const Brasas = (() => {
-  let currentRecipe = null;
-  let currentStep   = 0;
-  let comensales    = 4;
-  let prevTab       = 'inicio';
+  let cur = null, step = 0, comensales = 4, prevScreen = 'inicio';
 
-  /* --- Render home screen --- */
   function renderHome() {
-    // Category circles
-    const catsEl = document.getElementById('home-cats');
-    if (catsEl) {
-      catsEl.innerHTML = DATA.categories.map((c, i) =>
+    // Categorías
+    const cats = document.getElementById('home-cats');
+    if (cats) {
+      cats.innerHTML = DATA.categories.map((c, i) =>
         `<div class="home-cat${i===0?' active':''}" onclick="Brasas.filterCat('${c.id}')">
           <div class="home-cat-circle">${c.emoji}</div>
           <div class="home-cat-name">${c.label}</div>
         </div>`
       ).join('');
     }
-    // Suggested recipes
-    const sugEl = document.getElementById('sug-list');
-    if (sugEl) {
-      const sugs = DATA.recipes.filter(r => r.sugerida);
-      sugEl.innerHTML = sugs.map(r =>
-        `<div class="sug-card" onclick="Brasas.openRecipe('${r.id}')">
-          <div class="sug-card-bg" style="background: linear-gradient(135deg, var(--surface2), var(--surface));">${r.emoji}</div>
-          <div class="sug-card-overlay">
-            <div class="sug-card-info">
+    // Sugeridas
+    const sug = document.getElementById('home-sug-list');
+    if (sug) {
+      sug.innerHTML = DATA.recipes.filter(r => r.sugerida).map(r =>
+        `<div class="home-sug-card" onclick="Brasas.openRecipe('${r.id}')">
+          <div class="home-sug-placeholder">${r.emoji}</div>
+          <div class="home-sug-overlay">
+            <div class="home-sug-info">
               <h4>${r.name}</h4>
-              <div class="sug-card-meta"><span class="stars">★★★★★</span> ${r.rating}</div>
+              <div class="home-sug-meta"><span class="home-sug-stars">★★★★★</span>&nbsp;${r.rating}</div>
             </div>
-            <div class="sug-card-right">
-              <div class="sug-time">${r.time}</div>
-              <button class="sug-btn">Ver →</button>
+            <div class="home-sug-right">
+              <div class="home-sug-time">${r.time}</div>
+              <button class="home-sug-btn">Ver →</button>
             </div>
           </div>
         </div>`
@@ -1485,137 +1190,123 @@ const Brasas = (() => {
     }
   }
 
-  /* --- Render recipes grid --- */
-  function renderRecipesGrid(filter) {
+  function renderGrid(filter) {
     const el = document.getElementById('recipes-grid');
     if (!el) return;
-    const list = filter && filter !== 'todos'
-      ? DATA.recipes.filter(r => r.category === filter)
-      : DATA.recipes;
+    const list = filter && filter !== 'todos' ? DATA.recipes.filter(r => r.category === filter) : DATA.recipes;
     el.innerHTML = list.map(r =>
       `<div class="recipe-card" onclick="Brasas.openRecipe('${r.id}')">
-        <div class="recipe-card-thumb" style="background: linear-gradient(135deg, #3D1A05, #1A0A02)">${r.emoji}</div>
+        <div class="recipe-card-thumb">${r.emoji}</div>
         <div class="recipe-card-body">
-          <h4>${r.name}</h4>
-          <div class="recipe-card-meta">
-            <span class="stars">★</span>${r.rating}
-            <span>${r.time}</span>
-          </div>
+          <h3>${r.name}</h3>
+          <div class="recipe-card-meta">★ ${r.rating} · ${r.time}</div>
+          <span class="difficulty">${r.difficulty}</span>
         </div>
       </div>`
     ).join('');
   }
 
-  /* --- Filter pills --- */
-  function renderFilterPills() {
+  function renderPills() {
     const el = document.getElementById('filter-row');
     if (!el) return;
-    const categories = [
+    const cats = [
       { id: 'todos', label: 'Todos' },
       { id: 'vacuno', label: 'Vacuno' },
       { id: 'cerdo', label: 'Cerdo' },
       { id: 'aves', label: 'Aves' },
       { id: 'cordero', label: 'Cordero' },
     ];
-    el.innerHTML = categories.map((c, i) =>
-      `<button class="filter-pill${i===0?' active':''}" onclick="Brasas.filterRecipes('${c.id}', this)">${c.label}</button>`
+    el.innerHTML = cats.map((c, i) =>
+      `<button class="filter-pill${i===0?' active':''}" onclick="Brasas.filterPill('${c.id}', this)">${c.label}</button>`
     ).join('');
   }
 
-  function filterRecipes(catId, btn) {
+  function filterPill(id, btn) {
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    renderRecipesGrid(catId);
+    renderGrid(id);
   }
 
-  function filterCat(catId) {
-    if (catId === 'alinos') { Nav.goTo('tecnicas'); return; }
-    if (catId === 'carbon' || catId === 'lena') { Nav.goTo('guias'); return; }
-    // Highlight correct pill
-    document.querySelectorAll('.home-cat').forEach(c => c.classList.remove('active'));
-    event.currentTarget?.classList.add('active');
+  function filterCat(id) {
+    if (id === 'alinos') { Nav.goTo('tecnicas'); return; }
+    if (id === 'guias')  { Nav.goTo('guias');    return; }
     Nav.goTo('recetas');
-    // Apply filter after nav
     setTimeout(() => {
+      const pill = document.querySelector(`.filter-pill`);
+      if (!pill) return;
       document.querySelectorAll('.filter-pill').forEach(p => {
-        if (p.textContent.toLowerCase().includes(catId) || (catId === 'todos' && p.textContent === 'Todos')) {
-          p.classList.add('active');
-          filterRecipes(catId, p);
-        }
+        const matches = id === 'todos' ? p.textContent === 'Todos' : p.textContent.toLowerCase() === id;
+        if (matches) { p.classList.add('active'); renderGrid(id); }
+        else p.classList.remove('active');
       });
-      renderRecipesGrid(catId === 'todos' ? null : catId);
     }, 50);
   }
 
-  /* --- Open recipe detail --- */
-  function openRecipe(id, fromScreen) {
+  function openRecipe(id) {
     const r = DATA.recipes.find(x => x.id === id);
     if (!r) return;
-    currentRecipe = r;
-    currentStep   = 0;
-    comensales    = 4;
-    prevTab       = fromScreen || Nav.getPrev();
+    cur = r; step = 0; comensales = 4;
+    prevScreen = Nav.prev();
 
-    document.getElementById('recipe-tag').textContent  = r.tag;
-    document.getElementById('recipe-name').textContent = r.name;
+    document.getElementById('recipe-tag').textContent    = r.tag;
+    document.getElementById('recipe-name').textContent   = r.name;
     document.getElementById('recipe-rating').textContent = `★ ${r.rating}`;
     document.getElementById('recipe-time').textContent   = r.time;
     document.getElementById('recipe-diff').textContent   = r.difficulty;
     document.getElementById('recipe-desc').textContent   = r.desc;
-    document.getElementById('recipe-header-bg').textContent = '';
-    document.getElementById('recipe-header-bg').style.background = 'linear-gradient(135deg, #5A2208, #1A0500)';
-    document.getElementById('recipe-header-bg').innerHTML = `<span style="font-size:4rem;opacity:.6">${r.emoji}</span>`;
+    document.getElementById('recipe-hero-ph').textContent = r.emoji;
 
     switchTab('guia');
     renderStep();
-    renderIngredients();
-    Nav.goToRecipe();
+    renderIngs();
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-recipe').classList.add('active');
+    window.scrollTo(0, 0);
   }
 
-  function goBack() {
-    Nav.goTo(prevTab || 'inicio');
-  }
+  function goBack() { Nav.goTo(prevScreen || 'inicio'); }
 
-  /* --- Step rendering --- */
   function renderStep() {
-    if (!currentRecipe) return;
-    const step  = currentRecipe.steps[currentStep];
-    const total = currentRecipe.steps.length;
-    const pct   = Math.round(((currentStep + 1) / total) * 100);
+    if (!cur) return;
+    const s = cur.steps[step], total = cur.steps.length;
+    const pct = Math.round(((step + 1) / total) * 100);
 
-    document.getElementById('step-title').textContent    = currentRecipe.name;
-    document.getElementById('step-subtitle').textContent = currentRecipe.desc.split('.')[0] + '.';
+    document.getElementById('step-recipe-name').textContent = cur.name;
+    document.getElementById('step-subtitle').textContent    = cur.desc.split('.')[0] + '.';
     document.getElementById('comensales-badge').textContent = comensales + ' personas';
-    document.getElementById('progress-fill').style.width  = pct + '%';
-    document.getElementById('step-counter').textContent   = `Paso ${currentStep + 1} de ${total}`;
-
-    document.getElementById('btn-prev').disabled = currentStep === 0;
-    document.getElementById('btn-next').textContent = currentStep === total - 1 ? 'Finalizar ✓' : 'Siguiente →';
+    document.getElementById('progress-fill').style.width   = pct + '%';
+    document.getElementById('step-counter').textContent    = `Paso ${step + 1} de ${total}`;
+    document.getElementById('btn-prev').disabled           = step === 0;
+    document.getElementById('btn-next').textContent        = step === total - 1 ? 'Finalizar ✓' : 'Siguiente →';
 
     document.getElementById('step-display').innerHTML =
       `<div class="step-card">
-        <div class="step-num">Paso ${currentStep + 1} de ${total}</div>
-        <h3>${step.title}</h3>
-        <p>${step.text}</p>
-        ${step.time !== '—' ? `<div class="step-time-badge">⏱ ${step.time}</div>` : ''}
-        ${step.ingredients !== '—' ? `<div class="step-ing"><strong>Necesitas:</strong> ${step.ingredients}</div>` : ''}
+        <div class="step-inner">
+          <div class="step-num">${step + 1}</div>
+          <div class="step-body">
+            <h3>${s.title}</h3>
+            <p>${s.text}</p>
+            ${s.time !== '—' ? `<span class="step-timing">⏱ ${s.time}</span>` : ''}
+          </div>
+        </div>
+        ${s.ing !== '—' ? `<div class="step-ingredients">🧂 ${s.ing}</div>` : ''}
       </div>`;
   }
 
   function changeStep(dir) {
-    if (!currentRecipe) return;
-    const total = currentRecipe.steps.length;
-    if (dir === 1 && currentStep === total - 1) { Nav.goTo(prevTab || 'inicio'); return; }
-    currentStep = Math.max(0, Math.min(total - 1, currentStep + dir));
+    if (!cur) return;
+    if (dir === 1 && step === cur.steps.length - 1) { Nav.goTo(prevScreen || 'inicio'); return; }
+    step = Math.max(0, Math.min(cur.steps.length - 1, step + dir));
     renderStep();
   }
 
-  /* --- Ingredients tab --- */
-  function renderIngredients() {
-    if (!currentRecipe) return;
+  function renderIngs() {
+    if (!cur) return;
     const el = document.getElementById('ing-list');
     if (!el) return;
-    el.innerHTML = currentRecipe.ingredients.map(ing => {
+    el.innerHTML = cur.ingredients.map(ing => {
       const qty = (ing.perPerson * comensales).toFixed(ing.unit === 'g' || ing.unit === 'ml' ? 0 : 1);
       return `<li><span>${ing.name}</span><span class="ing-qty">${qty} ${ing.unit}</span></li>`;
     }).join('');
@@ -1627,80 +1318,74 @@ const Brasas = (() => {
     comensales = parseInt(val);
     document.getElementById('comensal-val').textContent = comensales;
     document.getElementById('comensales-badge').textContent = comensales + ' personas';
-    renderIngredients();
+    renderIngs();
   }
 
-  /* --- Tab switching --- */
   function switchTab(tab) {
-    document.getElementById('tab-guia').style.display          = tab === 'guia' ? 'block' : 'none';
-    document.getElementById('tab-ingredientes').style.display  = tab === 'ingredientes' ? 'block' : 'none';
+    document.getElementById('tab-guia').style.display         = tab === 'guia' ? 'block' : 'none';
+    document.getElementById('tab-ingredientes').style.display = tab === 'ingredientes' ? 'block' : 'none';
     document.querySelectorAll('.inner-tab').forEach((t, i) => {
       t.classList.toggle('active', (i === 0 && tab === 'guia') || (i === 1 && tab === 'ingredientes'));
     });
   }
 
-  /* --- Aliños rendering --- */
   function renderAlinos() {
     const el = document.getElementById('alinos-list');
     if (!el) return;
     el.innerHTML = DATA.alinos.map(a =>
       `<div class="alino-card" onclick="Brasas.toggleAlino('${a.id}')">
-        <div class="alino-card-header">
+        <div class="alino-header">
           <h4>${a.name}</h4>
           <span class="alino-icon">${a.emoji}</span>
         </div>
         <div class="alino-desc">${a.desc}</div>
         <div class="alino-body" id="alino-${a.id}">
-          <div class="alino-ing"><strong style="font-size:.8rem;color:var(--fire);text-transform:uppercase;letter-spacing:.05em">Ingredientes:</strong>
-            <ul style="margin-top:.3rem">${a.ingredientes.map(i => `<li>${i}</li>`).join('')}</ul>
-          </div>
-          <div class="alino-steps"><strong style="color:var(--fire)">Preparación:</strong> ${a.preparacion}</div>
+          <strong style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--rice)">Ingredientes</strong>
+          <ul style="margin-top:.3rem">${a.ingredientes.map(i => `<li>${i}</li>`).join('')}</ul>
+          <div class="alino-prep"><strong>Preparación:</strong> ${a.preparacion}</div>
         </div>
       </div>`
     ).join('');
   }
 
   function toggleAlino(id) {
-    const el = document.getElementById('alino-' + id);
-    if (el) el.classList.toggle('open');
+    document.getElementById('alino-' + id)?.classList.toggle('open');
   }
 
-  /* --- Cortes rendering --- */
   function renderCortes() {
     const el = document.getElementById('cortes-list');
     if (!el) return;
-    const badgeMap = { facil: ['Fácil', 'badge-easy'], medio: ['Medio', 'badge-medium'], dificil: ['Difícil', 'badge-hard'] };
-    el.innerHTML = DATA.cortes.map(c => {
-      const [label, cls] = badgeMap[c.dificultad] || ['—', ''];
-      return `<div class="corte-card">
+    const map = { facil: 'badge-facil', medio: 'badge-medio', dificil: 'badge-dificil' };
+    const lbl = { facil: 'Fácil', medio: 'Medio', dificil: 'Difícil' };
+    el.innerHTML = DATA.cortes.map(c =>
+      `<div class="corte-card">
         <div class="corte-emoji">${c.emoji}</div>
         <div class="corte-info">
           <h4>${c.name}</h4>
           <div class="note">${c.desc}</div>
-          <div class="note" style="margin-top:2px;color:var(--fire)">Temp. objetivo: ${c.temp}</div>
+          <div class="corte-temp">Temp. objetivo: ${c.temp}</div>
         </div>
-        <div class="corte-badge ${cls}">${label}</div>
-      </div>`;
-    }).join('');
+        <div class="corte-badge ${map[c.dificultad]}">${lbl[c.dificultad]}</div>
+      </div>`
+    ).join('');
   }
 
-  /* --- Init --- */
   function init() {
     renderHome();
-    renderFilterPills();
-    renderRecipesGrid();
+    renderPills();
+    renderGrid();
     renderAlinos();
     renderCortes();
   }
 
-  return { init, openRecipe, goBack, changeStep, switchTab, updateComensales, filterRecipes, filterCat, toggleAlino, renderRecipesGrid };
+  return { init, openRecipe, goBack, changeStep, switchTab, updateComensales, filterPill, filterCat, toggleAlino };
 })();
 
-/* ── APP INIT ─────────────────────────────────────────────────── */
+/* ── APP INIT ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  Theme.init();
   Brasas.init();
 });
-
 </script>
 </body>
 </html>
