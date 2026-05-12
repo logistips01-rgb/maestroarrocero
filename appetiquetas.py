@@ -1969,7 +1969,7 @@ elif menu == "🏷️ Etiquetas":
                 gmail_user = get_password("GMAIL_USER", "")
                 gmail_pass = get_password("GMAIL_APP_PASSWORD", "")
                 if not gmail_user or not gmail_pass:
-                    return False
+                    return False, "GMAIL_USER o GMAIL_APP_PASSWORD no configurados en Secrets"
                 cuerpo = "<br>".join(lineas)
                 msg = MIMEMultipart()
                 msg["From"] = gmail_user
@@ -1979,9 +1979,9 @@ elif menu == "🏷️ Etiquetas":
                 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                     server.login(gmail_user, gmail_pass)
                     server.sendmail(gmail_user, EMAILS_NOTIF, msg.as_string())
-                return True
-            except Exception:
-                return False
+                return True, None
+            except Exception as e:
+                return False, str(e)
 
         def guardar_cambio_fb(data):
             db, _ = get_firestore()
@@ -2032,7 +2032,8 @@ elif menu == "🏷️ Etiquetas":
                             f"<p><b>Fecha arranque:</b> {c.get('fecha_arranque','')}</p>",
                             f"<p style='color:red;'><b>Faltan 7 dias para el arranque.</b></p>",
                         ]
-                        if enviar_email_cambio(asunto, lineas):
+                        ok_mail, _ = enviar_email_cambio(asunto, lineas)
+                        if ok_mail:
                             db2, _ = get_firestore()
                             if db2:
                                 db2.collection("cambios_etiqueta").document(c["id"]).update({"recordatorio_enviado": True})
@@ -2048,7 +2049,8 @@ elif menu == "🏷️ Etiquetas":
                     refs_etq_disp = []
                     if st.session_state.df_etiquetas_final is not None:
                         refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia etiqueta:", [""] + refs_etq_disp)
+                    ref_cambio = st.selectbox("Referencia etiqueta actual:", [""] + refs_etq_disp)
+                    ref_nueva_c = st.text_input("Referencia nueva etiqueta:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
                     fecha_arranque_c = st.date_input("Fecha de arranque:")
                 with cf2:
@@ -2062,6 +2064,7 @@ elif menu == "🏷️ Etiquetas":
                     else:
                         data = {
                             "referencia": ref_cambio,
+                            "ref_nueva": ref_nueva_c,
                             "descripcion": desc_cambio_c,
                             "motivo": motivo_c,
                             "observaciones": obs_cambio_c,
@@ -2078,14 +2081,19 @@ elif menu == "🏷️ Etiquetas":
                         if guardar_cambio_fb(data):
                             lineas = [
                                 f"<h3>Nuevo cambio de etiqueta registrado</h3>",
-                                f"<p><b>Referencia:</b> {ref_cambio}</p>",
+                                f"<p><b>Referencia actual:</b> {ref_cambio}</p>",
+                                f"<p><b>Referencia nueva:</b> {ref_nueva_c or '—'}</p>",
                                 f"<p><b>Motivo:</b> {motivo_c}</p>",
                                 f"<p><b>Fecha arranque:</b> {fecha_arranque_c}</p>",
                                 f"<p><b>Descripcion:</b> {desc_cambio_c}</p>",
                                 f"<p><b>Observaciones:</b> {obs_cambio_c}</p>",
                             ]
-                            enviado = enviar_email_cambio(f"NUEVO cambio etiqueta: {ref_cambio}", lineas)
-                            st.success(f"Cambio registrado. {'Email enviado.' if enviado else 'Configura GMAIL_USER y GMAIL_APP_PASSWORD para emails.'}")
+                            enviado, err_mail = enviar_email_cambio(f"NUEVO cambio etiqueta: {ref_cambio}", lineas)
+                            if enviado:
+                                st.success("Cambio registrado y email enviado.")
+                            else:
+                                st.success("Cambio registrado.")
+                                st.warning(f"Email no enviado: {err_mail}")
                             st.rerun()
                         else:
                             st.error("Error al guardar en Firebase.")
@@ -2161,6 +2169,16 @@ elif menu == "🏷️ Etiquetas":
                     col_left, col_right = st.columns([3, 2])
 
                     with col_left:
+                        ref_nueva_html = f"""
+  <div>
+    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Ref. nueva etiqueta</div>
+    <div style="font-size:13px;font-weight:600;color:#2980B9;">{cambio.get('ref_nueva','—')}</div>
+  </div>""" if cambio.get('ref_nueva') else ''
+                        nota_html = f"""
+  <div>
+    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Nota gestión</div>
+    <div style="font-size:13px;color:#2C3E50;">{cambio.get('nota_gestion','')}</div>
+  </div>""" if cambio.get("nota_gestion") else ''
                         st.markdown(f"""
 <div style="display:flex;flex-direction:column;gap:8px;">
   <div>
@@ -2175,7 +2193,8 @@ elif menu == "🏷️ Etiquetas":
     <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Fecha arranque</div>
     <div style="font-size:13px;font-weight:600;color:{fecha_color};">{cambio.get('fecha_arranque','—')}</div>
   </div>
-  {('<div><div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Nota gestión</div><div style="font-size:13px;color:#2C3E50;">' + cambio.get("nota_gestion","") + '</div></div>') if cambio.get("nota_gestion") else ''}
+  {ref_nueva_html}
+  {nota_html}
 </div>""", unsafe_allow_html=True)
 
                     with col_right:
@@ -2207,10 +2226,15 @@ elif menu == "🏷️ Etiquetas":
                                 if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
                                     lineas = [
                                         f"<p>Cambio etiqueta <b>{cambio.get('referencia','')}</b> → estado <b>{nuevo_est}</b></p>",
+                                        f"<p><b>Ref. nueva:</b> {cambio.get('ref_nueva','—')}</p>",
                                         f"<p>Nota: {nota_g}</p>",
                                     ]
-                                    enviar_email_cambio(f"Cambio etiqueta {cambio.get('referencia','')} → {nuevo_est}", lineas)
-                                    st.success(f"Estado actualizado a {nuevo_est}")
+                                    ok_mail, err_mail = enviar_email_cambio(f"Cambio etiqueta {cambio.get('referencia','')} → {nuevo_est}", lineas)
+                                    if ok_mail:
+                                        st.success(f"Estado actualizado a {nuevo_est} · Email enviado ✓")
+                                    else:
+                                        st.success(f"Estado actualizado a {nuevo_est}")
+                                        st.warning(f"Email no enviado: {err_mail}")
                                     st.rerun()
 
     if tab_etq is None:
