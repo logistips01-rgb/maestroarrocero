@@ -2160,50 +2160,36 @@ elif menu == "🏷️ Etiquetas":
                 _nota_g   = _html.escape(str(cambio.get('nota_gestion','')))
 
                 with st.container(border=True):
-                    # ── Cabecera de la tarjeta ──
-                    st.markdown(f"""
-<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-  <div>
-    <div style="font-size:14px;font-weight:600;color:#2C3E50;line-height:1.3;">{_ref}</div>
-    <div style="font-size:12px;color:#7F8C8D;margin-top:2px;">{_motivo} · Registrado por {reg_por} · {fecha_reg}</div>
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:12px;">
-    {dias_badge_html}
-    <span style="{badge_style}border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;">{badge_dot} {estado}</span>
-  </div>
-</div>""", unsafe_allow_html=True)
+                    # ── Cabecera: nativa sin HTML complejo ──
+                    h_col1, h_col2 = st.columns([3, 1])
+                    with h_col1:
+                        st.markdown(f"**{_ref}**")
+                        st.caption(f"{_motivo} · Registrado por {reg_por} · {fecha_reg}")
+                    with h_col2:
+                        dias_txt = f" · {dias_num}d" if dias_num is not None and estado != "Activo" else ""
+                        BADGE_MD = {
+                            "Pendiente":      "🔴 Pendiente",
+                            "En preparacion": "🟡 En preparación",
+                            "Activo":         "🟢 Activo",
+                        }
+                        st.markdown(f"**{BADGE_MD.get(estado, estado)}{dias_txt}**")
+
+                    st.divider()
 
                     # ── Cuerpo: 2 columnas ──
                     col_left, col_right = st.columns([3, 2])
 
                     with col_left:
-                        ref_nueva_html = f"""
-  <div>
-    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Ref. nueva etiqueta</div>
-    <div style="font-size:13px;font-weight:600;color:#2980B9;">{_ref_nueva}</div>
-  </div>""" if cambio.get('ref_nueva') else ''
-                        nota_html = f"""
-  <div>
-    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Nota gestión</div>
-    <div style="font-size:13px;color:#2C3E50;">{_nota_g}</div>
-  </div>""" if cambio.get("nota_gestion") else ''
-                        st.markdown(f"""
-<div style="display:flex;flex-direction:column;gap:8px;">
-  <div>
-    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Descripción</div>
-    <div style="font-size:13px;color:#2C3E50;">{_desc}</div>
-  </div>
-  <div>
-    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Observaciones</div>
-    <div style="font-size:13px;color:#2C3E50;">{_obs}</div>
-  </div>
-  <div>
-    <div style="font-size:10px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:2px;">Fecha arranque</div>
-    <div style="font-size:13px;font-weight:600;color:{fecha_color};">{_farr}</div>
-  </div>
-  {ref_nueva_html}
-  {nota_html}
-</div>""", unsafe_allow_html=True)
+                        st.markdown(f"**Descripción:** {_desc}")
+                        st.markdown(f"**Observaciones:** {_obs}")
+                        if fecha_color == "#E74C3C":
+                            st.markdown(f"**Fecha arranque:** :red[{_farr}]")
+                        else:
+                            st.markdown(f"**Fecha arranque:** {_farr}")
+                        if cambio.get('ref_nueva'):
+                            st.markdown(f"**Ref. nueva etiqueta:** :blue[{_ref_nueva}]")
+                        if cambio.get('nota_gestion'):
+                            st.markdown(f"**Nota gestión:** {_nota_g}")
 
                     with col_right:
                         if cambio.get("imagen_b64"):
@@ -2219,11 +2205,7 @@ elif menu == "🏷️ Etiquetas":
                             except Exception:
                                 pass
                         else:
-                            st.markdown("""
-<div style="background:#F8F9FA;border:0.5px dashed #CCC;border-radius:6px;padding:18px;
-            text-align:center;font-size:12px;color:#999;">
-  🖼️ Sin imagen adjunta
-</div>""", unsafe_allow_html=True)
+                            st.caption("🖼️ Sin imagen adjunta")
 
                         if ROL in ["admin", "almacen"] and estado != "Activo":
                             nota_g = st.text_input("Nota de gestión", key=f"nota_{cambio['id']}",
