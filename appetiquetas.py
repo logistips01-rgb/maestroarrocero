@@ -276,6 +276,56 @@ header[data-testid="stHeader"] { background: #ECF0F1 !important; border-bottom: 
 /* Expanders */
 [data-testid="stExpander"] { background: white !important; border: 1px solid #D5D8DC !important; border-radius: 8px !important; }
 
+/* Form labels → uppercase pequeño como el mockup */
+.stTextInput label, .stTextArea label, .stSelectbox label,
+.stDateInput label, .stFileUploader label {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #7F8C8D !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Inputs con borde fino */
+.stTextInput input, .stTextArea textarea {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  background: white !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus {
+  border-color: #E74C3C !important;
+  box-shadow: 0 0 0 2px rgba(231,76,60,0.15) !important;
+}
+
+/* Selectbox borde fino */
+.stSelectbox > div > div {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Date input */
+.stDateInput input {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Botón submit rojo */
+[data-testid="stFormSubmitButton"] button {
+  background: #E74C3C !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 10px !important;
+}
+[data-testid="stFormSubmitButton"] button:hover {
+  background: #C0392B !important;
+}
+
 /* Divider */
 hr { border-color: #D5D8DC !important; }
 </style>
@@ -1919,7 +1969,7 @@ elif menu == "🏷️ Etiquetas":
                 gmail_user = get_password("GMAIL_USER", "")
                 gmail_pass = get_password("GMAIL_APP_PASSWORD", "")
                 if not gmail_user or not gmail_pass:
-                    return False
+                    return False, "GMAIL_USER o GMAIL_APP_PASSWORD no configurados en Secrets"
                 cuerpo = "<br>".join(lineas)
                 msg = MIMEMultipart()
                 msg["From"] = gmail_user
@@ -1929,9 +1979,9 @@ elif menu == "🏷️ Etiquetas":
                 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                     server.login(gmail_user, gmail_pass)
                     server.sendmail(gmail_user, EMAILS_NOTIF, msg.as_string())
-                return True
-            except Exception:
-                return False
+                return True, None
+            except Exception as e:
+                return False, str(e)
 
         def guardar_cambio_fb(data):
             db, _ = get_firestore()
@@ -1982,7 +2032,8 @@ elif menu == "🏷️ Etiquetas":
                             f"<p><b>Fecha arranque:</b> {c.get('fecha_arranque','')}</p>",
                             f"<p style='color:red;'><b>Faltan 7 dias para el arranque.</b></p>",
                         ]
-                        if enviar_email_cambio(asunto, lineas):
+                        ok_mail, _ = enviar_email_cambio(asunto, lineas)
+                        if ok_mail:
                             db2, _ = get_firestore()
                             if db2:
                                 db2.collection("cambios_etiqueta").document(c["id"]).update({"recordatorio_enviado": True})
@@ -1998,7 +2049,8 @@ elif menu == "🏷️ Etiquetas":
                     refs_etq_disp = []
                     if st.session_state.df_etiquetas_final is not None:
                         refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia etiqueta:", [""] + refs_etq_disp)
+                    ref_cambio = st.selectbox("Referencia etiqueta actual:", [""] + refs_etq_disp)
+                    ref_nueva_c = st.text_input("Referencia nueva etiqueta:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
                     fecha_arranque_c = st.date_input("Fecha de arranque:")
                 with cf2:
@@ -2012,6 +2064,7 @@ elif menu == "🏷️ Etiquetas":
                     else:
                         data = {
                             "referencia": ref_cambio,
+                            "ref_nueva": ref_nueva_c,
                             "descripcion": desc_cambio_c,
                             "motivo": motivo_c,
                             "observaciones": obs_cambio_c,
@@ -2028,25 +2081,51 @@ elif menu == "🏷️ Etiquetas":
                         if guardar_cambio_fb(data):
                             lineas = [
                                 f"<h3>Nuevo cambio de etiqueta registrado</h3>",
-                                f"<p><b>Referencia:</b> {ref_cambio}</p>",
+                                f"<p><b>Referencia actual:</b> {ref_cambio}</p>",
+                                f"<p><b>Referencia nueva:</b> {ref_nueva_c or '—'}</p>",
                                 f"<p><b>Motivo:</b> {motivo_c}</p>",
                                 f"<p><b>Fecha arranque:</b> {fecha_arranque_c}</p>",
                                 f"<p><b>Descripcion:</b> {desc_cambio_c}</p>",
                                 f"<p><b>Observaciones:</b> {obs_cambio_c}</p>",
                             ]
-                            enviado = enviar_email_cambio(f"NUEVO cambio etiqueta: {ref_cambio}", lineas)
-                            st.success(f"Cambio registrado. {'Email enviado.' if enviado else 'Configura GMAIL_USER y GMAIL_APP_PASSWORD para emails.'}")
+                            enviado, err_mail = enviar_email_cambio(f"NUEVO cambio etiqueta: {ref_cambio}", lineas)
+                            if enviado:
+                                st.success("Cambio registrado y email enviado.")
+                            else:
+                                st.success("Cambio registrado.")
+                                st.warning(f"Email no enviado: {err_mail}")
                             st.rerun()
                         else:
                             st.error("Error al guardar en Firebase.")
             st.divider()
 
+        # ── FUNCIONES AUXILIARES ──────────────────────────────
+        def archivar_cambio_fb(doc_id):
+            db, _ = get_firestore()
+            if db:
+                db.collection("cambios_etiqueta").document(doc_id).update({"archivado": True})
+                return True
+            return False
+
+        def consultar_stock_ref(ref_nueva):
+            if not ref_nueva or st.session_state.df_etiquetas_final is None:
+                return None
+            df = st.session_state.df_etiquetas_final
+            ref_buscar = str(ref_nueva).strip().upper()
+            fila = df[df["Referencia"].astype(str).str.upper() == ref_buscar]
+            if fila.empty:
+                return "sin_maestro"
+            stock_cols = [c for c in ["Stock_interno", "Stock_merca", "Stock_txt"] if c in fila.columns]
+            total = fila[stock_cols].fillna(0).sum(axis=1).iloc[0] if stock_cols else 0
+            return "con_stock" if total > 0 else "sin_stock"
+
         # ── LISTA DE CAMBIOS ──────────────────────────────────
         st.markdown("### Cambios registrados")
-        cambios = cargar_cambios_fb()
+        cambios_todos = cargar_cambios_fb()
+        cambios = [c for c in cambios_todos if not c.get("archivado")]
 
         if not cambios:
-            st.info("No hay cambios registrados.")
+            st.info("No hay cambios activos registrados.")
         else:
             fc1, fc2 = st.columns(2)
             filtro_estado_c = fc1.selectbox("Estado:", ["Todos", "Pendiente", "En preparacion", "Activo"], key="fec")
@@ -2059,97 +2138,138 @@ elif menu == "🏷️ Etiquetas":
             alertas_arr = [c for c in cambios if c.get("estado") == "Pendiente" and c.get("fecha_arranque") and
                           0 <= (datetime.strptime(c["fecha_arranque"], "%Y-%m-%d").date() - hoy).days <= 7]
             if alertas_arr:
-                st.markdown(f"""
-<div style="background:#FEF9E7;border:0.5px solid #F39C12;border-radius:8px;padding:8px 12px;
-            font-size:12px;color:#856404;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-  ⏰ <b>{len(alertas_arr)} cambio(s)</b> con arranque en los próximos 7 días
-</div>""", unsafe_allow_html=True)
+                st.warning(f"⏰ {len(alertas_arr)} cambio(s) con arranque en los próximos 7 días")
 
-            BADGE_CFG = {
-                "Pendiente":       ("background:#FDEDEC;color:#C0392B;", "🔴"),
-                "En preparacion":  ("background:#FEF9E7;color:#D68910;", "🟡"),
-                "Activo":          ("background:#EAFAF1;color:#1E8449;", "🟢"),
+            BADGE_MD = {
+                "Pendiente":      "🔴 Pendiente",
+                "En preparacion": "🟡 En preparación",
+                "Activo":         "🟢 Activo",
             }
 
             for cambio in cambios_f:
-                estado = cambio.get("estado", "Pendiente")
-                badge_style, badge_dot = BADGE_CFG.get(estado, ("background:#eee;color:#333;", "⚪"))
-                dias_num = None
-                fecha_color = "#2C3E50"
+                estado   = cambio.get("estado", "Pendiente")
+                ref      = cambio.get("referencia", "")
+                motivo   = cambio.get("motivo", "")
+                reg_por  = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                fecha_reg= cambio.get("fecha_registro","")[:10]
+                ref_nueva= cambio.get("ref_nueva","")
+
+                dias_txt = ""
+                fecha_color = "normal"
                 if cambio.get("fecha_arranque"):
                     try:
                         dias_num = (datetime.strptime(cambio["fecha_arranque"], "%Y-%m-%d").date() - hoy).days
-                        if dias_num < 0:
-                            fecha_color = "#7F8C8D"
-                        elif dias_num <= 7:
-                            fecha_color = "#E74C3C"
+                        if estado != "Activo":
+                            dias_txt = f" · {dias_num}d"
+                        if dias_num <= 7 and estado != "Activo":
+                            fecha_color = "red"
                     except Exception:
                         pass
 
-                dias_badge_html = ""
-                if dias_num is not None and estado != "Activo":
-                    dias_badge_html = f'<span style="background:#FDEDEC;color:#C0392B;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin-right:6px;">{dias_num}d</span>'
+                label_exp = f"{BADGE_MD.get(estado, estado)}{dias_txt}  —  {ref}  ·  {motivo}"
 
-                reg_por = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                with st.expander(label_exp):
+                    col_left, col_right = st.columns([3, 2])
 
-                st.markdown(f"""
-<div style="background:white;border:0.5px solid #E0E0E0;border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-    <div>
-      <div style="font-size:14px;font-weight:600;color:#2C3E50;">{cambio.get('referencia','')}</div>
-      <div style="font-size:12px;color:#7F8C8D;margin-top:2px;">{cambio.get('motivo','')} · Registrado por {reg_por} · {cambio.get('fecha_registro','')[:10]}</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-      {dias_badge_html}
-      <span style="{badge_style}border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">{badge_dot} {estado}</span>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Descripción</div>
-      <div style="font-size:13px;color:#2C3E50;">{cambio.get('descripcion','—')}</div>
-    </div>
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Observaciones</div>
-      <div style="font-size:13px;color:#2C3E50;">{cambio.get('observaciones','—')}</div>
-    </div>
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Fecha arranque</div>
-      <div style="font-size:13px;font-weight:600;color:{fecha_color};">{cambio.get('fecha_arranque','—')}</div>
-    </div>
-    {'<div><div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Nota gestión</div><div style="font-size:13px;color:#2C3E50;">' + cambio.get('nota_gestion','—') + '</div></div>' if cambio.get('nota_gestion') else ''}
-  </div>
-</div>""", unsafe_allow_html=True)
+                    with col_left:
+                        st.caption(f"Registrado por {reg_por} · {fecha_reg}")
+                        st.markdown(f"**Descripción:** {cambio.get('descripcion','—')}")
+                        st.markdown(f"**Observaciones:** {cambio.get('observaciones','—')}")
+                        farr = cambio.get('fecha_arranque','—')
+                        if fecha_color == "red":
+                            st.markdown(f"**Fecha arranque:** :red[{farr}]")
+                        else:
+                            st.markdown(f"**Fecha arranque:** {farr}")
+                        if ref_nueva:
+                            st.markdown(f"**Ref. nueva etiqueta:** :blue[{ref_nueva}]")
+                            stock_result = consultar_stock_ref(ref_nueva)
+                            if stock_result == "con_stock":
+                                st.success("✅ Stock disponible")
+                            elif stock_result == "sin_stock":
+                                st.error("❌ Sin stock")
+                            elif stock_result == "sin_maestro":
+                                st.warning("⚠️ Sin actualizar maestro")
+                        if cambio.get("nota_gestion"):
+                            st.markdown(f"**Nota gestión:** {cambio.get('nota_gestion','')}")
 
-                col_img, col_acc = st.columns([1, 1])
-                with col_img:
-                    if cambio.get("imagen_b64"):
-                        try:
-                            img_bytes = base64.b64decode(cambio["imagen_b64"])
-                            tipo = cambio.get("imagen_tipo", "image/jpeg")
-                            if "pdf" not in tipo:
-                                st.image(img_bytes, caption=cambio.get("imagen_nombre","Etiqueta nueva"), use_column_width=True)
+                    with col_right:
+                        if cambio.get("imagen_b64"):
+                            try:
+                                img_bytes = base64.b64decode(cambio["imagen_b64"])
+                                tipo = cambio.get("imagen_tipo", "image/jpeg")
+                                if "pdf" not in tipo:
+                                    st.image(img_bytes, caption=cambio.get("imagen_nombre",""), use_column_width=True)
+                                else:
+                                    st.download_button("📄 Descargar PDF", img_bytes,
+                                                       file_name=cambio.get("imagen_nombre","etiqueta.pdf"),
+                                                       key=f"pdf_{cambio['id']}", use_container_width=True)
+                            except Exception:
+                                pass
+                        else:
+                            st.caption("🖼️ Sin imagen adjunta")
+
+                        st.markdown("---")
+
+                        # Botón notificación manual
+                        if st.button("📧 Enviar notificación", key=f"notif_{cambio['id']}", use_container_width=True):
+                            lineas = [
+                                f"<h3>Notificación cambio de etiqueta</h3>",
+                                f"<p><b>Referencia:</b> {ref}</p>",
+                                f"<p><b>Ref. nueva:</b> {ref_nueva or '—'}</p>",
+                                f"<p><b>Motivo:</b> {motivo}</p>",
+                                f"<p><b>Estado:</b> {estado}</p>",
+                                f"<p><b>Fecha arranque:</b> {cambio.get('fecha_arranque','—')}</p>",
+                                f"<p><b>Descripción:</b> {cambio.get('descripcion','')}</p>",
+                                f"<p><b>Observaciones:</b> {cambio.get('observaciones','')}</p>",
+                            ]
+                            ok_mail, err_mail = enviar_email_cambio(f"Notificación cambio etiqueta: {ref}", lineas)
+                            if ok_mail:
+                                st.success("📧 Notificación enviada ✓")
                             else:
-                                st.download_button("📄 Descargar PDF", img_bytes, file_name=cambio.get("imagen_nombre", "etiqueta.pdf"), key=f"pdf_{cambio['id']}")
-                        except Exception:
-                            pass
+                                st.error(f"No se pudo enviar: {err_mail}")
 
-                with col_acc:
-                    if ROL in ["admin", "almacen"] and estado != "Activo":
-                        nota_g = st.text_input("Nota de gestión:", key=f"nota_{cambio['id']}", placeholder="Añadir nota...")
-                        nuevo_est = "En preparacion" if estado == "Pendiente" else "Activo"
-                        btn_txt = "Marcar en preparación" if estado == "Pendiente" else "Marcar como Activo"
-                        if st.button(btn_txt, key=f"btn_{cambio['id']}", use_container_width=True):
-                            if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
-                                lineas = [
-                                    f"<p>Cambio etiqueta <b>{cambio.get('referencia','')}</b> → estado <b>{nuevo_est}</b></p>",
-                                    f"<p>Nota: {nota_g}</p>",
-                                ]
-                                enviar_email_cambio(f"Cambio etiqueta {cambio.get('referencia','')} → {nuevo_est}", lineas)
-                                st.success(f"Estado actualizado a {nuevo_est}")
-                                st.rerun()
+                        # Botón cambiar estado
+                        if ROL in ["admin", "almacen"] and estado != "Activo":
+                            nota_g = st.text_input("Nota de gestión", key=f"nota_{cambio['id']}",
+                                                   placeholder="Añadir nota...")
+                            nuevo_est = "En preparacion" if estado == "Pendiente" else "Activo"
+                            btn_txt = "▶ Marcar en preparación" if estado == "Pendiente" else "✅ Marcar como Activo"
+                            if st.button(btn_txt, key=f"btn_{cambio['id']}", use_container_width=True):
+                                if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
+                                    lineas = [
+                                        f"<p>Cambio etiqueta <b>{ref}</b> → estado <b>{nuevo_est}</b></p>",
+                                        f"<p><b>Ref. nueva:</b> {ref_nueva or '—'}</p>",
+                                        f"<p>Nota: {nota_g}</p>",
+                                    ]
+                                    ok_mail, err_mail = enviar_email_cambio(f"Cambio etiqueta {ref} → {nuevo_est}", lineas)
+                                    if ok_mail:
+                                        st.success(f"Estado → {nuevo_est} · Email enviado ✓")
+                                    else:
+                                        st.success(f"Estado → {nuevo_est}")
+                                        st.warning(f"Email no enviado: {err_mail}")
+                                    st.rerun()
 
-                st.markdown("<hr style='border:none;border-top:0.5px solid #F0F0F0;margin:4px 0 10px;'>", unsafe_allow_html=True)
+                        # Botón archivar
+                        if ROL in ["admin"] and estado == "Activo":
+                            if st.button("📁 Archivar", key=f"arch_{cambio['id']}", use_container_width=True):
+                                if archivar_cambio_fb(cambio["id"]):
+                                    st.success("Cambio archivado.")
+                                    st.rerun()
+
+        # ── ARCHIVADOS ────────────────────────────────────────
+        archivados = [c for c in cambios_todos if c.get("archivado")]
+        if archivados:
+            with st.expander(f"📁 Archivados ({len(archivados)})"):
+                for cambio in archivados:
+                    ref     = cambio.get("referencia","")
+                    estado  = cambio.get("estado","")
+                    motivo  = cambio.get("motivo","")
+                    farr    = cambio.get("fecha_arranque","—")
+                    reg_por = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                    st.markdown(f"**{ref}** · {motivo} · {BADGE_MD.get(estado, estado)} · Arranque: {farr} · Por: {reg_por}")
+                    if cambio.get("descripcion"):
+                        st.caption(cambio.get("descripcion",""))
+                    st.divider()
 
     if tab_etq is None:
         st.stop()
