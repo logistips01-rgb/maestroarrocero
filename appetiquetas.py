@@ -2169,6 +2169,14 @@ elif menu == "🏷️ Etiquetas":
             total = fila[stock_cols].fillna(0).sum(axis=1).iloc[0] if stock_cols else 0
             return "con_stock" if total > 0 else "sin_stock"
 
+        # ── FEEDBACK PERSISTENTE ──────────────────────────────
+        if st.session_state.get("email_feedback"):
+            msg, tipo = st.session_state.pop("email_feedback")
+            if tipo == "ok":
+                st.success(msg)
+            else:
+                st.warning(msg)
+
         # ── LISTA DE CAMBIOS ──────────────────────────────────
         st.markdown("### Cambios registrados")
         cambios_todos = cargar_cambios_fb()
@@ -2297,17 +2305,16 @@ elif menu == "🏷️ Etiquetas":
                                     color_est = {"En preparacion":"#F39C12","Activo":"#27AE60"}.get(nuevo_est,"#E74C3C")
                                     ok_mail, err_mail = enviar_email_cambio(f"Cambio etiqueta {ref} → {nuevo_est}", campos_est, color_est)
                                     if ok_mail:
-                                        st.success(f"Estado → {nuevo_est} · Email enviado ✓")
+                                        st.session_state["email_feedback"] = (f"✅ Estado → {nuevo_est} · Email enviado ✓", "ok")
                                     else:
-                                        st.success(f"Estado → {nuevo_est}")
-                                        st.warning(f"Email no enviado: {err_mail}")
+                                        st.session_state["email_feedback"] = (f"✅ Estado → {nuevo_est} · Email no enviado: {err_mail}", "warn")
                                     st.rerun()
 
                         # Botón archivar
                         if ROL in ["admin"] and estado == "Activo":
                             if st.button("📁 Archivar", key=f"arch_{cambio['id']}", use_container_width=True):
                                 if archivar_cambio_fb(cambio["id"]):
-                                    st.success("Cambio archivado.")
+                                    st.session_state["email_feedback"] = ("📁 Cambio archivado correctamente.", "ok")
                                     st.rerun()
 
         # ── ARCHIVADOS ────────────────────────────────────────
