@@ -2,4 +2,3 @@ streamlit
 pandas
 firebase-admin
 python-dotenv
-resend

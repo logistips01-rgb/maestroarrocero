@@ -1954,7 +1954,7 @@ elif menu == "🏷️ Etiquetas":
         import base64
         from datetime import datetime, timedelta
 
-        EMAILS_NOTIF = ["almacenseco@aldelis.com", "dgamarra@aldelis.com", "mlorente@aldelis.com"]
+        EMAILS_NOTIF = ["mlorente@aldelis.com"]
         MOTIVOS = ["Alergenos", "Normativa legal", "Rediseno", "Error", "Proveedor", "Otro"]
         ESTADOS_COLOR = {
             "Pendiente": ("#FDEDEC", "#C0392B"),
@@ -2060,13 +2060,16 @@ elif menu == "🏷️ Etiquetas":
 
         def enviar_email_cambio(asunto, campos, color_estado="#E74C3C", cambio_data=None):
             try:
-                import resend
-                api_key = get_password("RESEND_API_KEY", "")
-                if not api_key:
-                    return False, "RESEND_API_KEY no configurado en Secrets"
-                resend.api_key = api_key
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
+                from email.mime.image import MIMEImage
+                from email.mime.application import MIMEApplication
 
-                remitente = get_password("RESEND_FROM", "Aldelis Etiquetas <notificaciones@aldelis.com>")
+                gmail_user = get_password("GMAIL_USER", "")
+                gmail_pass = get_password("GMAIL_APP_PASSWORD", "")
+                if not gmail_user or not gmail_pass:
+                    return False, "GMAIL_USER o GMAIL_APP_PASSWORD no configurados en Secrets"
 
                 # Añadir stock al cuerpo si hay ref nueva
                 campos_email = dict(campos)
@@ -2080,24 +2083,31 @@ elif menu == "🏷️ Etiquetas":
                         campos_email["Stock nueva etiqueta"] = "⚠️ Sin actualizar maestro"
 
                 cuerpo = email_plantilla(asunto, campos_email, color_estado)
-
-                params = {
-                    "from": remitente,
-                    "to": EMAILS_NOTIF,
-                    "subject": asunto,
-                    "html": cuerpo,
-                }
+                msg = MIMEMultipart()
+                msg["From"] = gmail_user
+                msg["To"] = ", ".join(EMAILS_NOTIF)
+                msg["Subject"] = asunto
+                msg.attach(MIMEText(cuerpo, "html"))
 
                 # Adjuntar imagen si existe
                 if cambio_data and cambio_data.get("imagen_b64"):
                     try:
                         img_bytes = base64.b64decode(cambio_data["imagen_b64"])
                         nombre = cambio_data.get("imagen_nombre", "etiqueta")
-                        params["attachments"] = [{"filename": nombre, "content": list(img_bytes)}]
+                        tipo = cambio_data.get("imagen_tipo", "image/jpeg")
+                        if "pdf" in tipo:
+                            adjunto = MIMEApplication(img_bytes, _subtype="pdf")
+                        else:
+                            adjunto = MIMEImage(img_bytes)
+                        adjunto.add_header("Content-Disposition", "attachment", filename=nombre)
+                        msg.attach(adjunto)
                     except Exception:
                         pass
 
-                resend.Emails.send(params)
+                with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                    server.starttls()
+                    server.login(gmail_user, gmail_pass)
+                    server.sendmail(gmail_user, EMAILS_NOTIF, msg.as_string())
                 return True, None
             except Exception as e:
                 return False, str(e)
