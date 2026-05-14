@@ -758,6 +758,110 @@ def columnas_faltantes(df, requeridas, nombre_archivo):
     return faltantes
 
 
+def exportar_excel_prof(df, sheet_name="Datos", color_col=None):
+    """Genera un BytesIO con Excel de diseño profesional Aldelis."""
+    import io
+    from openpyxl.styles import PatternFill, Font, Alignment, Border, Side, GradientFill
+    from openpyxl.utils import get_column_letter
+
+    # Mapa de colores para columna Estado
+    ESTADO_COLORS = {
+        "Pendiente":        ("FFFDEDEC", "FFC0392B"),
+        "Urgente":          ("FFFDEDEC", "FFC0392B"),
+        "Crítico":          ("FFFDEDEC", "FFC0392B"),
+        "En preparacion":   ("FFFFF8E8", "FFD68910"),
+        "En Curso":         ("FFFFF8E8", "FFD68910"),
+        "Activo":           ("FFEAFAF1", "FF1E8449"),
+        "OK":               ("FFEAFAF1", "FF1E8449"),
+        "Sin stock":        ("FFFDEDEC", "FFC0392B"),
+        "Bajo stock":       ("FFFFF8E8", "FFD68910"),
+        "Con stock":        ("FFEAFAF1", "FF1E8449"),
+    }
+    # Mapa de colores RGB usados en la app (col Color)
+    APP_COLOR_MAP = {
+        "#721c24": ("FFFDEDEC", "FF721C24"),
+        "#856404": ("FFFFF8E8", "FF856404"),
+        "#155724": ("FFEAFAF1", "FF155724"),
+        "#FDEDEC": ("FFFDEDEC", "FFC0392B"),
+        "#FEF9E7": ("FFFFF8E8", "FFD68910"),
+        "#EAFAF1": ("FFEAFAF1", "FF1E8449"),
+    }
+
+    HDR_BG   = "FF2C3E50"
+    HDR_FG   = "FFFFFFFF"
+    ROW_ALT  = "FFF7F8FA"
+    ROW_EVEN = "FFFFFFFF"
+    BORDER_COLOR = "FFD5D8DC"
+
+    thin = Side(style="thin", color=BORDER_COLOR)
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name=sheet_name)
+        ws = writer.sheets[sheet_name]
+
+        # Cabecera
+        for col_idx, cell in enumerate(ws[1], start=1):
+            cell.fill    = PatternFill("solid", fgColor=HDR_BG)
+            cell.font    = Font(bold=True, color=HDR_FG, size=10)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border  = border
+        ws.row_dimensions[1].height = 22
+
+        # Filas de datos
+        cols = df.columns.tolist()
+        estado_idx = None
+        color_idx  = None
+        if "Estado" in cols:
+            estado_idx = cols.index("Estado") + 1
+        if color_col and color_col in cols:
+            color_idx = cols.index(color_col) + 1
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_row=ws.max_row), start=2):
+            bg = ROW_ALT if row_idx % 2 == 0 else ROW_EVEN
+            fill_default = PatternFill("solid", fgColor=bg)
+            font_default = Font(size=10)
+
+            # Color de fila por columna Color (hex app)
+            row_fill = None
+            row_font = None
+            if color_idx:
+                raw = str(df.iloc[row_idx - 2, color_idx - 1]) if color_idx <= len(cols) else ""
+                mapped = APP_COLOR_MAP.get(raw)
+                if mapped:
+                    row_fill = PatternFill("solid", fgColor=mapped[0])
+                    row_font = Font(size=10, color=mapped[1], bold=True)
+
+            for cell in row:
+                cell.fill   = row_fill or fill_default
+                cell.font   = row_font or font_default
+                cell.border = border
+                cell.alignment = Alignment(vertical="center")
+
+            # Colorear celda Estado individualmente (si hay col Color no sobreescribir)
+            if estado_idx and not row_fill:
+                estado_val = str(df.iloc[row_idx - 2, estado_idx - 1])
+                mapped = ESTADO_COLORS.get(estado_val)
+                if mapped:
+                    cell_e = ws.cell(row=row_idx, column=estado_idx)
+                    cell_e.fill = PatternFill("solid", fgColor=mapped[0])
+                    cell_e.font = Font(size=10, color=mapped[1], bold=True)
+
+        # Anchos de columna automáticos
+        for col_idx, col_cells in enumerate(ws.columns, start=1):
+            max_len = max(
+                (len(str(c.value)) if c.value is not None else 0 for c in col_cells),
+                default=8
+            )
+            ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len + 3, 40)
+
+        ws.freeze_panes = "A2"
+
+    output.seek(0)
+    return output
+
+
 # ─────────────────────────────────────────────
 # NAVEGACIÓN
 # ─────────────────────────────────────────────
@@ -1305,27 +1409,10 @@ elif menu == "📊 Dashboard":
     render_dashboard_table(vista, cols_mostrar)
 
     # --- Exportar a Excel ---
-    import io
-    output = io.BytesIO()
     export_df = vista[cols_mostrar].copy()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        export_df.to_excel(writer, index=False, sheet_name='Dashboard')
-        ws = writer.sheets['Dashboard']
-        # Colores en Excel
-        from openpyxl.styles import PatternFill, Font
-        color_map = {'#721c24': 'FF721C24', '#856404': 'FF856404', '#155724': 'FF155724'}
-        for i, row_idx in enumerate(vista.index, start=2):
-            hex_color = color_map.get(vista.loc[row_idx, 'Color'] if row_idx in vista.index else '', 'FF155724')
-            fill = PatternFill(start_color=hex_color, end_color=hex_color, fill_type='solid')
-            font = Font(color='FFFFFFFF')
-            for col_idx in range(1, len(cols_mostrar) + 1):
-                cell = ws.cell(row=i, column=col_idx)
-                cell.fill = fill
-                cell.font = font
-    output.seek(0)
     st.download_button(
         label="📥 Exportar a Excel",
-        data=output,
+        data=exportar_excel_prof(export_df, "Dashboard", color_col="Color"),
         file_name="dashboard_compras.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -1905,16 +1992,12 @@ elif menu == "🔗 Materiales":
             )
 
             # Exportar
-            import io
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                resultado[['Gen', 'Referencia', 'Descripcion', 'Codigo', 'Descripcion_material']].to_excel(
-                    writer, index=False, sheet_name='Materiales'
-                )
-            output.seek(0)
             st.download_button(
                 label="📥 Exportar a Excel",
-                data=output,
+                data=exportar_excel_prof(
+                    resultado[['Gen', 'Referencia', 'Descripcion', 'Codigo', 'Descripcion_material']],
+                    "Materiales"
+                ),
                 file_name=f"materiales_{codigo_final}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
@@ -2700,12 +2783,9 @@ elif menu == "🏷️ Etiquetas":
         render_etq_table(vista_etq, cols_etq)
 
         # Exportar
-        import io
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            vista_etq[cols_etq].to_excel(writer, index=False, sheet_name='Etiquetas')
-        output.seek(0)
-        st.download_button("📥 Exportar a Excel", output, "dashboard_etiquetas.xlsx",
+        st.download_button("📥 Exportar a Excel",
+                           exportar_excel_prof(vista_etq[cols_etq], "Etiquetas"),
+                           "dashboard_etiquetas.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -2773,12 +2853,9 @@ elif menu == "📋 Pedidos":
     st.dataframe(vista_ped.reset_index(drop=True), use_container_width=True, height=400)
 
     # ── Exportar ──────────────────────────────
-    import io
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        vista_ped.to_excel(writer, index=False, sheet_name='Pedidos')
-    output.seek(0)
-    st.download_button("📥 Exportar a Excel", output, "pedidos.xlsx",
+    st.download_button("📥 Exportar a Excel",
+                       exportar_excel_prof(vista_ped, "Pedidos"),
+                       "pedidos.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ── Borrar todos ──────────────────────────
@@ -2890,11 +2967,9 @@ elif menu == "🔍 Previsión y Obsoletos":
         def color_band(row):
             return [f'background-color: {cot_band.loc[row.name, "Color"]}; color: white'] * len(row)
         st.dataframe(vista_band[cols_b].style.apply(color_band, axis=1), use_container_width=True, height=400)
-        out_b = io.BytesIO()
-        with pd.ExcelWriter(out_b, engine='openpyxl') as w:
-            vista_band[cols_b].to_excel(w, index=False, sheet_name='Bandejas')
-        out_b.seek(0)
-        st.download_button("📥 Exportar Bandejas", out_b, "cotejo_bandejas.xlsx",
+        st.download_button("📥 Exportar Bandejas",
+                           exportar_excel_prof(vista_band[cols_b], "Bandejas"),
+                           "cotejo_bandejas.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         # ── ETIQUETAS ─────────────────────────────────────────
@@ -2927,11 +3002,9 @@ elif menu == "🔍 Previsión y Obsoletos":
             def color_etq_p(row):
                 return [f'background-color: {cot_etq.loc[row.name, "Color"]}; color: white'] * len(row)
             st.dataframe(vista_etq[cols_e].style.apply(color_etq_p, axis=1), use_container_width=True, height=400)
-            out_e = io.BytesIO()
-            with pd.ExcelWriter(out_e, engine='openpyxl') as w:
-                vista_etq[cols_e].to_excel(w, index=False, sheet_name='Etiquetas')
-            out_e.seek(0)
-            st.download_button("📥 Exportar Etiquetas", out_e, "cotejo_etiquetas.xlsx",
+            st.download_button("📥 Exportar Etiquetas",
+                               exportar_excel_prof(vista_etq[cols_e], "Etiquetas"),
+                               "cotejo_etiquetas.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ══ TAB 2: SIN MAESTRO ══════════════════════════════════════
@@ -2945,11 +3018,9 @@ elif menu == "🔍 Previsión y Obsoletos":
             st.warning(f"⚠️ {len(sin_maestro)} materiales sin configurar:")
             cols_sm = [c for c in ['Codigo', 'Descripcion', 'Apro'] if c in sin_maestro.columns]
             st.dataframe(sin_maestro[cols_sm].reset_index(drop=True), use_container_width=True)
-            out_sm = io.BytesIO()
-            with pd.ExcelWriter(out_sm, engine='openpyxl') as w:
-                sin_maestro[cols_sm].to_excel(w, index=False, sheet_name='Sin_maestro')
-            out_sm.seek(0)
-            st.download_button("📥 Exportar Sin Maestro", out_sm, "sin_maestro.xlsx",
+            st.download_button("📥 Exportar Sin Maestro",
+                               exportar_excel_prof(sin_maestro[cols_sm], "Sin_maestro"),
+                               "sin_maestro.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ══ TAB 3: OBSOLETOS ════════════════════════════════════════
@@ -3021,11 +3092,9 @@ elif menu == "🔍 Previsión y Obsoletos":
 
                 st.dataframe(vista_obs.reset_index(drop=True).style.apply(colorear_obs, axis=1), use_container_width=True)
 
-                out_obs = io.BytesIO()
-                with pd.ExcelWriter(out_obs, engine='openpyxl') as w:
-                    vista_obs.to_excel(w, index=False, sheet_name='Obsoletos')
-                out_obs.seek(0)
-                st.download_button("📥 Exportar Obsoletos", out_obs, "obsoletos.xlsx",
+                st.download_button("📥 Exportar Obsoletos",
+                                   exportar_excel_prof(vista_obs, "Obsoletos"),
+                                   "obsoletos.xlsx",
                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -3164,12 +3233,9 @@ elif menu == "🏪 Producto Terminado":
 
     st.dataframe(vista_pt[cols_pt].style.apply(colorear_pt, axis=1), use_container_width=True, height=500)
 
-    import io
-    out_pt = io.BytesIO()
-    with pd.ExcelWriter(out_pt, engine='openpyxl') as w:
-        vista_pt[cols_pt].to_excel(w, index=False, sheet_name='ProductoTerminado')
-    out_pt.seek(0)
-    st.download_button("📥 Exportar", out_pt, "producto_terminado.xlsx",
+    st.download_button("📥 Exportar",
+                       exportar_excel_prof(vista_pt[cols_pt], "ProductoTerminado"),
+                       "producto_terminado.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -3283,12 +3349,9 @@ elif menu == "🏭 Planificación Producción":
 
         st.dataframe(comp[cols_comp].style.apply(colorear_comp, axis=1), use_container_width=True, height=400)
 
-        import io
-        out_comp = io.BytesIO()
-        with pd.ExcelWriter(out_comp, engine='openpyxl') as w:
-            comp[cols_comp].to_excel(w, index=False, sheet_name='Comparativa')
-        out_comp.seek(0)
-        st.download_button("📥 Exportar comparativa", out_comp, "plan_produccion.xlsx",
+        st.download_button("📥 Exportar comparativa",
+                           exportar_excel_prof(comp[cols_comp], "Comparativa"),
+                           "plan_produccion.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     else:
         st.info("Sube el plan de producción recibido para comparar con la sugerencia.")
