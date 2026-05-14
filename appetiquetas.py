@@ -2241,10 +2241,13 @@ elif menu == "🏷️ Etiquetas":
                 return True
             return False
 
-        def obtener_stock_cantidad(ref):
-            if not ref or st.session_state.df_etiquetas_final is None:
+        def obtener_stock_cantidad(ref, tipo="Etiqueta"):
+            if tipo == "Bandeja":
+                df = st.session_state.get("df_final")
+            else:
+                df = st.session_state.df_etiquetas_final
+            if not ref or df is None:
                 return None
-            df = st.session_state.df_etiquetas_final
             fila = df[df["Referencia"].astype(str).str.upper() == str(ref).strip().upper()]
             if fila.empty:
                 return None
@@ -2279,14 +2282,21 @@ elif menu == "🏷️ Etiquetas":
         # ── FORMULARIO NUEVO CAMBIO (I+D y Admin) ────────────
         if ROL in ["admin", "id"]:
             st.markdown("### Registrar nuevo cambio")
+
+            # Tipo fuera del form para que el selectbox de refs se actualice al cambiar
+            tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"],
+                              horizontal=True, key="tipo_cambio_radio")
+
             with st.form("form_cambio_etq", clear_on_submit=True):
-                tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"], horizontal=True)
                 cf1, cf2 = st.columns(2)
                 with cf1:
-                    refs_etq_disp = []
-                    if st.session_state.df_etiquetas_final is not None:
-                        refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_etq_disp)
+                    # Referencias según tipo seleccionado
+                    refs_disp = []
+                    if tipo_c == "Etiqueta" and st.session_state.df_etiquetas_final is not None:
+                        refs_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
+                    elif tipo_c == "Bandeja" and st.session_state.get("df_final") is not None:
+                        refs_disp = sorted(st.session_state.df_final["Referencia"].astype(str).tolist())
+                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_disp)
                     ref_nueva_c = st.text_input("Referencia nueva:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
                     agotar_stock_c = st.checkbox("Agotar stock primero (sin fecha fija)")
@@ -2436,7 +2446,7 @@ elif menu == "🏷️ Etiquetas":
                         if agotar:
                             st.markdown("**Arranque:** Agotar stock primero")
                             # Pista de stock actual de la ref. actual
-                            stock_act = obtener_stock_cantidad(ref)
+                            stock_act = obtener_stock_cantidad(ref, tipo_label)
                             if stock_act is not None:
                                 st.caption(f"📦 Stock actual ref. actual: **{stock_act:,} ud**")
                             # Fecha primera producción
