@@ -2295,7 +2295,14 @@ elif menu == "🏷️ Etiquetas":
                     if tipo_c == "Etiqueta" and st.session_state.df_etiquetas_final is not None:
                         refs_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
                     elif tipo_c == "Bandeja" and st.session_state.get("df_final") is not None:
-                        refs_disp = sorted(st.session_state.df_final["Referencia"].astype(str).tolist())
+                        refs_band = set(st.session_state.df_final["Referencia"].astype(str).tolist())
+                        # Filtrar solo bandejas que aparecen en el archivo de componentes
+                        df_mat_s = st.session_state.get("df_materiales")
+                        if df_mat_s is not None and "Codigo" in df_mat_s.columns:
+                            codigos_comp = set(df_mat_s["Codigo"].astype(str).str.strip().str.upper())
+                            refs_disp = sorted([r for r in refs_band if str(r).strip().upper() in codigos_comp])
+                        else:
+                            refs_disp = sorted(refs_band)
                     ref_cambio = st.selectbox("Referencia actual:", [""] + refs_disp)
                     if ref_cambio:
                         _df_desc = st.session_state.df_etiquetas_final if tipo_c == "Etiqueta" else st.session_state.get("df_final")
