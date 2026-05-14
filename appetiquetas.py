@@ -2297,6 +2297,12 @@ elif menu == "🏷️ Etiquetas":
                     elif tipo_c == "Bandeja" and st.session_state.get("df_final") is not None:
                         refs_disp = sorted(st.session_state.df_final["Referencia"].astype(str).tolist())
                     ref_cambio = st.selectbox("Referencia actual:", [""] + refs_disp)
+                    if ref_cambio:
+                        _df_desc = st.session_state.df_etiquetas_final if tipo_c == "Etiqueta" else st.session_state.get("df_final")
+                        if _df_desc is not None and "Descripcion" in _df_desc.columns:
+                            _fila = _df_desc[_df_desc["Referencia"].astype(str) == ref_cambio]
+                            if not _fila.empty:
+                                st.caption(f"📋 {_fila.iloc[0]['Descripcion']}")
                     ref_nueva_c = st.text_input("Referencia nueva:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
                     agotar_stock_c = st.checkbox("Agotar stock primero (sin fecha fija)")
