@@ -2227,6 +2227,25 @@ elif menu == "🏷️ Etiquetas":
                 return True
             return False
 
+        def confirmar_fecha_prod_fb(doc_id, fecha):
+            db, _ = get_firestore()
+            if db:
+                db.collection("cambios_etiqueta").document(doc_id).update(
+                    {"fecha_primera_produccion": fecha}
+                )
+                return True
+            return False
+
+        def obtener_stock_cantidad(ref):
+            if not ref or st.session_state.df_etiquetas_final is None:
+                return None
+            df = st.session_state.df_etiquetas_final
+            fila = df[df["Referencia"].astype(str).str.upper() == str(ref).strip().upper()]
+            if fila.empty:
+                return None
+            cols = [c for c in ["Stock_interno", "Stock_merca", "Stock_txt"] if c in fila.columns]
+            return int(fila[cols].fillna(0).sum(axis=1).iloc[0]) if cols else None
+
         hoy = datetime.now().date()
 
         # Recordatorios automáticos
@@ -2254,33 +2273,37 @@ elif menu == "🏷️ Etiquetas":
 
         # ── FORMULARIO NUEVO CAMBIO (I+D y Admin) ────────────
         if ROL in ["admin", "id"]:
-            st.markdown("### Registrar nuevo cambio de etiqueta")
+            st.markdown("### Registrar nuevo cambio")
             with st.form("form_cambio_etq", clear_on_submit=True):
+                tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"], horizontal=True)
                 cf1, cf2 = st.columns(2)
                 with cf1:
                     refs_etq_disp = []
                     if st.session_state.df_etiquetas_final is not None:
                         refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia etiqueta actual:", [""] + refs_etq_disp)
-                    ref_nueva_c = st.text_input("Referencia nueva etiqueta:", placeholder="Ej: C12044")
+                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_etq_disp)
+                    ref_nueva_c = st.text_input("Referencia nueva:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
-                    fecha_arranque_c = st.date_input("Fecha de arranque:")
+                    agotar_stock_c = st.checkbox("Agotar stock primero (sin fecha fija)")
+                    fecha_arranque_c = st.date_input("Fecha de arranque (si se conoce):", value=None)
                 with cf2:
                     desc_cambio_c = st.text_area("Descripcion del cambio:", height=80)
                     obs_cambio_c = st.text_area("Observaciones:", height=80)
-                    imagen_cambio_c = st.file_uploader("Imagen nueva etiqueta (opcional):", type=["jpg","jpeg","png","pdf"])
+                    imagen_cambio_c = st.file_uploader("Imagen (opcional):", type=["jpg","jpeg","png","pdf"])
 
                 if st.form_submit_button("Registrar cambio", use_container_width=True):
                     if not ref_cambio:
                         st.error("Selecciona una referencia.")
                     else:
                         data = {
+                            "tipo": tipo_c,
                             "referencia": ref_cambio,
                             "ref_nueva": ref_nueva_c,
                             "descripcion": desc_cambio_c,
                             "motivo": motivo_c,
                             "observaciones": obs_cambio_c,
-                            "fecha_arranque": fecha_arranque_c.strftime("%Y-%m-%d"),
+                            "agotar_stock": agotar_stock_c,
+                            "fecha_arranque": fecha_arranque_c.strftime("%Y-%m-%d") if fecha_arranque_c and not agotar_stock_c else "",
                             "fecha_registro": datetime.now().strftime("%Y-%m-%d %H:%M"),
                             "registrado_por": ROL,
                             "estado": "Pendiente",
@@ -2292,15 +2315,16 @@ elif menu == "🏷️ Etiquetas":
                             data["imagen_tipo"] = imagen_cambio_c.type
                         if guardar_cambio_fb(data):
                             campos_nuevo = {
+                                "Tipo": tipo_c,
                                 "Referencia actual": ref_cambio,
-                                "Ref. nueva etiqueta": ref_nueva_c or "—",
+                                "Ref. nueva": ref_nueva_c or "—",
                                 "Motivo": motivo_c,
-                                "Fecha arranque": str(fecha_arranque_c),
+                                "Fecha arranque": "Agotar stock primero" if agotar_stock_c else str(fecha_arranque_c or "—"),
                                 "Descripción": desc_cambio_c,
                                 "Observaciones": obs_cambio_c,
                                 "Registrado por": ROL,
                             }
-                            enviado, err_mail = enviar_email_cambio(f"Nuevo cambio de etiqueta: {ref_cambio}", campos_nuevo)
+                            enviado, err_mail = enviar_email_cambio(f"Nuevo cambio de {tipo_c.lower()}: {ref_cambio}", campos_nuevo)
                             if enviado:
                                 st.success("Cambio registrado y email enviado.")
                             else:
@@ -2353,12 +2377,14 @@ elif menu == "🏷️ Etiquetas":
         if not cambios:
             st.info("No hay cambios activos registrados.")
         else:
-            fc1, fc2 = st.columns(2)
+            fc1, fc2, fc3 = st.columns(3)
             filtro_estado_c = fc1.selectbox("Estado:", ["Todos", "Pendiente", "En preparacion", "Activo"], key="fec")
-            filtro_ref_c = fc2.text_input("Buscar referencia:", key="frc")
+            filtro_tipo_c   = fc2.selectbox("Tipo:", ["Todos", "Etiqueta", "Bandeja"], key="ftc")
+            filtro_ref_c    = fc3.text_input("Buscar referencia:", key="frc")
 
             cambios_f = [c for c in cambios if
                         (filtro_estado_c == "Todos" or c.get("estado") == filtro_estado_c) and
+                        (filtro_tipo_c == "Todos" or c.get("tipo", "Etiqueta") == filtro_tipo_c) and
                         (not filtro_ref_c or filtro_ref_c.upper() in c.get("referencia","").upper())]
 
             alertas_arr = [c for c in cambios if c.get("estado") == "Pendiente" and c.get("fecha_arranque") and
@@ -2367,12 +2393,14 @@ elif menu == "🏷️ Etiquetas":
                 st.warning(f"⏰ {len(alertas_arr)} cambio(s) con arranque en los próximos 7 días")
 
             for cambio in cambios_f:
-                estado   = cambio.get("estado", "Pendiente")
-                ref      = cambio.get("referencia", "")
-                motivo   = cambio.get("motivo", "")
-                reg_por  = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
-                fecha_reg= cambio.get("fecha_registro","")[:10]
-                ref_nueva= cambio.get("ref_nueva","")
+                estado    = cambio.get("estado", "Pendiente")
+                ref       = cambio.get("referencia", "")
+                motivo    = cambio.get("motivo", "")
+                tipo_label= cambio.get("tipo", "Etiqueta")
+                reg_por   = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                fecha_reg = cambio.get("fecha_registro","")[:10]
+                ref_nueva = cambio.get("ref_nueva","")
+                agotar    = cambio.get("agotar_stock", False)
 
                 dias_txt = ""
                 fecha_color = "normal"
@@ -2385,23 +2413,49 @@ elif menu == "🏷️ Etiquetas":
                             fecha_color = "red"
                     except Exception:
                         pass
+                elif agotar:
+                    dias_txt = " · 🏷️ Agotar stock"
 
-                label_exp = f"{BADGE_MD.get(estado, estado)}{dias_txt}  —  {ref}  ·  {motivo}"
+                tipo_icon = "🏷️" if tipo_label == "Etiqueta" else "📦"
+                label_exp = f"{BADGE_MD.get(estado, estado)}{dias_txt}  —  {tipo_icon} {ref}  ·  {motivo}"
 
                 with st.expander(label_exp):
                     col_left, col_right = st.columns([3, 2])
 
                     with col_left:
-                        st.caption(f"Registrado por {reg_por} · {fecha_reg}")
+                        st.caption(f"{tipo_icon} {tipo_label} · Registrado por {reg_por} · {fecha_reg}")
                         st.markdown(f"**Descripción:** {cambio.get('descripcion','—')}")
                         st.markdown(f"**Observaciones:** {cambio.get('observaciones','—')}")
-                        farr = cambio.get('fecha_arranque','—')
-                        if fecha_color == "red":
-                            st.markdown(f"**Fecha arranque:** :red[{farr}]")
+
+                        # Fecha arranque / agotar stock
+                        if agotar:
+                            st.markdown("**Arranque:** Agotar stock primero")
+                            # Pista de stock actual de la ref. actual
+                            stock_act = obtener_stock_cantidad(ref)
+                            if stock_act is not None:
+                                st.caption(f"📦 Stock actual ref. actual: **{stock_act:,} ud**")
+                            # Fecha primera producción
+                            fecha_primera = cambio.get("fecha_primera_produccion")
+                            if fecha_primera:
+                                st.markdown(f"**Fecha 1ª producción:** :green[{fecha_primera}]")
+                            elif ROL in ["admin", "almacen"]:
+                                st.markdown("**Confirmar fecha 1ª producción:**")
+                                fp_val = st.date_input("", key=f"fp_{cambio['id']}", value=None,
+                                                       label_visibility="collapsed")
+                                if fp_val and st.button("✅ Confirmar fecha", key=f"cfp_{cambio['id']}",
+                                                        use_container_width=True):
+                                    confirmar_fecha_prod_fb(cambio["id"], fp_val.strftime("%Y-%m-%d"))
+                                    st.session_state["email_feedback"] = ("📅 Fecha primera producción confirmada.", "ok")
+                                    st.rerun()
                         else:
-                            st.markdown(f"**Fecha arranque:** {farr}")
+                            farr = cambio.get('fecha_arranque','—')
+                            if fecha_color == "red":
+                                st.markdown(f"**Fecha arranque:** :red[{farr}]")
+                            else:
+                                st.markdown(f"**Fecha arranque:** {farr}")
+
                         if ref_nueva:
-                            st.markdown(f"**Ref. nueva etiqueta:** :blue[{ref_nueva}]")
+                            st.markdown(f"**Ref. nueva {tipo_label.lower()}:** :blue[{ref_nueva}]")
                             stock_result = consultar_stock_ref(ref_nueva)
                             if stock_result == "con_stock":
                                 st.success("✅ Stock disponible")
@@ -2433,16 +2487,18 @@ elif menu == "🏷️ Etiquetas":
                         # Botón notificación manual
                         if st.button("📧 Enviar notificación", key=f"notif_{cambio['id']}", use_container_width=True):
                             campos_notif = {
+                                "Tipo": tipo_label,
                                 "Referencia": ref,
-                                "Ref. nueva etiqueta": ref_nueva or "—",
+                                "Ref. nueva": ref_nueva or "—",
                                 "Motivo": motivo,
                                 "Estado": estado,
-                                "Fecha arranque": cambio.get("fecha_arranque","—"),
+                                "Fecha arranque": "Agotar stock primero" if agotar else cambio.get("fecha_arranque","—"),
+                                "Fecha 1ª producción": cambio.get("fecha_primera_produccion","—") if agotar else "",
                                 "Descripción": cambio.get("descripcion",""),
                                 "Observaciones": cambio.get("observaciones",""),
                             }
                             color_notif = {"Pendiente":"#E74C3C","En preparacion":"#F39C12","Activo":"#27AE60"}.get(estado,"#E74C3C")
-                            ok_mail, err_mail = enviar_email_cambio(f"Notificación cambio etiqueta: {ref}", campos_notif, color_notif, cambio)
+                            ok_mail, err_mail = enviar_email_cambio(f"Notificación cambio {tipo_label.lower()}: {ref}", campos_notif, color_notif, cambio)
                             if ok_mail:
                                 st.success("📧 Notificación enviada ✓")
                             else:
@@ -2457,15 +2513,17 @@ elif menu == "🏷️ Etiquetas":
                             if st.button(btn_txt, key=f"btn_{cambio['id']}", use_container_width=True):
                                 if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
                                     campos_est = {
+                                        "Tipo": tipo_label,
                                         "Referencia": ref,
-                                        "Ref. nueva etiqueta": ref_nueva or "—",
+                                        "Ref. nueva": ref_nueva or "—",
                                         "Motivo": motivo,
                                         "Nuevo estado": nuevo_est,
-                                        "Fecha arranque": cambio.get("fecha_arranque","—"),
+                                        "Fecha arranque": "Agotar stock primero" if agotar else cambio.get("fecha_arranque","—"),
+                                        "Fecha 1ª producción": cambio.get("fecha_primera_produccion","—") if agotar else "",
                                         "Nota gestión": nota_g or "—",
                                     }
                                     color_est = {"En preparacion":"#F39C12","Activo":"#27AE60"}.get(nuevo_est,"#E74C3C")
-                                    ok_mail, err_mail = enviar_email_cambio(f"Cambio etiqueta {ref} → {nuevo_est}", campos_est, color_est, cambio)
+                                    ok_mail, err_mail = enviar_email_cambio(f"Cambio {tipo_label.lower()} {ref} → {nuevo_est}", campos_est, color_est, cambio)
                                     if ok_mail:
                                         st.session_state["email_feedback"] = (f"✅ Estado → {nuevo_est} · Email enviado ✓", "ok")
                                     else:
