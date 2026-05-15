@@ -414,70 +414,56 @@ if 'df_consumos' not in st.session_state:
 
 # ── Carga automática desde Firebase al arrancar ──────────────
 if not st.session_state.firebase_cargado:
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Todas las lecturas declaradas: (session_key, coleccion, doc_id)
+    _CARGAS = [
+        ("df_final",           "bandejas",          "df_final"),
+        ("df_consumos",        "bandejas",           "df_consumos"),
+        ("df_transito",        "bandejas",           "df_transito"),
+        ("df_transito2",       "bandejas",           "df_transito2"),
+        ("df_materiales",      "materiales",         "df_materiales"),
+        ("df_etiquetas_final", "etiquetas",          "df_etiquetas_final"),
+        ("df_ventas",          "etiquetas",          "df_ventas"),
+        ("df_transito_etq",    "etiquetas",          "df_transito_etq"),
+        ("df_envase",          "etiquetas",          "df_envase"),
+        ("df_pedidos",         "pedidos",            "df_pedidos"),
+        ("df_planificacion",   "planificacion",      "df_planificacion"),
+        ("df_paletizacion",    "logistica",          "df_paletizacion"),
+        ("df_stock_pt",        "producto_terminado", "df_stock_pt"),
+        ("df_produccion_pt",   "producto_terminado", "df_produccion_pt"),
+        ("df_plan_produccion", "producto_terminado", "df_plan_produccion"),
+    ]
+
     _fb_errores = []
-    try:
-        df_fb, err = firebase_a_df('bandejas', 'df_final')
-        if df_fb is not None:
-            st.session_state.df_final = df_fb
-        elif err and err not in ("No existe",) and not err.startswith('[{'):
-            _fb_errores.append(f"bandejas/df_final: {err}")
-        df_cons_fb, err = firebase_a_df('bandejas', 'df_consumos')
-        if df_cons_fb is not None:
-            df_cons_fb['Fecha'] = pd.to_datetime(df_cons_fb['Fecha'], errors='coerce')
-            st.session_state.df_consumos = df_cons_fb
-        df_mat_fb, _ = firebase_a_df('materiales', 'df_materiales')
-        if df_mat_fb is not None:
-            st.session_state.df_materiales = df_mat_fb
-        df_etq_fb, _ = firebase_a_df('etiquetas', 'df_etiquetas_final')
-        if df_etq_fb is not None:
-            st.session_state.df_etiquetas_final = df_etq_fb
-        df_vent_fb, _ = firebase_a_df('etiquetas', 'df_ventas')
-        if df_vent_fb is not None:
-            st.session_state.df_ventas = df_vent_fb
+    _resultados = {}
 
-        # Tránsitos
-        for key, coleccion in [
-            ('df_transito',     'bandejas'),
-            ('df_transito2',    'bandejas'),
-            ('df_transito_etq', 'etiquetas'),
-        ]:
-            df_t_fb, _ = firebase_a_df(coleccion, key)
-            if df_t_fb is not None:
-                st.session_state[key] = df_t_fb
+    with st.spinner("Cargando datos..."):
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = {
+                executor.submit(firebase_a_df, col, doc): key
+                for key, col, doc in _CARGAS
+            }
+            for future in as_completed(futures):
+                key = futures[future]
+                try:
+                    df_r, err = future.result()
+                    _resultados[key] = (df_r, err)
+                except Exception as e:
+                    _resultados[key] = (None, str(e))
 
-        # Pedidos
-        df_ped_fb, _ = firebase_a_df('pedidos', 'df_pedidos')
-        if df_ped_fb is not None:
-            df_ped_fb['Fecha_entrega'] = pd.to_datetime(df_ped_fb['Fecha_entrega'], errors='coerce')
-            st.session_state.df_pedidos = df_ped_fb
+    # Aplicar resultados al session_state con postprocesado donde sea necesario
+    for key, col, doc in _CARGAS:
+        df_r, err = _resultados.get(key, (None, None))
+        if df_r is not None:
+            if key == "df_consumos":
+                df_r["Fecha"] = pd.to_datetime(df_r["Fecha"], errors="coerce")
+            elif key == "df_pedidos":
+                df_r["Fecha_entrega"] = pd.to_datetime(df_r["Fecha_entrega"], errors="coerce")
+            st.session_state[key] = df_r
+        elif err and err not in ("No existe",) and not err.startswith("[{"):
+            _fb_errores.append(f"{doc}: {err}")
 
-        # Planificación
-        df_plan_fb, _ = firebase_a_df('planificacion', 'df_planificacion')
-        if df_plan_fb is not None:
-            st.session_state.df_planificacion = df_plan_fb
-
-        # Paletización
-        df_pal_fb, _ = firebase_a_df('logistica', 'df_paletizacion')
-        if df_pal_fb is not None:
-            st.session_state.df_paletizacion = df_pal_fb
-
-        # Producto Terminado
-        df_spt_fb, _ = firebase_a_df('producto_terminado', 'df_stock_pt')
-        if df_spt_fb is not None:
-            st.session_state.df_stock_pt = df_spt_fb
-        df_ppt_fb, _ = firebase_a_df('producto_terminado', 'df_produccion_pt')
-        if df_ppt_fb is not None:
-            st.session_state.df_produccion_pt = df_ppt_fb
-        df_pp_fb, _ = firebase_a_df('producto_terminado', 'df_plan_produccion')
-        if df_pp_fb is not None:
-            st.session_state.df_plan_produccion = df_pp_fb
-
-        # Envase (etiquetas de caja)
-        df_env_fb, _ = firebase_a_df('etiquetas', 'df_envase')
-        if df_env_fb is not None:
-            st.session_state.df_envase = df_env_fb
-    except Exception as e:
-        _fb_errores.append(str(e))
     if _fb_errores:
         st.sidebar.warning(f"⚠️ Firebase: {'; '.join(_fb_errores)}")
     elif st.session_state.df_final is not None:
@@ -764,28 +750,32 @@ def exportar_excel_prof(df, sheet_name="Datos", color_col=None):
     from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
 
-    # Estado → (fondo celda, texto celda, color borde izq fila)
-    ESTADO_COLORS = {
-        "Pendiente":      ("FFE8B4B8", "FF7B241C", "FFC0392B"),
-        "Urgente":        ("FFE8B4B8", "FF7B241C", "FFC0392B"),
-        "Crítico":        ("FFE8B4B8", "FF7B241C", "FFC0392B"),
-        "Sin stock":      ("FFE8B4B8", "FF7B241C", "FFC0392B"),
-        "En preparacion": ("FFFDE8A0", "FF7D6608", "FFD4AC0D"),
-        "En Curso":       ("FFFDE8A0", "FF7D6608", "FFD4AC0D"),
-        "Bajo stock":     ("FFFDE8A0", "FF7D6608", "FFD4AC0D"),
-        "Activo":         ("FFABEBC6", "FF1A5E38", "FF27AE60"),
-        "OK":             ("FFABEBC6", "FF1A5E38", "FF27AE60"),
-        "Con stock":      ("FFABEBC6", "FF1A5E38", "FF27AE60"),
-    }
-    # Color de fila (col Color hex app) → (fondo fila, texto fila, borde izq)
+    # (fondo fila, texto fila, color borde izq)
+    ROJO    = ("FFFCE4E6", "FF7B241C", "FFC0392B")
+    AMARILLO= ("FFFEF4CC", "FF7D6608", "FFD4AC0D")
+    VERDE   = ("FFD6F0E0", "FF1A5E38", "FF27AE60")
+
+    # Colores hex app → triple
     APP_COLOR_MAP = {
-        "#721c24": ("FFFCE4E6", "FF7B241C", "FFC0392B"),
-        "#856404": ("FFFEF4CC", "FF7D6608", "FFD4AC0D"),
-        "#155724": ("FFD6F0E0", "FF1A5E38", "FF27AE60"),
-        "#FDEDEC": ("FFFCE4E6", "FF7B241C", "FFC0392B"),
-        "#FEF9E7": ("FFFEF4CC", "FF7D6608", "FFD4AC0D"),
-        "#EAFAF1": ("FFD6F0E0", "FF1A5E38", "FF27AE60"),
+        "#721c24": ROJO,    "#FDEDEC": ROJO,
+        "#856404": AMARILLO,"#FEF9E7": AMARILLO,
+        "#155724": VERDE,   "#EAFAF1": VERDE,
     }
+
+    def triple_para_valor(val):
+        """Devuelve triple de color según emoji prefix o texto exacto."""
+        s = str(val)
+        if s.startswith("🔴"):  return ROJO
+        if s.startswith("🟡"):  return AMARILLO
+        if s.startswith("🟢"):  return VERDE
+        # textos sin emoji
+        if any(k in s for k in ("Pendiente","Urgente","Crítico","Sin stock","PELIGRO","FALTA")):
+            return ROJO
+        if any(k in s for k in ("preparacion","En Curso","Bajo stock","AVISO")):
+            return AMARILLO
+        if any(k in s for k in ("Activo","OK","Con stock")):
+            return VERDE
+        return None
 
     HDR_BG       = "FF2C3E50"
     HDR_FG       = "FFFFFFFF"
@@ -796,9 +786,21 @@ def exportar_excel_prof(df, sheet_name="Datos", color_col=None):
     thin   = Side(style="thin",   color=BORDER_COLOR)
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
 
+    # Auto-detectar columna Color si existe y no se pasó
+    cols_df = df.columns.tolist()
+    if not color_col and "Color" in cols_df:
+        color_col = "Color"
+
+    # Exportar sin columna Color (es interna, no interesa en el archivo)
+    cols_export = [c for c in cols_df if c != "Color"]
+    df_exp = df[cols_export].copy()
+
+    estado_idx = cols_export.index("Estado") + 1 if "Estado" in cols_export else None
+    color_src  = df[color_col].tolist() if color_col and color_col in cols_df else None
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name=sheet_name)
+        df_exp.to_excel(writer, index=False, sheet_name=sheet_name)
         ws = writer.sheets[sheet_name]
 
         # Cabecera
@@ -809,42 +811,33 @@ def exportar_excel_prof(df, sheet_name="Datos", color_col=None):
             cell.border    = border
         ws.row_dimensions[1].height = 22
 
-        cols = df.columns.tolist()
-        estado_idx = cols.index("Estado") + 1 if "Estado" in cols else None
-        color_idx  = cols.index(color_col) + 1 if color_col and color_col in cols else None
-
         for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_row=ws.max_row), start=2):
+            i = row_idx - 2  # índice dataframe
+
+            # Determinar triple de color: primero col Color, luego col Estado
+            triple = None
+            if color_src:
+                triple = APP_COLOR_MAP.get(str(color_src[i]))
+            if not triple and estado_idx:
+                triple = triple_para_valor(df_exp.iloc[i, estado_idx - 1])
+
             bg           = ROW_ALT if row_idx % 2 == 0 else ROW_EVEN
             fill_default = PatternFill("solid", fgColor=bg)
             font_default = Font(size=10)
 
-            # Determinar color de estado de la fila
-            row_color_triple = None
-            if color_idx:
-                raw = str(df.iloc[row_idx - 2, color_idx - 1])
-                row_color_triple = APP_COLOR_MAP.get(raw)
-            if not row_color_triple and estado_idx:
-                estado_val = str(df.iloc[row_idx - 2, estado_idx - 1])
-                row_color_triple = ESTADO_COLORS.get(estado_val)
-
-            # Borde izquierdo coloreado si hay estado
-            if row_color_triple:
-                accent = Side(style="medium", color=row_color_triple[2])
-                border_accent = Border(left=accent, right=thin, top=thin, bottom=thin)
-            else:
-                border_accent = border
+            accent = Side(style="medium", color=triple[2]) if triple else thin
+            borde_fila = Border(left=accent, right=thin, top=thin, bottom=thin)
 
             for cell in row:
-                cell.fill      = PatternFill("solid", fgColor=row_color_triple[0]) if row_color_triple else fill_default
-                cell.font      = Font(size=10, color=row_color_triple[1]) if row_color_triple else font_default
-                cell.border    = border_accent
+                cell.fill      = PatternFill("solid", fgColor=triple[0]) if triple else fill_default
+                cell.font      = Font(size=10, color=triple[1]) if triple else font_default
+                cell.border    = borde_fila
                 cell.alignment = Alignment(vertical="center")
 
-            # Celda Estado: fondo más marcado con texto bold
-            if estado_idx and row_color_triple:
-                cell_e       = ws.cell(row=row_idx, column=estado_idx)
-                cell_e.fill  = PatternFill("solid", fgColor=row_color_triple[0])
-                cell_e.font  = Font(size=10, color=row_color_triple[1], bold=True)
+            # Celda Estado en negrita
+            if estado_idx and triple:
+                ce = ws.cell(row=row_idx, column=estado_idx)
+                ce.font = Font(size=10, color=triple[1], bold=True)
 
         # Anchos automáticos
         for col_idx, col_cells in enumerate(ws.columns, start=1):
@@ -2234,10 +2227,13 @@ elif menu == "🏷️ Etiquetas":
                 return True
             return False
 
-        def obtener_stock_cantidad(ref):
-            if not ref or st.session_state.df_etiquetas_final is None:
+        def obtener_stock_cantidad(ref, tipo="Etiqueta"):
+            if tipo == "Bandeja":
+                df = st.session_state.get("df_final")
+            else:
+                df = st.session_state.df_etiquetas_final
+            if not ref or df is None:
                 return None
-            df = st.session_state.df_etiquetas_final
             fila = df[df["Referencia"].astype(str).str.upper() == str(ref).strip().upper()]
             if fila.empty:
                 return None
@@ -2272,14 +2268,34 @@ elif menu == "🏷️ Etiquetas":
         # ── FORMULARIO NUEVO CAMBIO (I+D y Admin) ────────────
         if ROL in ["admin", "id"]:
             st.markdown("### Registrar nuevo cambio")
+
+            # Tipo fuera del form para que el selectbox de refs se actualice al cambiar
+            tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"],
+                              horizontal=True, key="tipo_cambio_radio")
+
             with st.form("form_cambio_etq", clear_on_submit=True):
-                tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"], horizontal=True)
                 cf1, cf2 = st.columns(2)
                 with cf1:
-                    refs_etq_disp = []
-                    if st.session_state.df_etiquetas_final is not None:
-                        refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_etq_disp)
+                    # Referencias según tipo seleccionado
+                    refs_disp = []
+                    if tipo_c == "Etiqueta" and st.session_state.df_etiquetas_final is not None:
+                        refs_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
+                    elif tipo_c == "Bandeja" and st.session_state.get("df_final") is not None:
+                        refs_band = set(st.session_state.df_final["Referencia"].astype(str).tolist())
+                        # Filtrar solo bandejas que aparecen en el archivo de componentes
+                        df_mat_s = st.session_state.get("df_materiales")
+                        if df_mat_s is not None and "Codigo" in df_mat_s.columns:
+                            codigos_comp = set(df_mat_s["Codigo"].astype(str).str.strip().str.upper())
+                            refs_disp = sorted([r for r in refs_band if str(r).strip().upper() in codigos_comp])
+                        else:
+                            refs_disp = sorted(refs_band)
+                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_disp)
+                    if ref_cambio:
+                        _df_desc = st.session_state.df_etiquetas_final if tipo_c == "Etiqueta" else st.session_state.get("df_final")
+                        if _df_desc is not None and "Descripcion" in _df_desc.columns:
+                            _fila = _df_desc[_df_desc["Referencia"].astype(str) == ref_cambio]
+                            if not _fila.empty:
+                                st.caption(f"📋 {_fila.iloc[0]['Descripcion']}")
                     ref_nueva_c = st.text_input("Referencia nueva:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
                     agotar_stock_c = st.checkbox("Agotar stock primero (sin fecha fija)")
@@ -2429,7 +2445,7 @@ elif menu == "🏷️ Etiquetas":
                         if agotar:
                             st.markdown("**Arranque:** Agotar stock primero")
                             # Pista de stock actual de la ref. actual
-                            stock_act = obtener_stock_cantidad(ref)
+                            stock_act = obtener_stock_cantidad(ref, tipo_label)
                             if stock_act is not None:
                                 st.caption(f"📦 Stock actual ref. actual: **{stock_act:,} ud**")
                             # Fecha primera producción
