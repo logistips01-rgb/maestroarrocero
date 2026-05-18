@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Arroces de Autor · IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ── 1. VARIABLES Y RESET ─────────────────────────────────── */
+:root {
+  --rice:        #C8864A;
+  --rice-dark:   #8B5A2B;
+  --rice-light:  #F5E6D3;
+  --saffron:     #E8A020;
+  --success:     #4A7C59;
+  --r:           12px;
+
+  --bg:          #C8BFB0;
+  --surface:     #BEB5A5;
+  --text:        #2A1F14;
+  --text-muted:  #7A6555;
+  --border:      rgba(139,90,43,0.15);
+  --nav-bg:      #2A1F14;
+  --nav-text:    #ffffff;
+  --bottom-bg:   #B8AF9F;
+  --bottom-border: rgba(139,90,43,0.15);
+  --card-bg:     rgba(255,255,255,.45);
+  --input-bg:    #ffffff;
+  --result-bg:   #FFF8F0;
+}
+
+body.dark {
+  --bg:           #0F1923;
+  --surface:      #151E28;
+  --text:         #F0EBE3;
+  --text-muted:   #8A9BAC;
+  --border:       rgba(255,255,255,0.08);
+  --nav-bg:       #0A1018;
+  --nav-text:     #ffffff;
+  --bottom-bg:    #0A1018;
+  --bottom-border: rgba(255,255,255,0.07);
+  --card-bg:      rgba(255,255,255,0.04);
+  --input-bg:     rgba(255,255,255,0.06);
+  --result-bg:    rgba(255,255,255,0.04);
+  --rice-light:   rgba(200,134,74,0.15);
+  --rice-dark:    #E8A020;
+}
+
+body, nav, .card, input, select, textarea, .btn, .style-btn, .inner-tab {
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── 2. NAV ───────────────────────────────────────────────── */
+nav {
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-logo span { color: var(--saffron); }
+.nav-back {
+  background: none;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: .75rem;
+  color: rgba(255,255,255,.75);
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+}
+.theme-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: .75rem;
+  color: rgba(255,255,255,.75);
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── 3. LAYOUT ────────────────────────────────────────────── */
+.page { padding: 1.5rem 1rem 5rem; max-width: 680px; margin: 0 auto; }
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  margin-bottom: .25rem;
+}
+.section-title span { color: var(--rice); }
+.section-sub { font-size: .85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+
+/* ── 4. FORMULARIO ────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.1rem;
+  margin-bottom: 1rem;
+}
+.card-label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: .6rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+label { display: block; font-size: .83rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+
+input[type=text],
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .93rem;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  resize: none;
+}
+input[type=text]:focus, textarea:focus { border-color: var(--rice); }
+
+/* Selector comensales */
+.comensales-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: .25rem;
+}
+.comensal-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.comensal-btn:hover { border-color: var(--rice); color: var(--rice); }
+.comensal-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--rice);
+  min-width: 28px;
+  text-align: center;
+}
+.comensal-label { font-size: .82rem; color: var(--text-muted); }
+
+/* Selector estilo */
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  margin-top: .25rem;
+}
+.style-btn {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem .5rem;
+  cursor: pointer;
+  background: var(--input-bg);
+  text-align: center;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.style-btn:hover { border-color: var(--rice); }
+.style-btn.active {
+  border-color: var(--rice);
+  background: var(--rice-light);
+}
+.style-btn .sb-icon { font-size: 1.4rem; margin-bottom: .25rem; }
+.style-btn .sb-name { font-size: .82rem; font-weight: 500; color: var(--text); }
+.style-btn .sb-desc { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+.style-btn.active .sb-name { color: var(--rice-dark); }
+
+/* ── 5. BOTONES ───────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--rice);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn:hover { background: var(--rice-dark); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-full { width: 100%; }
+.btn-secondary {
+  background: transparent;
+  color: var(--rice);
+  border: 1.5px solid var(--rice);
+}
+.btn-secondary:hover { background: var(--rice-light); }
+.btn-sm { padding: 6px 14px; font-size: .8rem; }
+
+/* ── 6. ESTADOS DE LA UI ──────────────────────────────────── */
+
+/* --- Spinner --- */
+.spinner-wrap {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  gap: 1rem;
+  text-align: center;
+}
+.spinner-wrap.visible { display: flex; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--rice);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-msg { font-size: .88rem; color: var(--text-muted); max-width: 220px; line-height: 1.5; }
+
+/* --- Concepto (paso intermedio) --- */
+.concept-box {
+  display: none;
+  background: var(--result-bg);
+  border: 1.5px solid var(--rice);
+  border-radius: var(--r);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+.concept-box.visible { display: block; }
+.concept-eyebrow {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--saffron);
+  margin-bottom: .5rem;
+}
+.concept-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+.concept-actions { display: flex; gap: .6rem; }
+
+/* --- Receta resultado --- */
+.result-wrap { display: none; }
+.result-wrap.visible { display: block; }
+
+.recipe-image-wrap {
+  width: calc(100% + 2rem);
+  margin: 0 -1rem 1.25rem;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #2a1a0a;
+}
+.recipe-image-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(.75);
+}
+.recipe-image-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(42,26,10,.95) 0%, transparent 60%);
+}
+.recipe-image-ct {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1rem 1.1rem .9rem;
+}
+.recipe-eyebrow {
+  font-size: .68rem; color: var(--saffron);
+  letter-spacing: .12em; text-transform: uppercase; margin-bottom: .3rem;
+}
+.recipe-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; color: #fff;
+  line-height: 1.2; margin-bottom: .3rem;
+}
+.recipe-meta { font-size: .75rem; color: rgba(255,255,255,.5); }
+
+.recipe-image-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: .5rem;
+}
+.image-spinner {
+  width: 32px; height: 32px;
+  border: 2px solid rgba(255,255,255,.2);
+  border-top-color: var(--saffron);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.image-spinner-txt { font-size: .75rem; color: rgba(255,255,255,.4); }
+
+/* Secciones de receta */
+.recipe-section { margin-bottom: 1.25rem; }
+.recipe-section-title {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--rice);
+  margin-bottom: .75rem;
+  padding-bottom: .4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Ingredientes */
+.ing-list { list-style: none; }
+.ing-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .88rem;
+}
+.ing-list li:last-child { border-bottom: none; }
+.ing-amount { font-weight: 500; color: var(--rice); white-space: nowrap; margin-left: 1rem; }
+
+/* Pasos */
+.step-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: .75rem;
+}
+.step-inner { display: flex; }
+.step-num {
+  background: var(--rice);
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  width: 46px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-body { padding: .875rem; flex: 1; }
+.step-body h3 { font-size: .9rem; font-weight: 500; margin-bottom: .2rem; }
+.step-body p { font-size: .83rem; color: var(--text-muted); line-height: 1.6; }
+.step-timing {
+  font-size: .72rem;
+  background: var(--rice-light);
+  color: var(--rice-dark);
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: .4rem;
+}
+
+/* Tip de presentación */
+.tip-box {
+  background: linear-gradient(135deg, rgba(232,160,32,.08), rgba(200,134,74,.06));
+  border: 1px solid rgba(232,160,32,.25);
+  border-radius: var(--r);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+.tip-box .tip-icon { font-size: 1.3rem; margin-bottom: .4rem; }
+.tip-box .tip-title { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--saffron); margin-bottom: .4rem; }
+.tip-box p { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+/* Nueva receta */
+.reset-row { text-align: center; padding-top: .5rem; }
+
+/* ── 7. MODO PRUEBAS ──────────────────────────────────────── */
+.dev-notice {
+  background: rgba(232,160,32,.1);
+  border: 1px solid rgba(232,160,32,.3);
+  border-radius: 8px;
+  padding: .7rem 1rem;
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* ── 8. DIVIDER ───────────────────────────────────────────── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-back">← Volver</a>
+  <div class="nav-logo">🍚 Arroces de <span>Autor</span></div>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙 Oscuro</button>
+</nav>
+
+<div class="page">
+
+  <!-- Cabecera -->
+  <div style="margin-bottom:1.5rem">
+    <div class="section-title">Tu arroz de <span>autor</span></div>
+    <div class="section-sub">Dime qué tienes y cómo te gusta. La IA diseñará una receta con criterio culinario: fondo, sofrito, vestido y presentación.</div>
+  </div>
+
+  <!-- Aviso modo pruebas -->
+  <div class="dev-notice">
+    ⚗️ <span><strong>Modo pruebas local</strong> — introduce tu API key de Anthropic para generar recetas reales. No se guarda ni se envía a ningún servidor.</span>
+  </div>
+
+  <!-- Formulario -->
+  <div id="form-section">
+
+    <!-- API Key (solo pruebas) -->
+    <div class="card">
+      <div class="card-label">🔑 API Key (pruebas locales)</div>
+      <input type="text" id="api-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+    </div>
+
+    <!-- Ingredientes -->
+    <div class="card">
+      <div class="card-label">🧅 ¿Qué tienes en casa?</div>
+      <textarea id="ingredientes" rows="3" placeholder="Ej: gambas, pimiento rojo, caldo de pescado, azafrán, tomate..."></textarea>
+      <div style="font-size:.75rem;color:var(--text-muted);margin-top:-.2rem">Sé específico: cuantos más detalles, mejor receta.</div>
+    </div>
+
+    <!-- Comensales -->
+    <div class="card">
+      <div class="card-label">👥 Comensales</div>
+      <div class="comensales-row">
+        <button class="comensal-btn" onclick="changeComensales(-1)">−</button>
+        <div class="comensal-count" id="comensales-display">4</div>
+        <div class="comensal-label">personas</div>
+        <button class="comensal-btn" onclick="changeComensales(1)">+</button>
+      </div>
+    </div>
+
+    <!-- Estilo -->
+    <div class="card">
+      <div class="card-label">🍲 Estilo de arroz</div>
+      <div class="style-grid">
+        <div class="style-btn active" data-style="meloso" onclick="selectStyle(this)">
+          <div class="sb-icon">🌊</div>
+          <div class="sb-name">Meloso</div>
+          <div class="sb-desc">cremoso, untuoso</div>
+        </div>
+        <div class="style-btn" data-style="seco" onclick="selectStyle(this)">
+          <div class="sb-icon">✨</div>
+          <div class="sb-name">Seco</div>
+          <div class="sb-desc">socarrat, grano suelto</div>
+        </div>
+        <div class="style-btn" data-style="caldoso" onclick="selectStyle(this)">
+          <div class="sb-icon">🥣</div>
+          <div class="sb-name">Caldoso</div>
+          <div class="sb-desc">casi una sopa</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuéntame más -->
+    <div class="card">
+      <div class="card-label">💬 Cuéntame más <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem">(opcional)</span></div>
+      <textarea id="extra" rows="2" placeholder="Ej: me gustan los sabores potentes de mar, sin picante, es para una cena especial..."></textarea>
+    </div>
+
+    <!-- Botón -->
+    <button class="btn btn-full" id="btn-generar" onclick="generarConcepto()" style="font-size:.95rem;padding:14px">
+      ✨ Crear mi receta
+    </button>
+
+  </div>
+
+  <!-- Spinner concepto -->
+  <div class="spinner-wrap" id="spinner-concepto">
+    <div class="spinner"></div>
+    <div class="spinner-msg">Analizando ingredientes y diseñando el concepto…</div>
+  </div>
+
+  <!-- Concepto para confirmar -->
+  <div class="concept-box" id="concept-box">
+    <div class="concept-eyebrow">💡 Propuesta de receta</div>
+    <div class="concept-text" id="concept-text"></div>
+    <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem">¿Te convence esta dirección? Puedes ajustar o lanzar la receta completa.</div>
+    <div class="concept-actions">
+      <button class="btn" onclick="generarRecetaCompleta()" style="flex:1">🔥 Generar receta completa</button>
+      <button class="btn btn-secondary btn-sm" onclick="resetear()">Cambiar</button>
+    </div>
+  </div>
+
+  <!-- Spinner receta -->
+  <div class="spinner-wrap" id="spinner-receta">
+    <div class="spinner"></div>
+    <div class="spinner-msg" id="spinner-receta-msg">Componiendo la receta y generando la imagen…</div>
+  </div>
+
+  <!-- Resultado final -->
+  <div class="result-wrap" id="result-wrap">
+
+    <!-- Imagen de presentación -->
+    <div class="recipe-image-wrap" id="recipe-image-wrap">
+      <div class="recipe-image-placeholder" id="image-placeholder">
+        <div class="image-spinner"></div>
+        <div class="image-spinner-txt">Generando imagen…</div>
+      </div>
+      <div class="recipe-image-grad"></div>
+      <div class="recipe-image-ct">
+        <div class="recipe-eyebrow">Receta de autor · IA</div>
+        <div class="recipe-title" id="recipe-title">—</div>
+        <div class="recipe-meta" id="recipe-meta">—</div>
+      </div>
+    </div>
+
+    <!-- Ingredientes -->
+    <div class="recipe-section">
+      <div class="recipe-section-title">Ingredientes</div>
+      <ul class="ing-list" id="ing-list"></ul>
+    </div>
+
+    <hr class="divider">
+
+    <!-- El fondo -->
+    <div class="recipe-section">
+      <div class="recipe-section-title">El fondo</div>
+      <div id="fondo-content" style="font-size:.88rem;color:var(--text-muted);line-height:1.7"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- El sofrito -->
+    <div class="recipe-section">
+      <div class="recipe-section-title">El sofrito</div>
+      <div id="sofrito-content" style="font-size:.88rem;color:var(--text-muted);line-height:1.7"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Pasos -->
+    <div class="recipe-section">
+      <div class="recipe-section-title">Elaboración paso a paso</div>
+      <div id="pasos-list"></div>
+    </div>
+
+    <!-- Presentación / vestido -->
+    <div class="tip-box" id="presentacion-box">
+      <div class="tip-icon">🎨</div>
+      <div class="tip-title">Cómo vestirlo</div>
+      <p id="presentacion-text"></p>
+    </div>
+
+    <!-- Nueva receta -->
+    <div class="reset-row">
+      <button class="btn btn-secondary" onclick="resetear()">🔄 Nueva receta</button>
+    </div>
+
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const CONFIG = {
+  // En producción: URL del Cloudflare Worker
+  // En pruebas locales: llama a la API de Anthropic directamente
+  workerUrl: null, // se rellenará al desplegar
+  localMode: true,
+};
+
+let comensales = 4;
+let estiloSeleccionado = 'meloso';
+let conceptoActual = '';
+let recetaGenerada = null;
+
+// ── Tema ──────────────────────────────────────────────────
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const btn = document.querySelector('.theme-toggle');
+  btn.textContent = document.body.classList.contains('dark') ? '☀️ Claro' : '🌙 Oscuro';
+}
+
+// ── Comensales ────────────────────────────────────────────
+function changeComensales(delta) {
+  comensales = Math.max(1, Math.min(12, comensales + delta));
+  document.getElementById('comensales-display').textContent = comensales;
+}
+
+// ── Estilo ────────────────────────────────────────────────
+function selectStyle(el) {
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  estiloSeleccionado = el.dataset.style;
+}
+
+// ── Llamada a la API ──────────────────────────────────────
+async function llamarClaude(messages, maxTokens = 600) {
+  const apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey) throw new Error('Introduce tu API key de Anthropic para continuar.');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-client-side-api-key-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: maxTokens,
+      system: SYSTEM_PROMPT,
+      messages,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+// ── Sistema prompt ────────────────────────────────────────
+const SYSTEM_PROMPT = `Eres el Maestro Arrocero, un chef especializado en arroces mediterráneos con criterio culinario exigente.
+
+REGLAS DE COHERENCIA:
+- Si los ingredientes no tienen sentido juntos (ej: curry con azafrán y vino blanco), señálalo y propón ajustes antes de continuar.
+- Respeta las familias de sabores: mar con mar, tierra con tierra. Las mezclas deben ser intencionadas.
+- No generes recetas con ingredientes que entren en conflicto de sabor o técnica.
+
+ESTILO:
+- Nombres creativos y evocadores (ej: "Arroz meloso de galeras con aire de ñora y mar abierto")
+- Técnica rigorosa: fondos, sofritos lentos, puntos de cocción precisos
+- Responde siempre en español`;
+
+// ── Paso 1: Generar concepto ──────────────────────────────
+async function generarConcepto() {
+  const ingredientes = document.getElementById('ingredientes').value.trim();
+  if (!ingredientes) {
+    alert('Escribe al menos algunos ingredientes.');
+    return;
+  }
+
+  const extra = document.getElementById('extra').value.trim();
+
+  show('spinner-concepto');
+  hide('form-section');
+  document.getElementById('btn-generar').disabled = true;
+
+  const prompt = `Ingredientes disponibles: ${ingredientes}
+Comensales: ${comensales}
+Estilo deseado: arroz ${estiloSeleccionado}
+${extra ? `Preferencias: ${extra}` : ''}
+
+TAREA: Antes de generar la receta completa, evalúa la coherencia de los ingredientes. Si hay incompatibilidades, explícalo brevemente y sugiere qué cambiar.
+
+Si todo es coherente, responde ÚNICAMENTE con una frase de concepto (máximo 2 líneas) describiendo la receta que vas a crear: nombre creativo + idea del plato. Sin más texto.
+
+Ejemplo de respuesta correcta: "Arroz meloso de rape y gambas al azafrán con fondo de cabezas tostadas — el mar en estado puro, cremoso y con socarrat en los bordes."`;
+
+  try {
+    const respuesta = await llamarClaude([{ role: 'user', content: prompt }], 300);
+    conceptoActual = respuesta.trim();
+    document.getElementById('concept-text').textContent = conceptoActual;
+    hide('spinner-concepto');
+    show('concept-box');
+  } catch (e) {
+    hide('spinner-concepto');
+    show('form-section');
+    document.getElementById('btn-generar').disabled = false;
+    alert('Error: ' + e.message);
+  }
+}
+
+// ── Paso 2: Receta completa ───────────────────────────────
+async function generarRecetaCompleta() {
+  const ingredientes = document.getElementById('ingredientes').value.trim();
+  const extra = document.getElementById('extra').value.trim();
+
+  hide('concept-box');
+  show('spinner-receta');
+
+  const prompt = `Ingredientes disponibles: ${ingredientes}
+Comensales: ${comensales}
+Estilo: arroz ${estiloSeleccionado}
+${extra ? `Preferencias: ${extra}` : ''}
+Concepto acordado: ${conceptoActual}
+
+Genera la receta completa en JSON con EXACTAMENTE esta estructura:
+{
+  "titulo": "Nombre creativo",
+  "subtitulo": "breve descripción poética (1 línea)",
+  "tiempo_total": "X min",
+  "dificultad": "fácil|media|alta",
+  "ingredientes": [
+    {"nombre": "...", "cantidad": "..."},
+    ...
+  ],
+  "fondo": "Párrafo explicando cómo hacer el fondo: ingredientes, técnica, tiempo, proporciones de agua.",
+  "sofrito": "Párrafo explicando el sofrito: orden, tiempos, punto exacto.",
+  "pasos": [
+    {"titulo": "...", "descripcion": "...", "tiempo": "X min"},
+    ...
+  ],
+  "presentacion": "Cómo emplatar y vestir el arroz: el toque de autor final.",
+  "imagen_prompt": "Prompt en inglés para generar imagen del plato terminado. Estilo: food photography, natural light, editorial, mediterranean rice dish, dark moody background."
+}
+
+Responde SOLO con el JSON, sin texto adicional.`;
+
+  try {
+    const respuesta = await llamarClaude([{ role: 'user', content: prompt }], 2000);
+    const json = respuesta.replace(/```json\n?|\n?```/g, '').trim();
+    recetaGenerada = JSON.parse(json);
+
+    mostrarReceta(recetaGenerada);
+    hide('spinner-receta');
+    show('result-wrap');
+
+    // Lanzar generación de imagen en paralelo
+    generarImagen(recetaGenerada.imagen_prompt);
+
+  } catch (e) {
+    hide('spinner-receta');
+    show('concept-box');
+    alert('Error generando la receta: ' + e.message);
+  }
+}
+
+// ── Mostrar receta ────────────────────────────────────────
+function mostrarReceta(r) {
+  document.getElementById('recipe-title').textContent = r.titulo;
+  document.getElementById('recipe-meta').textContent = `${r.tiempo_total} · ${r.dificultad} · ${comensales} personas`;
+
+  // Ingredientes
+  const ingList = document.getElementById('ing-list');
+  ingList.innerHTML = r.ingredientes.map(i =>
+    `<li><span>${i.nombre}</span><span class="ing-amount">${i.cantidad}</span></li>`
+  ).join('');
+
+  // Fondo y sofrito
+  document.getElementById('fondo-content').textContent = r.fondo;
+  document.getElementById('sofrito-content').textContent = r.sofrito;
+
+  // Pasos
+  document.getElementById('pasos-list').innerHTML = r.pasos.map((p, i) => `
+    <div class="step-card">
+      <div class="step-inner">
+        <div class="step-num">${i + 1}</div>
+        <div class="step-body">
+          <h3>${p.titulo}</h3>
+          <p>${p.descripcion}</p>
+          ${p.tiempo ? `<span class="step-timing">⏱ ${p.tiempo}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Presentación
+  document.getElementById('presentacion-text').textContent = r.presentacion;
+}
+
+// ── Generar imagen (Cloudflare AI / placeholder local) ────
+async function generarImagen(prompt) {
+  // En modo local no hay worker, mostramos placeholder decorativo
+  if (CONFIG.localMode || !CONFIG.workerUrl) {
+    setTimeout(() => {
+      const ph = document.getElementById('image-placeholder');
+      ph.innerHTML = `<div style="font-size:3rem">🍚</div><div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.4rem">Imagen disponible con worker desplegado</div>`;
+    }, 1200);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${CONFIG.workerUrl}/imagen`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!res.ok) throw new Error('Error generando imagen');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const wrap = document.getElementById('recipe-image-wrap');
+    const ph = document.getElementById('image-placeholder');
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = recetaGenerada?.titulo || 'Receta';
+    wrap.insertBefore(img, wrap.firstChild);
+    ph.remove();
+  } catch {
+    const ph = document.getElementById('image-placeholder');
+    ph.innerHTML = `<div style="font-size:2.5rem">🍚</div>`;
+  }
+}
+
+// ── Reset ─────────────────────────────────────────────────
+function resetear() {
+  conceptoActual = '';
+  recetaGenerada = null;
+  hide('concept-box');
+  hide('result-wrap');
+  hide('spinner-concepto');
+  hide('spinner-receta');
+  show('form-section');
+  document.getElementById('btn-generar').disabled = false;
+
+  // Resetear imagen placeholder
+  document.getElementById('image-placeholder').innerHTML = `
+    <div class="image-spinner"></div>
+    <div class="image-spinner-txt">Generando imagen…</div>`;
+  const oldImg = document.querySelector('.recipe-image-wrap img');
+  if (oldImg) oldImg.remove();
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function show(id) { document.getElementById(id).classList.add('visible'); }
+function hide(id) { document.getElementById(id).classList.remove('visible'); }
+</script>
+</body>
+</html>

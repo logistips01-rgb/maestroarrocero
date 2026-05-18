@@ -276,6 +276,56 @@ header[data-testid="stHeader"] { background: #ECF0F1 !important; border-bottom: 
 /* Expanders */
 [data-testid="stExpander"] { background: white !important; border: 1px solid #D5D8DC !important; border-radius: 8px !important; }
 
+/* Form labels → uppercase pequeño como el mockup */
+.stTextInput label, .stTextArea label, .stSelectbox label,
+.stDateInput label, .stFileUploader label {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #7F8C8D !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Inputs con borde fino */
+.stTextInput input, .stTextArea textarea {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  background: white !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus {
+  border-color: #E74C3C !important;
+  box-shadow: 0 0 0 2px rgba(231,76,60,0.15) !important;
+}
+
+/* Selectbox borde fino */
+.stSelectbox > div > div {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Date input */
+.stDateInput input {
+  border: 0.5px solid #D5D8DC !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+}
+
+/* Botón submit rojo */
+[data-testid="stFormSubmitButton"] button {
+  background: #E74C3C !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 10px !important;
+}
+[data-testid="stFormSubmitButton"] button:hover {
+  background: #C0392B !important;
+}
+
 /* Divider */
 hr { border-color: #D5D8DC !important; }
 </style>
@@ -364,70 +414,56 @@ if 'df_consumos' not in st.session_state:
 
 # ── Carga automática desde Firebase al arrancar ──────────────
 if not st.session_state.firebase_cargado:
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Todas las lecturas declaradas: (session_key, coleccion, doc_id)
+    _CARGAS = [
+        ("df_final",           "bandejas",          "df_final"),
+        ("df_consumos",        "bandejas",           "df_consumos"),
+        ("df_transito",        "bandejas",           "df_transito"),
+        ("df_transito2",       "bandejas",           "df_transito2"),
+        ("df_materiales",      "materiales",         "df_materiales"),
+        ("df_etiquetas_final", "etiquetas",          "df_etiquetas_final"),
+        ("df_ventas",          "etiquetas",          "df_ventas"),
+        ("df_transito_etq",    "etiquetas",          "df_transito_etq"),
+        ("df_envase",          "etiquetas",          "df_envase"),
+        ("df_pedidos",         "pedidos",            "df_pedidos"),
+        ("df_planificacion",   "planificacion",      "df_planificacion"),
+        ("df_paletizacion",    "logistica",          "df_paletizacion"),
+        ("df_stock_pt",        "producto_terminado", "df_stock_pt"),
+        ("df_produccion_pt",   "producto_terminado", "df_produccion_pt"),
+        ("df_plan_produccion", "producto_terminado", "df_plan_produccion"),
+    ]
+
     _fb_errores = []
-    try:
-        df_fb, err = firebase_a_df('bandejas', 'df_final')
-        if df_fb is not None:
-            st.session_state.df_final = df_fb
-        elif err and err not in ("No existe",) and not err.startswith('[{'):
-            _fb_errores.append(f"bandejas/df_final: {err}")
-        df_cons_fb, err = firebase_a_df('bandejas', 'df_consumos')
-        if df_cons_fb is not None:
-            df_cons_fb['Fecha'] = pd.to_datetime(df_cons_fb['Fecha'], errors='coerce')
-            st.session_state.df_consumos = df_cons_fb
-        df_mat_fb, _ = firebase_a_df('materiales', 'df_materiales')
-        if df_mat_fb is not None:
-            st.session_state.df_materiales = df_mat_fb
-        df_etq_fb, _ = firebase_a_df('etiquetas', 'df_etiquetas_final')
-        if df_etq_fb is not None:
-            st.session_state.df_etiquetas_final = df_etq_fb
-        df_vent_fb, _ = firebase_a_df('etiquetas', 'df_ventas')
-        if df_vent_fb is not None:
-            st.session_state.df_ventas = df_vent_fb
+    _resultados = {}
 
-        # Tránsitos
-        for key, coleccion in [
-            ('df_transito',     'bandejas'),
-            ('df_transito2',    'bandejas'),
-            ('df_transito_etq', 'etiquetas'),
-        ]:
-            df_t_fb, _ = firebase_a_df(coleccion, key)
-            if df_t_fb is not None:
-                st.session_state[key] = df_t_fb
+    with st.spinner("Cargando datos..."):
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = {
+                executor.submit(firebase_a_df, col, doc): key
+                for key, col, doc in _CARGAS
+            }
+            for future in as_completed(futures):
+                key = futures[future]
+                try:
+                    df_r, err = future.result()
+                    _resultados[key] = (df_r, err)
+                except Exception as e:
+                    _resultados[key] = (None, str(e))
 
-        # Pedidos
-        df_ped_fb, _ = firebase_a_df('pedidos', 'df_pedidos')
-        if df_ped_fb is not None:
-            df_ped_fb['Fecha_entrega'] = pd.to_datetime(df_ped_fb['Fecha_entrega'], errors='coerce')
-            st.session_state.df_pedidos = df_ped_fb
+    # Aplicar resultados al session_state con postprocesado donde sea necesario
+    for key, col, doc in _CARGAS:
+        df_r, err = _resultados.get(key, (None, None))
+        if df_r is not None:
+            if key == "df_consumos":
+                df_r["Fecha"] = pd.to_datetime(df_r["Fecha"], errors="coerce")
+            elif key == "df_pedidos":
+                df_r["Fecha_entrega"] = pd.to_datetime(df_r["Fecha_entrega"], errors="coerce")
+            st.session_state[key] = df_r
+        elif err and err not in ("No existe",) and not err.startswith("[{"):
+            _fb_errores.append(f"{doc}: {err}")
 
-        # Planificación
-        df_plan_fb, _ = firebase_a_df('planificacion', 'df_planificacion')
-        if df_plan_fb is not None:
-            st.session_state.df_planificacion = df_plan_fb
-
-        # Paletización
-        df_pal_fb, _ = firebase_a_df('logistica', 'df_paletizacion')
-        if df_pal_fb is not None:
-            st.session_state.df_paletizacion = df_pal_fb
-
-        # Producto Terminado
-        df_spt_fb, _ = firebase_a_df('producto_terminado', 'df_stock_pt')
-        if df_spt_fb is not None:
-            st.session_state.df_stock_pt = df_spt_fb
-        df_ppt_fb, _ = firebase_a_df('producto_terminado', 'df_produccion_pt')
-        if df_ppt_fb is not None:
-            st.session_state.df_produccion_pt = df_ppt_fb
-        df_pp_fb, _ = firebase_a_df('producto_terminado', 'df_plan_produccion')
-        if df_pp_fb is not None:
-            st.session_state.df_plan_produccion = df_pp_fb
-
-        # Envase (etiquetas de caja)
-        df_env_fb, _ = firebase_a_df('etiquetas', 'df_envase')
-        if df_env_fb is not None:
-            st.session_state.df_envase = df_env_fb
-    except Exception as e:
-        _fb_errores.append(str(e))
     if _fb_errores:
         st.sidebar.warning(f"⚠️ Firebase: {'; '.join(_fb_errores)}")
     elif st.session_state.df_final is not None:
@@ -706,6 +742,115 @@ def columnas_faltantes(df, requeridas, nombre_archivo):
             f"Columnas detectadas: `{'`, `'.join(df.columns.tolist())}`"
         )
     return faltantes
+
+
+def exportar_excel_prof(df, sheet_name="Datos", color_col=None):
+    """Genera un BytesIO con Excel de diseño profesional Aldelis."""
+    import io
+    from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    # (fondo fila, texto fila, color borde izq)
+    ROJO    = ("FFFCE4E6", "FF7B241C", "FFC0392B")
+    AMARILLO= ("FFFEF4CC", "FF7D6608", "FFD4AC0D")
+    VERDE   = ("FFD6F0E0", "FF1A5E38", "FF27AE60")
+
+    # Colores hex app → triple
+    APP_COLOR_MAP = {
+        "#721c24": ROJO,    "#FDEDEC": ROJO,
+        "#856404": AMARILLO,"#FEF9E7": AMARILLO,
+        "#155724": VERDE,   "#EAFAF1": VERDE,
+    }
+
+    def triple_para_valor(val):
+        """Devuelve triple de color según emoji prefix o texto exacto."""
+        s = str(val)
+        if s.startswith("🔴"):  return ROJO
+        if s.startswith("🟡"):  return AMARILLO
+        if s.startswith("🟢"):  return VERDE
+        # textos sin emoji
+        if any(k in s for k in ("Pendiente","Urgente","Crítico","Sin stock","PELIGRO","FALTA")):
+            return ROJO
+        if any(k in s for k in ("preparacion","En Curso","Bajo stock","AVISO")):
+            return AMARILLO
+        if any(k in s for k in ("Activo","OK","Con stock")):
+            return VERDE
+        return None
+
+    HDR_BG       = "FF2C3E50"
+    HDR_FG       = "FFFFFFFF"
+    ROW_ALT      = "FFF7F8FA"
+    ROW_EVEN     = "FFFFFFFF"
+    BORDER_COLOR = "FFD5D8DC"
+
+    thin   = Side(style="thin",   color=BORDER_COLOR)
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    # Auto-detectar columna Color si existe y no se pasó
+    cols_df = df.columns.tolist()
+    if not color_col and "Color" in cols_df:
+        color_col = "Color"
+
+    # Exportar sin columna Color (es interna, no interesa en el archivo)
+    cols_export = [c for c in cols_df if c != "Color"]
+    df_exp = df[cols_export].copy()
+
+    estado_idx = cols_export.index("Estado") + 1 if "Estado" in cols_export else None
+    color_src  = df[color_col].tolist() if color_col and color_col in cols_df else None
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df_exp.to_excel(writer, index=False, sheet_name=sheet_name)
+        ws = writer.sheets[sheet_name]
+
+        # Cabecera
+        for cell in ws[1]:
+            cell.fill      = PatternFill("solid", fgColor=HDR_BG)
+            cell.font      = Font(bold=True, color=HDR_FG, size=10)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border    = border
+        ws.row_dimensions[1].height = 22
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_row=ws.max_row), start=2):
+            i = row_idx - 2  # índice dataframe
+
+            # Determinar triple de color: primero col Color, luego col Estado
+            triple = None
+            if color_src:
+                triple = APP_COLOR_MAP.get(str(color_src[i]))
+            if not triple and estado_idx:
+                triple = triple_para_valor(df_exp.iloc[i, estado_idx - 1])
+
+            bg           = ROW_ALT if row_idx % 2 == 0 else ROW_EVEN
+            fill_default = PatternFill("solid", fgColor=bg)
+            font_default = Font(size=10)
+
+            accent = Side(style="medium", color=triple[2]) if triple else thin
+            borde_fila = Border(left=accent, right=thin, top=thin, bottom=thin)
+
+            for cell in row:
+                cell.fill      = PatternFill("solid", fgColor=triple[0]) if triple else fill_default
+                cell.font      = Font(size=10, color=triple[1]) if triple else font_default
+                cell.border    = borde_fila
+                cell.alignment = Alignment(vertical="center")
+
+            # Celda Estado en negrita
+            if estado_idx and triple:
+                ce = ws.cell(row=row_idx, column=estado_idx)
+                ce.font = Font(size=10, color=triple[1], bold=True)
+
+        # Anchos automáticos
+        for col_idx, col_cells in enumerate(ws.columns, start=1):
+            max_len = max(
+                (len(str(c.value)) if c.value is not None else 0 for c in col_cells),
+                default=8
+            )
+            ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len + 3, 40)
+
+        ws.freeze_panes = "A2"
+
+    output.seek(0)
+    return output
 
 
 # ─────────────────────────────────────────────
@@ -1255,27 +1400,10 @@ elif menu == "📊 Dashboard":
     render_dashboard_table(vista, cols_mostrar)
 
     # --- Exportar a Excel ---
-    import io
-    output = io.BytesIO()
     export_df = vista[cols_mostrar].copy()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        export_df.to_excel(writer, index=False, sheet_name='Dashboard')
-        ws = writer.sheets['Dashboard']
-        # Colores en Excel
-        from openpyxl.styles import PatternFill, Font
-        color_map = {'#721c24': 'FF721C24', '#856404': 'FF856404', '#155724': 'FF155724'}
-        for i, row_idx in enumerate(vista.index, start=2):
-            hex_color = color_map.get(vista.loc[row_idx, 'Color'] if row_idx in vista.index else '', 'FF155724')
-            fill = PatternFill(start_color=hex_color, end_color=hex_color, fill_type='solid')
-            font = Font(color='FFFFFFFF')
-            for col_idx in range(1, len(cols_mostrar) + 1):
-                cell = ws.cell(row=i, column=col_idx)
-                cell.fill = fill
-                cell.font = font
-    output.seek(0)
     st.download_button(
         label="📥 Exportar a Excel",
-        data=output,
+        data=exportar_excel_prof(export_df, "Dashboard", color_col="Color"),
         file_name="dashboard_compras.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -1855,16 +1983,12 @@ elif menu == "🔗 Materiales":
             )
 
             # Exportar
-            import io
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                resultado[['Gen', 'Referencia', 'Descripcion', 'Codigo', 'Descripcion_material']].to_excel(
-                    writer, index=False, sheet_name='Materiales'
-                )
-            output.seek(0)
             st.download_button(
                 label="📥 Exportar a Excel",
-                data=output,
+                data=exportar_excel_prof(
+                    resultado[['Gen', 'Referencia', 'Descripcion', 'Codigo', 'Descripcion_material']],
+                    "Materiales"
+                ),
                 file_name=f"materiales_{codigo_final}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
@@ -1901,12 +2025,10 @@ elif menu == "🏷️ Etiquetas":
         tab_etq = None
 
     with tab_cambios:
-        import base64, smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
+        import base64
         from datetime import datetime, timedelta
 
-        EMAILS_NOTIF = ["almacenseco@aldelis.com", "dgamarra@aldelis.com", "mlorente@aldelis.com"]
+        EMAILS_NOTIF = ["mlorente@aldelis.com"]
         MOTIVOS = ["Alergenos", "Normativa legal", "Rediseno", "Error", "Proveedor", "Otro"]
         ESTADOS_COLOR = {
             "Pendiente": ("#FDEDEC", "#C0392B"),
@@ -1914,24 +2036,155 @@ elif menu == "🏷️ Etiquetas":
             "Activo": ("#EAFAF1", "#1E8449"),
         }
 
-        def enviar_email_cambio(asunto, lineas):
+        def email_plantilla(titulo, campos, color_estado="#E74C3C"):
+            BADGE_COLORS = {
+                "#E74C3C": ("Pendiente",      "#FDEDEC", "#C0392B"),
+                "#F39C12": ("En preparación", "#FEF9E7", "#D68910"),
+                "#27AE60": ("Activo",         "#EAFAF1", "#1E8449"),
+            }
+            badge_txt, badge_bg, badge_fg = BADGE_COLORS.get(color_estado, ("", "#EEE", "#333"))
+
+            campos_html = ""
+            for k, v in campos.items():
+                if not v or v == "—":
+                    continue
+                campos_html += f"""
+            <td style="padding:0 0 14px 0;vertical-align:top;width:50%;">
+              <div style="font-size:10px;font-weight:600;color:#7F8C8D;text-transform:uppercase;
+                          letter-spacing:0.05em;margin-bottom:3px;">{k}</div>
+              <div style="font-size:13px;color:#2C3E50;">{v}</div>
+            </td>"""
+
+            # Agrupar en filas de 2 columnas
+            items = [(k, v) for k, v in campos.items() if v and v != "—"]
+            filas_html = ""
+            for i in range(0, len(items), 2):
+                par = items[i:i+2]
+                celdas = "".join([f"""
+              <td style="padding:0 12px 16px 0;vertical-align:top;width:50%;">
+                <div style="font-size:10px;font-weight:600;color:#7F8C8D;text-transform:uppercase;
+                            letter-spacing:0.05em;margin-bottom:3px;">{k}</div>
+                <div style="font-size:13px;color:#2C3E50;">{v}</div>
+              </td>""" for k, v in par])
+                if len(par) == 1:
+                    celdas += '<td style="width:50%;"></td>'
+                filas_html += f"<tr>{celdas}</tr>"
+
+            badge_html = f"""<span style="background:{badge_bg};color:{badge_fg};
+                border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">
+                ● {badge_txt}</span>""" if badge_txt else ""
+
+            return f"""<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#F0F2F5;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F0F2F5;padding:32px 0;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0"
+           style="background:white;border-radius:10px;overflow:hidden;
+                  border:1px solid #E0E0E0;">
+
+      <!-- Cabecera roja -->
+      <tr>
+        <td style="background:#2C3E50;padding:16px 24px 12px;">
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;
+                      letter-spacing:0.1em;margin-bottom:6px;">
+            Aldelis · Cambios de Etiqueta
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:18px;font-weight:700;color:white;">{titulo}</div>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Badge estado -->
+      <tr>
+        <td style="background:{color_estado};padding:8px 24px;">
+          <span style="font-size:12px;font-weight:600;color:white;">
+            {badge_txt or titulo}
+          </span>
+        </td>
+      </tr>
+
+      <!-- Campos en grid 2 columnas -->
+      <tr>
+        <td style="padding:20px 24px 8px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            {filas_html}
+          </table>
+        </td>
+      </tr>
+
+      <!-- Divider -->
+      <tr><td style="padding:0 24px;"><hr style="border:none;border-top:1px solid #F0F0F0;"></td></tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="padding:14px 24px;background:#FAFAFA;">
+          <div style="font-size:11px;color:#AAA;">
+            Generado automáticamente · Sistema de aprovisionamiento Aldelis
+          </div>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
+
+        def enviar_email_cambio(asunto, campos, color_estado="#E74C3C", cambio_data=None):
             try:
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
+                from email.mime.image import MIMEImage
+                from email.mime.application import MIMEApplication
+
                 gmail_user = get_password("GMAIL_USER", "")
                 gmail_pass = get_password("GMAIL_APP_PASSWORD", "")
                 if not gmail_user or not gmail_pass:
-                    return False
-                cuerpo = "<br>".join(lineas)
+                    return False, "GMAIL_USER o GMAIL_APP_PASSWORD no configurados en Secrets"
+
+                # Añadir stock al cuerpo si hay ref nueva
+                campos_email = dict(campos)
+                if cambio_data:
+                    stock = consultar_stock_ref(cambio_data.get("ref_nueva", ""))
+                    if stock == "con_stock":
+                        campos_email["Stock nueva etiqueta"] = "✅ Stock disponible en almacén"
+                    elif stock == "sin_stock":
+                        campos_email["Stock nueva etiqueta"] = "❌ Sin stock"
+                    elif stock == "sin_maestro":
+                        campos_email["Stock nueva etiqueta"] = "⚠️ Sin actualizar maestro"
+
+                cuerpo = email_plantilla(asunto, campos_email, color_estado)
                 msg = MIMEMultipart()
                 msg["From"] = gmail_user
                 msg["To"] = ", ".join(EMAILS_NOTIF)
                 msg["Subject"] = asunto
                 msg.attach(MIMEText(cuerpo, "html"))
-                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+
+                # Adjuntar imagen si existe
+                if cambio_data and cambio_data.get("imagen_b64"):
+                    try:
+                        img_bytes = base64.b64decode(cambio_data["imagen_b64"])
+                        nombre = cambio_data.get("imagen_nombre", "etiqueta")
+                        tipo = cambio_data.get("imagen_tipo", "image/jpeg")
+                        if "pdf" in tipo:
+                            adjunto = MIMEApplication(img_bytes, _subtype="pdf")
+                        else:
+                            adjunto = MIMEImage(img_bytes)
+                        adjunto.add_header("Content-Disposition", "attachment", filename=nombre)
+                        msg.attach(adjunto)
+                    except Exception:
+                        pass
+
+                with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                    server.starttls()
                     server.login(gmail_user, gmail_pass)
                     server.sendmail(gmail_user, EMAILS_NOTIF, msg.as_string())
-                return True
-            except Exception:
-                return False
+                return True, None
+            except Exception as e:
+                return False, str(e)
 
         def guardar_cambio_fb(data):
             db, _ = get_firestore()
@@ -1965,6 +2218,28 @@ elif menu == "🏷️ Etiquetas":
                 return True
             return False
 
+        def confirmar_fecha_prod_fb(doc_id, fecha):
+            db, _ = get_firestore()
+            if db:
+                db.collection("cambios_etiqueta").document(doc_id).update(
+                    {"fecha_primera_produccion": fecha}
+                )
+                return True
+            return False
+
+        def obtener_stock_cantidad(ref, tipo="Etiqueta"):
+            if tipo == "Bandeja":
+                df = st.session_state.get("df_final")
+            else:
+                df = st.session_state.df_etiquetas_final
+            if not ref or df is None:
+                return None
+            fila = df[df["Referencia"].astype(str).str.upper() == str(ref).strip().upper()]
+            if fila.empty:
+                return None
+            cols = [c for c in ["Stock_interno", "Stock_merca", "Stock_txt"] if c in fila.columns]
+            return int(fila[cols].fillna(0).sum(axis=1).iloc[0]) if cols else None
+
         hoy = datetime.now().date()
 
         # Recordatorios automáticos
@@ -1975,14 +2250,15 @@ elif menu == "🏷️ Etiquetas":
                     f_arr = datetime.strptime(c["fecha_arranque"], "%Y-%m-%d").date()
                     if (f_arr - hoy).days == 7:
                         asunto = f"Recordatorio: Cambio etiqueta {c.get('referencia','')} arranca en 7 dias"
-                        lineas = [
-                            f"<h3>Recordatorio cambio de etiqueta</h3>",
-                            f"<p><b>Referencia:</b> {c.get('referencia','')}</p>",
-                            f"<p><b>Motivo:</b> {c.get('motivo','')}</p>",
-                            f"<p><b>Fecha arranque:</b> {c.get('fecha_arranque','')}</p>",
-                            f"<p style='color:red;'><b>Faltan 7 dias para el arranque.</b></p>",
-                        ]
-                        if enviar_email_cambio(asunto, lineas):
+                        campos_rec = {
+                            "Referencia": c.get("referencia",""),
+                            "Ref. nueva etiqueta": c.get("ref_nueva",""),
+                            "Motivo": c.get("motivo",""),
+                            "Fecha arranque": c.get("fecha_arranque",""),
+                            "⚠️ Aviso": "Faltan 7 días para el arranque",
+                        }
+                        ok_mail, _ = enviar_email_cambio(asunto, campos_rec, "#F39C12")
+                        if ok_mail:
                             db2, _ = get_firestore()
                             if db2:
                                 db2.collection("cambios_etiqueta").document(c["id"]).update({"recordatorio_enviado": True})
@@ -1991,31 +2267,57 @@ elif menu == "🏷️ Etiquetas":
 
         # ── FORMULARIO NUEVO CAMBIO (I+D y Admin) ────────────
         if ROL in ["admin", "id"]:
-            st.markdown("### Registrar nuevo cambio de etiqueta")
+            st.markdown("### Registrar nuevo cambio")
+
+            # Tipo fuera del form para que el selectbox de refs se actualice al cambiar
+            tipo_c = st.radio("Tipo de material:", ["Etiqueta", "Bandeja"],
+                              horizontal=True, key="tipo_cambio_radio")
+
             with st.form("form_cambio_etq", clear_on_submit=True):
                 cf1, cf2 = st.columns(2)
                 with cf1:
-                    refs_etq_disp = []
-                    if st.session_state.df_etiquetas_final is not None:
-                        refs_etq_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
-                    ref_cambio = st.selectbox("Referencia etiqueta:", [""] + refs_etq_disp)
+                    # Referencias según tipo seleccionado
+                    refs_disp = []
+                    if tipo_c == "Etiqueta" and st.session_state.df_etiquetas_final is not None:
+                        refs_disp = sorted(st.session_state.df_etiquetas_final["Referencia"].astype(str).tolist())
+                    elif tipo_c == "Bandeja" and st.session_state.get("df_final") is not None:
+                        refs_band = set(st.session_state.df_final["Referencia"].astype(str).tolist())
+                        # Filtrar solo bandejas que aparecen en el archivo de componentes
+                        df_mat_s = st.session_state.get("df_materiales")
+                        if df_mat_s is not None and "Codigo" in df_mat_s.columns:
+                            codigos_comp = set(df_mat_s["Codigo"].astype(str).str.strip().str.upper())
+                            refs_disp = sorted([r for r in refs_band if str(r).strip().upper() in codigos_comp])
+                        else:
+                            refs_disp = sorted(refs_band)
+                    ref_cambio = st.selectbox("Referencia actual:", [""] + refs_disp)
+                    if ref_cambio:
+                        _df_desc = st.session_state.df_etiquetas_final if tipo_c == "Etiqueta" else st.session_state.get("df_final")
+                        if _df_desc is not None and "Descripcion" in _df_desc.columns:
+                            _fila = _df_desc[_df_desc["Referencia"].astype(str) == ref_cambio]
+                            if not _fila.empty:
+                                st.caption(f"📋 {_fila.iloc[0]['Descripcion']}")
+                    ref_nueva_c = st.text_input("Referencia nueva:", placeholder="Ej: C12044")
                     motivo_c = st.selectbox("Motivo del cambio:", MOTIVOS)
-                    fecha_arranque_c = st.date_input("Fecha de arranque:")
+                    agotar_stock_c = st.checkbox("Agotar stock primero (sin fecha fija)")
+                    fecha_arranque_c = st.date_input("Fecha de arranque (si se conoce):", value=None)
                 with cf2:
                     desc_cambio_c = st.text_area("Descripcion del cambio:", height=80)
                     obs_cambio_c = st.text_area("Observaciones:", height=80)
-                    imagen_cambio_c = st.file_uploader("Imagen nueva etiqueta (opcional):", type=["jpg","jpeg","png","pdf"])
+                    imagen_cambio_c = st.file_uploader("Imagen (opcional):", type=["jpg","jpeg","png","pdf"])
 
                 if st.form_submit_button("Registrar cambio", use_container_width=True):
                     if not ref_cambio:
                         st.error("Selecciona una referencia.")
                     else:
                         data = {
+                            "tipo": tipo_c,
                             "referencia": ref_cambio,
+                            "ref_nueva": ref_nueva_c,
                             "descripcion": desc_cambio_c,
                             "motivo": motivo_c,
                             "observaciones": obs_cambio_c,
-                            "fecha_arranque": fecha_arranque_c.strftime("%Y-%m-%d"),
+                            "agotar_stock": agotar_stock_c,
+                            "fecha_arranque": fecha_arranque_c.strftime("%Y-%m-%d") if fecha_arranque_c and not agotar_stock_c else "",
                             "fecha_registro": datetime.now().strftime("%Y-%m-%d %H:%M"),
                             "registrado_por": ROL,
                             "estado": "Pendiente",
@@ -2026,130 +2328,243 @@ elif menu == "🏷️ Etiquetas":
                             data["imagen_nombre"] = imagen_cambio_c.name
                             data["imagen_tipo"] = imagen_cambio_c.type
                         if guardar_cambio_fb(data):
-                            lineas = [
-                                f"<h3>Nuevo cambio de etiqueta registrado</h3>",
-                                f"<p><b>Referencia:</b> {ref_cambio}</p>",
-                                f"<p><b>Motivo:</b> {motivo_c}</p>",
-                                f"<p><b>Fecha arranque:</b> {fecha_arranque_c}</p>",
-                                f"<p><b>Descripcion:</b> {desc_cambio_c}</p>",
-                                f"<p><b>Observaciones:</b> {obs_cambio_c}</p>",
-                            ]
-                            enviado = enviar_email_cambio(f"NUEVO cambio etiqueta: {ref_cambio}", lineas)
-                            st.success(f"Cambio registrado. {'Email enviado.' if enviado else 'Configura GMAIL_USER y GMAIL_APP_PASSWORD para emails.'}")
+                            campos_nuevo = {
+                                "Tipo": tipo_c,
+                                "Referencia actual": ref_cambio,
+                                "Ref. nueva": ref_nueva_c or "—",
+                                "Motivo": motivo_c,
+                                "Fecha arranque": "Agotar stock primero" if agotar_stock_c else str(fecha_arranque_c or "—"),
+                                "Descripción": desc_cambio_c,
+                                "Observaciones": obs_cambio_c,
+                                "Registrado por": ROL,
+                            }
+                            enviado, err_mail = enviar_email_cambio(f"Nuevo cambio de {tipo_c.lower()}: {ref_cambio}", campos_nuevo)
+                            if enviado:
+                                st.success("Cambio registrado y email enviado.")
+                            else:
+                                st.success("Cambio registrado.")
+                                st.warning(f"Email no enviado: {err_mail}")
                             st.rerun()
                         else:
                             st.error("Error al guardar en Firebase.")
             st.divider()
 
+        # ── FUNCIONES AUXILIARES ──────────────────────────────
+        def archivar_cambio_fb(doc_id):
+            db, _ = get_firestore()
+            if db:
+                db.collection("cambios_etiqueta").document(doc_id).update({"archivado": True})
+                return True
+            return False
+
+        def consultar_stock_ref(ref_nueva):
+            if not ref_nueva or st.session_state.df_etiquetas_final is None:
+                return None
+            df = st.session_state.df_etiquetas_final
+            ref_buscar = str(ref_nueva).strip().upper()
+            fila = df[df["Referencia"].astype(str).str.upper() == ref_buscar]
+            if fila.empty:
+                return "sin_maestro"
+            stock_cols = [c for c in ["Stock_interno", "Stock_merca", "Stock_txt"] if c in fila.columns]
+            total = fila[stock_cols].fillna(0).sum(axis=1).iloc[0] if stock_cols else 0
+            return "con_stock" if total > 0 else "sin_stock"
+
+        # ── FEEDBACK PERSISTENTE ──────────────────────────────
+        if st.session_state.get("email_feedback"):
+            msg, tipo = st.session_state.pop("email_feedback")
+            if tipo == "ok":
+                st.success(msg)
+            else:
+                st.warning(msg)
+
         # ── LISTA DE CAMBIOS ──────────────────────────────────
         st.markdown("### Cambios registrados")
-        cambios = cargar_cambios_fb()
+        cambios_todos = cargar_cambios_fb()
+        cambios = [c for c in cambios_todos if not c.get("archivado")]
+
+        BADGE_MD = {
+            "Pendiente":      "🔴 Pendiente",
+            "En preparacion": "🟡 En preparación",
+            "Activo":         "🟢 Activo",
+        }
 
         if not cambios:
-            st.info("No hay cambios registrados.")
+            st.info("No hay cambios activos registrados.")
         else:
-            fc1, fc2 = st.columns(2)
+            fc1, fc2, fc3 = st.columns(3)
             filtro_estado_c = fc1.selectbox("Estado:", ["Todos", "Pendiente", "En preparacion", "Activo"], key="fec")
-            filtro_ref_c = fc2.text_input("Buscar referencia:", key="frc")
+            filtro_tipo_c   = fc2.selectbox("Tipo:", ["Todos", "Etiqueta", "Bandeja"], key="ftc")
+            filtro_ref_c    = fc3.text_input("Buscar referencia:", key="frc")
 
             cambios_f = [c for c in cambios if
                         (filtro_estado_c == "Todos" or c.get("estado") == filtro_estado_c) and
+                        (filtro_tipo_c == "Todos" or c.get("tipo", "Etiqueta") == filtro_tipo_c) and
                         (not filtro_ref_c or filtro_ref_c.upper() in c.get("referencia","").upper())]
 
             alertas_arr = [c for c in cambios if c.get("estado") == "Pendiente" and c.get("fecha_arranque") and
                           0 <= (datetime.strptime(c["fecha_arranque"], "%Y-%m-%d").date() - hoy).days <= 7]
             if alertas_arr:
-                st.markdown(f"""
-<div style="background:#FEF9E7;border:0.5px solid #F39C12;border-radius:8px;padding:8px 12px;
-            font-size:12px;color:#856404;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-  ⏰ <b>{len(alertas_arr)} cambio(s)</b> con arranque en los próximos 7 días
-</div>""", unsafe_allow_html=True)
-
-            BADGE_CFG = {
-                "Pendiente":       ("background:#FDEDEC;color:#C0392B;", "🔴"),
-                "En preparacion":  ("background:#FEF9E7;color:#D68910;", "🟡"),
-                "Activo":          ("background:#EAFAF1;color:#1E8449;", "🟢"),
-            }
+                st.warning(f"⏰ {len(alertas_arr)} cambio(s) con arranque en los próximos 7 días")
 
             for cambio in cambios_f:
-                estado = cambio.get("estado", "Pendiente")
-                badge_style, badge_dot = BADGE_CFG.get(estado, ("background:#eee;color:#333;", "⚪"))
-                dias_num = None
-                fecha_color = "#2C3E50"
+                estado    = cambio.get("estado", "Pendiente")
+                ref       = cambio.get("referencia", "")
+                motivo    = cambio.get("motivo", "")
+                tipo_label= cambio.get("tipo", "Etiqueta")
+                reg_por   = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                fecha_reg = cambio.get("fecha_registro","")[:10]
+                ref_nueva = cambio.get("ref_nueva","")
+                agotar    = cambio.get("agotar_stock", False)
+
+                dias_txt = ""
+                fecha_color = "normal"
                 if cambio.get("fecha_arranque"):
                     try:
                         dias_num = (datetime.strptime(cambio["fecha_arranque"], "%Y-%m-%d").date() - hoy).days
-                        if dias_num < 0:
-                            fecha_color = "#7F8C8D"
-                        elif dias_num <= 7:
-                            fecha_color = "#E74C3C"
+                        if estado != "Activo":
+                            dias_txt = f" · {dias_num}d"
+                        if dias_num <= 7 and estado != "Activo":
+                            fecha_color = "red"
                     except Exception:
                         pass
+                elif agotar:
+                    dias_txt = " · 🏷️ Agotar stock"
 
-                dias_badge_html = ""
-                if dias_num is not None and estado != "Activo":
-                    dias_badge_html = f'<span style="background:#FDEDEC;color:#C0392B;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin-right:6px;">{dias_num}d</span>'
+                tipo_icon = "🏷️" if tipo_label == "Etiqueta" else "📦"
+                label_exp = f"{BADGE_MD.get(estado, estado)}{dias_txt}  —  {tipo_icon} {ref}  ·  {motivo}"
 
-                reg_por = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                with st.expander(label_exp):
+                    col_left, col_right = st.columns([3, 2])
 
-                st.markdown(f"""
-<div style="background:white;border:0.5px solid #E0E0E0;border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-    <div>
-      <div style="font-size:14px;font-weight:600;color:#2C3E50;">{cambio.get('referencia','')}</div>
-      <div style="font-size:12px;color:#7F8C8D;margin-top:2px;">{cambio.get('motivo','')} · Registrado por {reg_por} · {cambio.get('fecha_registro','')[:10]}</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-      {dias_badge_html}
-      <span style="{badge_style}border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">{badge_dot} {estado}</span>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Descripción</div>
-      <div style="font-size:13px;color:#2C3E50;">{cambio.get('descripcion','—')}</div>
-    </div>
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Observaciones</div>
-      <div style="font-size:13px;color:#2C3E50;">{cambio.get('observaciones','—')}</div>
-    </div>
-    <div>
-      <div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Fecha arranque</div>
-      <div style="font-size:13px;font-weight:600;color:{fecha_color};">{cambio.get('fecha_arranque','—')}</div>
-    </div>
-    {'<div><div style="font-size:11px;color:#7F8C8D;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">Nota gestión</div><div style="font-size:13px;color:#2C3E50;">' + cambio.get('nota_gestion','—') + '</div></div>' if cambio.get('nota_gestion') else ''}
-  </div>
-</div>""", unsafe_allow_html=True)
+                    with col_left:
+                        st.caption(f"{tipo_icon} {tipo_label} · Registrado por {reg_por} · {fecha_reg}")
+                        st.markdown(f"**Descripción:** {cambio.get('descripcion','—')}")
+                        st.markdown(f"**Observaciones:** {cambio.get('observaciones','—')}")
 
-                col_img, col_acc = st.columns([1, 1])
-                with col_img:
-                    if cambio.get("imagen_b64"):
-                        try:
-                            img_bytes = base64.b64decode(cambio["imagen_b64"])
-                            tipo = cambio.get("imagen_tipo", "image/jpeg")
-                            if "pdf" not in tipo:
-                                st.image(img_bytes, caption=cambio.get("imagen_nombre","Etiqueta nueva"), use_column_width=True)
+                        # Fecha arranque / agotar stock
+                        if agotar:
+                            st.markdown("**Arranque:** Agotar stock primero")
+                            # Pista de stock actual de la ref. actual
+                            stock_act = obtener_stock_cantidad(ref, tipo_label)
+                            if stock_act is not None:
+                                st.caption(f"📦 Stock actual ref. actual: **{stock_act:,} ud**")
+                            # Fecha primera producción
+                            fecha_primera = cambio.get("fecha_primera_produccion")
+                            if fecha_primera:
+                                st.markdown(f"**Fecha 1ª producción:** :green[{fecha_primera}]")
+                            elif ROL in ["admin", "almacen"]:
+                                st.markdown("**Confirmar fecha 1ª producción:**")
+                                fp_val = st.date_input("", key=f"fp_{cambio['id']}", value=None,
+                                                       label_visibility="collapsed")
+                                if fp_val and st.button("✅ Confirmar fecha", key=f"cfp_{cambio['id']}",
+                                                        use_container_width=True):
+                                    confirmar_fecha_prod_fb(cambio["id"], fp_val.strftime("%Y-%m-%d"))
+                                    st.session_state["email_feedback"] = ("📅 Fecha primera producción confirmada.", "ok")
+                                    st.rerun()
+                        else:
+                            farr = cambio.get('fecha_arranque','—')
+                            if fecha_color == "red":
+                                st.markdown(f"**Fecha arranque:** :red[{farr}]")
                             else:
-                                st.download_button("📄 Descargar PDF", img_bytes, file_name=cambio.get("imagen_nombre", "etiqueta.pdf"), key=f"pdf_{cambio['id']}")
-                        except Exception:
-                            pass
+                                st.markdown(f"**Fecha arranque:** {farr}")
 
-                with col_acc:
-                    if ROL in ["admin", "almacen"] and estado != "Activo":
-                        nota_g = st.text_input("Nota de gestión:", key=f"nota_{cambio['id']}", placeholder="Añadir nota...")
-                        nuevo_est = "En preparacion" if estado == "Pendiente" else "Activo"
-                        btn_txt = "Marcar en preparación" if estado == "Pendiente" else "Marcar como Activo"
-                        if st.button(btn_txt, key=f"btn_{cambio['id']}", use_container_width=True):
-                            if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
-                                lineas = [
-                                    f"<p>Cambio etiqueta <b>{cambio.get('referencia','')}</b> → estado <b>{nuevo_est}</b></p>",
-                                    f"<p>Nota: {nota_g}</p>",
-                                ]
-                                enviar_email_cambio(f"Cambio etiqueta {cambio.get('referencia','')} → {nuevo_est}", lineas)
-                                st.success(f"Estado actualizado a {nuevo_est}")
-                                st.rerun()
+                        if ref_nueva:
+                            st.markdown(f"**Ref. nueva {tipo_label.lower()}:** :blue[{ref_nueva}]")
+                            stock_result = consultar_stock_ref(ref_nueva)
+                            if stock_result == "con_stock":
+                                st.success("✅ Stock disponible")
+                            elif stock_result == "sin_stock":
+                                st.error("❌ Sin stock")
+                            elif stock_result == "sin_maestro":
+                                st.warning("⚠️ Sin actualizar maestro")
+                        if cambio.get("nota_gestion"):
+                            st.markdown(f"**Nota gestión:** {cambio.get('nota_gestion','')}")
 
-                st.markdown("<hr style='border:none;border-top:0.5px solid #F0F0F0;margin:4px 0 10px;'>", unsafe_allow_html=True)
+                    with col_right:
+                        if cambio.get("imagen_b64"):
+                            try:
+                                img_bytes = base64.b64decode(cambio["imagen_b64"])
+                                tipo = cambio.get("imagen_tipo", "image/jpeg")
+                                if "pdf" not in tipo:
+                                    st.image(img_bytes, caption=cambio.get("imagen_nombre",""), use_column_width=True)
+                                else:
+                                    st.download_button("📄 Descargar PDF", img_bytes,
+                                                       file_name=cambio.get("imagen_nombre","etiqueta.pdf"),
+                                                       key=f"pdf_{cambio['id']}", use_container_width=True)
+                            except Exception:
+                                pass
+                        else:
+                            st.caption("🖼️ Sin imagen adjunta")
+
+                        st.markdown("---")
+
+                        # Botón notificación manual
+                        if st.button("📧 Enviar notificación", key=f"notif_{cambio['id']}", use_container_width=True):
+                            campos_notif = {
+                                "Tipo": tipo_label,
+                                "Referencia": ref,
+                                "Ref. nueva": ref_nueva or "—",
+                                "Motivo": motivo,
+                                "Estado": estado,
+                                "Fecha arranque": "Agotar stock primero" if agotar else cambio.get("fecha_arranque","—"),
+                                "Fecha 1ª producción": cambio.get("fecha_primera_produccion","—") if agotar else "",
+                                "Descripción": cambio.get("descripcion",""),
+                                "Observaciones": cambio.get("observaciones",""),
+                            }
+                            color_notif = {"Pendiente":"#E74C3C","En preparacion":"#F39C12","Activo":"#27AE60"}.get(estado,"#E74C3C")
+                            ok_mail, err_mail = enviar_email_cambio(f"Notificación cambio {tipo_label.lower()}: {ref}", campos_notif, color_notif, cambio)
+                            if ok_mail:
+                                st.success("📧 Notificación enviada ✓")
+                            else:
+                                st.error(f"No se pudo enviar: {err_mail}")
+
+                        # Botón cambiar estado
+                        if ROL in ["admin", "almacen"] and estado != "Activo":
+                            nota_g = st.text_input("Nota de gestión", key=f"nota_{cambio['id']}",
+                                                   placeholder="Añadir nota...")
+                            nuevo_est = "En preparacion" if estado == "Pendiente" else "Activo"
+                            btn_txt = "▶ Marcar en preparación" if estado == "Pendiente" else "✅ Marcar como Activo"
+                            if st.button(btn_txt, key=f"btn_{cambio['id']}", use_container_width=True):
+                                if actualizar_estado_fb(cambio["id"], nuevo_est, nota_g):
+                                    campos_est = {
+                                        "Tipo": tipo_label,
+                                        "Referencia": ref,
+                                        "Ref. nueva": ref_nueva or "—",
+                                        "Motivo": motivo,
+                                        "Nuevo estado": nuevo_est,
+                                        "Fecha arranque": "Agotar stock primero" if agotar else cambio.get("fecha_arranque","—"),
+                                        "Fecha 1ª producción": cambio.get("fecha_primera_produccion","—") if agotar else "",
+                                        "Nota gestión": nota_g or "—",
+                                    }
+                                    color_est = {"En preparacion":"#F39C12","Activo":"#27AE60"}.get(nuevo_est,"#E74C3C")
+                                    ok_mail, err_mail = enviar_email_cambio(f"Cambio {tipo_label.lower()} {ref} → {nuevo_est}", campos_est, color_est, cambio)
+                                    if ok_mail:
+                                        st.session_state["email_feedback"] = (f"✅ Estado → {nuevo_est} · Email enviado ✓", "ok")
+                                    else:
+                                        st.session_state["email_feedback"] = (f"✅ Estado → {nuevo_est} · Email no enviado: {err_mail}", "warn")
+                                    st.rerun()
+
+                        # Botón archivar
+                        if ROL in ["admin"] and estado == "Activo":
+                            if st.button("📁 Archivar", key=f"arch_{cambio['id']}", use_container_width=True):
+                                if archivar_cambio_fb(cambio["id"]):
+                                    st.session_state["email_feedback"] = ("📁 Cambio archivado correctamente.", "ok")
+                                    st.rerun()
+
+        # ── ARCHIVADOS ────────────────────────────────────────
+        archivados = [c for c in cambios_todos if c.get("archivado")]
+        if archivados:
+            with st.expander(f"📁 Archivados ({len(archivados)})"):
+                for cambio in archivados:
+                    ref     = cambio.get("referencia","")
+                    estado  = cambio.get("estado","")
+                    motivo  = cambio.get("motivo","")
+                    farr    = cambio.get("fecha_arranque","—")
+                    reg_por = {"admin": "Admin", "id": "I+D", "almacen": "Almacén"}.get(cambio.get("registrado_por",""), cambio.get("registrado_por",""))
+                    st.markdown(f"**{ref}** · {motivo} · {BADGE_MD.get(estado, estado)} · Arranque: {farr} · Por: {reg_por}")
+                    if cambio.get("descripcion"):
+                        st.caption(cambio.get("descripcion",""))
+                    st.divider()
 
     if tab_etq is None:
         st.stop()
@@ -2440,12 +2855,9 @@ elif menu == "🏷️ Etiquetas":
         render_etq_table(vista_etq, cols_etq)
 
         # Exportar
-        import io
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            vista_etq[cols_etq].to_excel(writer, index=False, sheet_name='Etiquetas')
-        output.seek(0)
-        st.download_button("📥 Exportar a Excel", output, "dashboard_etiquetas.xlsx",
+        st.download_button("📥 Exportar a Excel",
+                           exportar_excel_prof(vista_etq[cols_etq], "Etiquetas"),
+                           "dashboard_etiquetas.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -2513,12 +2925,9 @@ elif menu == "📋 Pedidos":
     st.dataframe(vista_ped.reset_index(drop=True), use_container_width=True, height=400)
 
     # ── Exportar ──────────────────────────────
-    import io
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        vista_ped.to_excel(writer, index=False, sheet_name='Pedidos')
-    output.seek(0)
-    st.download_button("📥 Exportar a Excel", output, "pedidos.xlsx",
+    st.download_button("📥 Exportar a Excel",
+                       exportar_excel_prof(vista_ped, "Pedidos"),
+                       "pedidos.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ── Borrar todos ──────────────────────────
@@ -2630,11 +3039,9 @@ elif menu == "🔍 Previsión y Obsoletos":
         def color_band(row):
             return [f'background-color: {cot_band.loc[row.name, "Color"]}; color: white'] * len(row)
         st.dataframe(vista_band[cols_b].style.apply(color_band, axis=1), use_container_width=True, height=400)
-        out_b = io.BytesIO()
-        with pd.ExcelWriter(out_b, engine='openpyxl') as w:
-            vista_band[cols_b].to_excel(w, index=False, sheet_name='Bandejas')
-        out_b.seek(0)
-        st.download_button("📥 Exportar Bandejas", out_b, "cotejo_bandejas.xlsx",
+        st.download_button("📥 Exportar Bandejas",
+                           exportar_excel_prof(vista_band[cols_b], "Bandejas"),
+                           "cotejo_bandejas.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         # ── ETIQUETAS ─────────────────────────────────────────
@@ -2667,11 +3074,9 @@ elif menu == "🔍 Previsión y Obsoletos":
             def color_etq_p(row):
                 return [f'background-color: {cot_etq.loc[row.name, "Color"]}; color: white'] * len(row)
             st.dataframe(vista_etq[cols_e].style.apply(color_etq_p, axis=1), use_container_width=True, height=400)
-            out_e = io.BytesIO()
-            with pd.ExcelWriter(out_e, engine='openpyxl') as w:
-                vista_etq[cols_e].to_excel(w, index=False, sheet_name='Etiquetas')
-            out_e.seek(0)
-            st.download_button("📥 Exportar Etiquetas", out_e, "cotejo_etiquetas.xlsx",
+            st.download_button("📥 Exportar Etiquetas",
+                               exportar_excel_prof(vista_etq[cols_e], "Etiquetas"),
+                               "cotejo_etiquetas.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ══ TAB 2: SIN MAESTRO ══════════════════════════════════════
@@ -2685,11 +3090,9 @@ elif menu == "🔍 Previsión y Obsoletos":
             st.warning(f"⚠️ {len(sin_maestro)} materiales sin configurar:")
             cols_sm = [c for c in ['Codigo', 'Descripcion', 'Apro'] if c in sin_maestro.columns]
             st.dataframe(sin_maestro[cols_sm].reset_index(drop=True), use_container_width=True)
-            out_sm = io.BytesIO()
-            with pd.ExcelWriter(out_sm, engine='openpyxl') as w:
-                sin_maestro[cols_sm].to_excel(w, index=False, sheet_name='Sin_maestro')
-            out_sm.seek(0)
-            st.download_button("📥 Exportar Sin Maestro", out_sm, "sin_maestro.xlsx",
+            st.download_button("📥 Exportar Sin Maestro",
+                               exportar_excel_prof(sin_maestro[cols_sm], "Sin_maestro"),
+                               "sin_maestro.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # ══ TAB 3: OBSOLETOS ════════════════════════════════════════
@@ -2761,11 +3164,9 @@ elif menu == "🔍 Previsión y Obsoletos":
 
                 st.dataframe(vista_obs.reset_index(drop=True).style.apply(colorear_obs, axis=1), use_container_width=True)
 
-                out_obs = io.BytesIO()
-                with pd.ExcelWriter(out_obs, engine='openpyxl') as w:
-                    vista_obs.to_excel(w, index=False, sheet_name='Obsoletos')
-                out_obs.seek(0)
-                st.download_button("📥 Exportar Obsoletos", out_obs, "obsoletos.xlsx",
+                st.download_button("📥 Exportar Obsoletos",
+                                   exportar_excel_prof(vista_obs, "Obsoletos"),
+                                   "obsoletos.xlsx",
                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -2904,12 +3305,9 @@ elif menu == "🏪 Producto Terminado":
 
     st.dataframe(vista_pt[cols_pt].style.apply(colorear_pt, axis=1), use_container_width=True, height=500)
 
-    import io
-    out_pt = io.BytesIO()
-    with pd.ExcelWriter(out_pt, engine='openpyxl') as w:
-        vista_pt[cols_pt].to_excel(w, index=False, sheet_name='ProductoTerminado')
-    out_pt.seek(0)
-    st.download_button("📥 Exportar", out_pt, "producto_terminado.xlsx",
+    st.download_button("📥 Exportar",
+                       exportar_excel_prof(vista_pt[cols_pt], "ProductoTerminado"),
+                       "producto_terminado.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # ══════════════════════════════════════════════
@@ -3023,12 +3421,9 @@ elif menu == "🏭 Planificación Producción":
 
         st.dataframe(comp[cols_comp].style.apply(colorear_comp, axis=1), use_container_width=True, height=400)
 
-        import io
-        out_comp = io.BytesIO()
-        with pd.ExcelWriter(out_comp, engine='openpyxl') as w:
-            comp[cols_comp].to_excel(w, index=False, sheet_name='Comparativa')
-        out_comp.seek(0)
-        st.download_button("📥 Exportar comparativa", out_comp, "plan_produccion.xlsx",
+        st.download_button("📥 Exportar comparativa",
+                           exportar_excel_prof(comp[cols_comp], "Comparativa"),
+                           "plan_produccion.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     else:
         st.info("Sube el plan de producción recibido para comparar con la sugerencia.")
