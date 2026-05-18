@@ -969,7 +969,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 </div>
 
 <!-- PANTALLA: RECETA -->
-<div id="screen-recipe" class="screen" style="padding-top:0">
+<div id="screen-recipe" class="screen">
   <!-- Hero receta -->
   <div class="recipe-hero" id="recipe-hero">
     <img id="recipe-hero-img" src="" alt="" style="display:none">
@@ -1960,6 +1960,88 @@ const Data = (() => {
         { title: 'Cocción sin tocar', time: '11 min', text: 'Baja a fuego medio. No remuevas en ningún momento. En el minuto 9 coloca las uvas crudas peladas repartidas sobre el arroz. En el minuto 15 coloca las pechugas encima con la piel hacia arriba — el vapor las terminará sin resecarlas. Deben quedar a 58–62°C en el centro, jugosas y ligeramente rosadas.', ingredients: 'Uvas crudas, Pechugas de faisán' },
         { title: 'Socarrat del albufera', time: '1,5 min', text: 'En el minuto 16–17 sube al máximo 75–90 segundos. El albufera forma socarrat más rápido que el bomba — el margen entre perfecto y quemado es estrecho. Escucha el crepitar seco. El olor a caza caramelizada y uva tostada es la señal. Apaga.', ingredients: '—' },
         { title: 'Reposo y presentación', time: '5 min', text: 'Cubre con papel de periódico 3 minutos exactos — el albufera no necesita más. Mientras, marca los dados de foie a fuego máximo sin grasa 20 seg/cara. Viste: pechugas al centro, foie en puntos simétricos, racimitos de uva en los bordes, hilo de reducción de Armagnac sobre el faisán y el foie, tomillo limón, pimienta gruesa y Maldon solo sobre la carne. Nunca sal ni reducción directamente sobre el arroz.', ingredients: 'Foie mi-cuit, Uvas moscatel, Reducción Armagnac, Tomillo limón, Maldon' },
+      ],
+    },
+
+    /* ── AVES NOBLES · CAMPEONATO ────────────────────────────── */
+    {
+      id: 'capon-castanas', name: 'Capón y Castañas', emoji: '🍗',
+      desc: 'Arroz seco de capón, castañas y vino rancio', difficulty: 'Alta', time: '80 min + fondo (día anterior)',
+      riceType: 'bomba', ricePerPerson: 80, waterRatio: 2.4, cookMin: 18,
+      ingredients: [
+        { name: 'Arroz bomba',             perPerson: 80,  unit: 'g' },
+        { name: 'Capón (muslos y contramuslos)', perPerson: 150, unit: 'g' },
+        { name: 'Castañas cocidas o asadas', perPerson: 60, unit: 'g' },
+        { name: 'Vino rancio u oloroso seco', perPerson: 40, unit: 'ml' },
+        { name: 'Azafrán en hebra',        perPerson: 0.05, unit: 'g' },
+        { name: 'Cebolla, puerro y apio',  perPerson: 60,  unit: 'g' },
+        { name: 'Tomillo y laurel',        perPerson: 1,   unit: 'ramita' },
+        { name: 'Aceite de oliva',         perPerson: 12,  unit: 'ml' },
+        { name: 'Sal',                     perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Fondo oscuro de capón (día anterior)', time: '2 h', text: 'Parte la carcasa en trozos y tuesta en horno a 210°C mínimo 40 min hasta que estén bien dorados. La grasa infiltrada del capón carameliza de forma distinta al pollo — más rica y profunda. Desglasa la bandeja con vino rancio, raspa los jugos. Cuece en olla con verduras, tomillo, laurel y un clavo 2 horas a fuego muy suave. Cuela y desgrasa parcialmente — dejar algo de grasa porque es sabor. Debe quedar ámbar oscuro y ligeramente untuoso.', ingredients: 'Carcasa de capón, Vino rancio, Cebolla, Puerro, Apio, Tomillo, Laurel' },
+        { title: 'Infusionar el azafrán', time: '20 min', text: 'Tuesta el azafrán 10 segundos en seco. Disuelve en un cazo de caldo caliente y tapa mínimo 20 minutos.', ingredients: 'Azafrán, Caldo de capón' },
+        { title: 'Dorar el capón', time: '10 min', text: 'Dora los trozos de capón en la paella con su propia grasa — sin aceite. La carne tiene que coger color caoba por todos los lados. Reserva.', ingredients: 'Capón' },
+        { title: 'Sofrito base', time: '12 min', text: 'En la misma grasa sofríe cebolla y puerro hasta transparentes. Añade el tomate y reduce hasta casi confitura. Fuera del fuego, pimentón 30 segundos.', ingredients: 'Cebolla, Puerro, Tomate, Pimentón' },
+        { title: 'El caldo al fuego', time: '3 min', text: 'Coloca el capón. Vierte el fondo con el azafrán infusionado. Hierve. Ratio 2,4:1 — la grasa del capón ralentiza la evaporación.', ingredients: 'Fondo de capón, Azafrán' },
+        { title: 'El arroz y las castañas', time: '18 min', text: 'Reparte el arroz. Fuego fuerte 8 min, luego reduce. Incorpora las castañas con el caldo, no antes — para que no se deshagan. A mitad de cocción comprueba la nivelación.', ingredients: 'Arroz bomba, Castañas' },
+        { title: 'Socarrat untuoso', time: '2 min', text: 'La grasa del capón crea el socarrat más untuoso y brillante — color miel oscura, casi cobrizo, con aroma a ave asada que impregna la sala. Fuego vivo 90 segundos. El azafrán caramelizado en el fondo da un tono casi lacado.', ingredients: '—' },
+        { title: 'Reposo y presentación', time: '5 min', text: 'Reposa 5 minutos. Viste con el muslo de capón dorado al centro, castañas enteras asadas en los bordes, reducción de vino rancio en hilo y hebras de azafrán sobre el arroz.', ingredients: '—' },
+      ],
+    },
+    {
+      id: 'pularda-foie', name: 'Pularda y Foie Mi-Cuit', emoji: '🍗',
+      desc: 'Arroz seco de pularda, foie mi-cuit, manzana asada y tomillo limón', difficulty: 'Alta', time: '75 min + fondo (día anterior)',
+      riceType: 'bomba', ricePerPerson: 80, waterRatio: 2.3, cookMin: 18,
+      ingredients: [
+        { name: 'Arroz bomba',            perPerson: 80,  unit: 'g' },
+        { name: 'Pularda (muslos y supremas)', perPerson: 140, unit: 'g' },
+        { name: 'Foie mi-cuit',           perPerson: 20,  unit: 'g' },
+        { name: 'Manzana golden o granny', perPerson: 50,  unit: 'g' },
+        { name: 'Tomillo limón fresco',   perPerson: 1,   unit: 'ramita' },
+        { name: 'Vino blanco (chardonnay o verdejo)', perPerson: 40, unit: 'ml' },
+        { name: 'Mantequilla',            perPerson: 5,   unit: 'g' },
+        { name: 'Cebolla blanca y puerro', perPerson: 50, unit: 'g' },
+        { name: 'Aceite de oliva',        perPerson: 10,  unit: 'ml' },
+        { name: 'Sal',                    perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Fondo claro de pularda (día anterior)', time: '1.5 h', text: 'A diferencia del capón, este fondo NO se tuesta en horno — se hace en blanco para preservar la elegancia. Rehoga la carcasa y huesos en aceite suave con cebolla blanca, puerro y apio sin que cojan color. Desglasa con vino blanco, evapora completamente. Agua fría, tomillo limón, pimienta blanca. 1,5 horas muy suave. Cuela. Añade unas gotas de zumo de manzana asada al final. El caldo es dorado pálido, limpio y aromático — muy distinto al oscuro del capón.', ingredients: 'Carcasa de pularda, Vino blanco, Cebolla, Puerro, Apio, Tomillo limón' },
+        { title: 'Asar la manzana', time: '20 min', text: 'Asa la manzana partida en gajos con mantequilla, tomillo y una pizca de azúcar a 180°C hasta que estén caramelizados. Reserva los gajos para la presentación. Los jugos y pieles van al fondo.', ingredients: 'Manzana, Mantequilla, Tomillo' },
+        { title: 'Marcar la pularda', time: '10 min', text: 'Dora muslos y supremas en aceite caliente. Las supremas solo por la piel 2 minutos — terminarán sobre el arroz. Reserva por separado.', ingredients: 'Pularda, Aceite' },
+        { title: 'Sofrito blanco', time: '10 min', text: 'En los jugos de la pularda sofríe cebolla blanca y puerro hasta transparentes sin que cojan color. Añade el tomate y reduce suave. El sofrito de este arroz es más claro y delicado que los de caza.', ingredients: 'Cebolla blanca, Puerro, Tomate' },
+        { title: 'El caldo al fuego', time: '3 min', text: 'Coloca los muslos. Vierte el fondo claro. Hierve. Ratio 2,3:1 — el fondo claro evapora más rápido que el oscuro, vigilar.', ingredients: 'Fondo de pularda' },
+        { title: 'El arroz', time: '18 min', text: 'Reparte el arroz. Fuego alto 8 min, reduce. En el minuto 14 coloca las supremas encima con la piel hacia arriba — el vapor las terminará jugosas. Una nuez de mantequilla fuera del fuego al terminar: el arroz se vuelve sedoso.', ingredients: 'Arroz bomba, Supremas de pularda, Mantequilla' },
+        { title: 'Socarrat fino', time: '1.5 min', text: 'El fondo claro con mantequilla puede quemar más rápido. Fuego medio-alto 75 segundos. Socarrat dorado pálido, casi rubio, con aroma a mantequilla tostada y tomillo. El más fino y aristocrático.', ingredients: '—' },
+        { title: 'Reposo y presentación', time: '5 min', text: 'Reposa 5 minutos. Marca los dados de foie en sartén sin grasa a fuego máximo, 20 seg/cara. Viste con suprema al centro, foie en puntos, gajos de manzana caramelizada, ramitas de tomillo limón y reducción de manzana y vino blanco.', ingredients: 'Foie mi-cuit, Manzana asada, Tomillo limón' },
+      ],
+    },
+    {
+      id: 'pintada-pera', name: 'Pintada y Pera Conferencia', emoji: '🦃',
+      desc: 'Arroz seco de pintada, pera conferencia asada y mostaza antigua — propuesta libre', difficulty: 'Alta', time: '75 min + fondo (día anterior)',
+      riceType: 'bomba', ricePerPerson: 80, waterRatio: 2.4, cookMin: 18,
+      ingredients: [
+        { name: 'Arroz bomba',              perPerson: 80,  unit: 'g' },
+        { name: 'Pintada (muslos y pechugas)', perPerson: 140, unit: 'g' },
+        { name: 'Pera conferencia',         perPerson: 60,  unit: 'g' },
+        { name: 'Mostaza antigua de Dijon', perPerson: 8,   unit: 'g' },
+        { name: 'Sidra natural seca',       perPerson: 50,  unit: 'ml' },
+        { name: 'Cebolla blanca y chalotas', perPerson: 50, unit: 'g' },
+        { name: 'Mantequilla y miel',       perPerson: 8,   unit: 'g' },
+        { name: 'Pimienta negra en grano',  perPerson: 2,   unit: 'g' },
+        { name: 'Aceite de oliva',          perPerson: 12,  unit: 'ml' },
+        { name: 'Sal',                      perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Fondo de pintada con sidra y pera (día anterior)', time: '1.5 h', text: 'Tuesta la carcasa en horno a 200°C. Lleva a olla con chalotas, zanahoria y apio. Desglasa con sidra seca y reduce a la mitad antes de añadir el agua — el alcohol se evapora pero el sabor de la sidra queda integrado. Añade los corazones y pieles de la pera asada. 1,5 horas a fuego suave. Cuela. El caldo tendrá una acidez frutal sutil pero perceptible.', ingredients: 'Carcasa de pintada, Sidra seca, Chalotas, Zanahoria, Pera (pieles y corazones)' },
+        { title: 'Asar las peras', time: '20 min', text: 'Parte las peras por la mitad. Asa a 180°C con mantequilla, miel y pimienta negra hasta que estén caramelizadas — deben quedar tiernas pero enteras. Reserva para la presentación. Los jugos del asado van al fondo.', ingredients: 'Pera conferencia, Mantequilla, Miel, Pimienta negra' },
+        { title: 'Dorar la pintada', time: '10 min', text: 'Dora bien la pintada en la paella a fuego fuerte — su carne es más dura que el pollo, necesita un sellado completo. Color caoba por todos los lados. Reserva.', ingredients: 'Pintada, Aceite' },
+        { title: 'Sofrito suave', time: '10 min', text: 'En los jugos de la pintada sofríe cebolla blanca y chalotas a fuego medio hasta que estén muy blandas y dulces. Añade tomate y reduce bien.', ingredients: 'Cebolla, Chalotas, Tomate' },
+        { title: 'El caldo al fuego', time: '3 min', text: 'Coloca la pintada. Vierte el fondo de sidra y pera. Hierve. Ratio 2,4:1 — la sidra en el fondo aporta líquido con azúcares, vigilar el socarrat.', ingredients: 'Fondo de pintada y sidra' },
+        { title: 'El arroz y la mostaza', time: '18 min', text: 'Reparte el arroz. Fuego fuerte 8 min, reduce. En el último cazo de caldo disuelve una cucharada de mostaza antigua antes de incorporarlo — se integra sin grumos y perfuma todo el arroz.', ingredients: 'Arroz bomba, Mostaza antigua' },
+        { title: 'Socarrat traicionero', time: '1 min', text: 'El azúcar de la pera y la sidra carameliza rápido — es el más traicionero en cuanto a tiempo. Máximo 60–70 segundos a fuego medio-alto. Color ámbar dorado con reflejos cobrizos. Aroma a fruta caramelizada y carne tostada. Apaga en cuanto lo huelas.', ingredients: '—' },
+        { title: 'Reposo y presentación', time: '5 min', text: 'Reposa 5 minutos. Viste con el muslo de pintada dorado al centro, mitad de pera asada caramelizada, puntos de mostaza antigua sin mezclar, pimienta negra gruesa recién molida y berros o rúcula baby en frío encima.', ingredients: 'Pera asada, Mostaza antigua, Berros' },
       ],
     },
   ];
