@@ -1930,6 +1930,38 @@ const Data = (() => {
         { title: 'Yogur de menta y reposo', time: '5 min', text: 'Mezcla el yogur griego con menta fresca picada, sal y unas gotas de limón — en frío. Reposa el arroz 5 minutos. Viste con la costillita entera glaseada al centro, puntos de yogur de menta en frío sobre el arroz caliente, hojas de menta, cilantro, piñones tostados y cúrcuma tamizada en el borde.', ingredients: 'Yogur griego, Menta fresca, Limón' },
       ],
     },
+    {
+      id: 'faisan-albufera', name: 'Faisán y Uva Moscatel', emoji: '🦚',
+      desc: 'Arroz seco de faisán al Armagnac, uvas moscatel y foie mi-cuit. Paella 60 cm · Albufera Tartana D.O.', difficulty: 'Alta', time: '55 min + fondo (día anterior)',
+      riceType: 'albufera', ricePerPerson: 70, waterRatio: 3.25, cookMin: 16,
+      ingredients: [
+        { name: 'Arroz albufera Tartana D.O.', perPerson: 70,   unit: 'g' },
+        { name: 'Faisán — muslos y contramuslos', perPerson: 100, unit: 'g' },
+        { name: 'Faisán — pechuga entera',      perPerson: 40,  unit: 'g' },
+        { name: 'Foie mi-cuit',                 perPerson: 17,  unit: 'g' },
+        { name: 'Uvas moscatel (arroz + presentación)', perPerson: 43, unit: 'g' },
+        { name: 'Caldo de faisán al Armagnac',  perPerson: 228, unit: 'ml' },
+        { name: 'Chalota',                      perPerson: 0.4, unit: 'ud' },
+        { name: 'Tomate maduro rallado',         perPerson: 21,  unit: 'g' },
+        { name: 'Azafrán en hebra',             perPerson: 0.07, unit: 'g' },
+        { name: 'Armagnac o coñac',             perPerson: 9,   unit: 'ml' },
+        { name: 'Mantequilla',                  perPerson: 3,   unit: 'g' },
+        { name: 'Aceite de oliva virgen extra',  perPerson: 11,  unit: 'ml' },
+        { name: 'Pimentón dulce de la Vera',    perPerson: 1,   unit: 'g' },
+        { name: 'Sal',                          perPerson: 3,   unit: 'g' },
+      ],
+      steps: [
+        { title: 'Fondo de faisán al Armagnac (día anterior)', time: '2,5 h + reposo', text: 'Tuesta las carcasas y menudillos (sin el hígado) en horno a 210°C durante 40–45 min hasta que estén oscuros. Flamea con Armagnac sobre la bandeja caliente. Desgrasa la bandeja con agua caliente raspando todos los jugos. Cuece en olla con verduras, uvas asadas, enebro, tomillo y laurel a fuego muy suave 1,5–2 horas. Cuela, reduce a 2 litros y reposa en nevera toda la noche. Al día siguiente retira la grasa solidificada. Debe quedar gelatinoso, caoba y con aroma a caza tostada y fruta.', ingredients: 'Carcasas de faisán, Armagnac, Cebolla, Zanahoria, Puerro, Apio, Uvas asadas, Enebro, Tomillo, Laurel' },
+        { title: 'Mise en place', time: '20 min', text: 'Caldo de faisán en cazuela a 85–90°C. Azafrán infusionado en 100 ml de caldo caliente tapado mínimo 20 min. Uvas peladas reservadas. Foie en dados de 2 cm en frío. Reducción de Armagnac y zumo de uva lista en biberón. Tomillo limón y pimienta preparados.', ingredients: 'Caldo, Azafrán, Uvas, Foie, Armagnac' },
+        { title: 'Marcar el faisán', time: '10 min', text: 'Calienta el aceite en la paella a fuego vivo. Marca muslos y contramuslos por todos los lados hasta que estén caoba — 6–7 min. Reserva. Marca las pechugas solo por la piel, 2 minutos — terminarán sobre el arroz. Reserva aparte.', ingredients: 'Faisán, Aceite de oliva' },
+        { title: 'Sofrito largo', time: '20 min', text: 'En los jugos del faisán sofríe chalota y ajo hasta transparentes (5 min). Añade las uvas moscatel asadas aplastadas — carameliza 3 min. Incorpora el tomate rallado y reduce a fuego medio-bajo hasta conseguir una pasta oscura y concentrada (10–12 min). Fuera del fuego, pimentón 30 segundos. No acortar este paso: es la base del sabor.', ingredients: 'Chalota, Ajo, Uvas asadas, Tomate rallado, Pimentón de la Vera' },
+        { title: 'Nacarar el arroz', time: '2 min', text: 'Sube a fuego medio-alto. Añade el arroz albufera Tartana sobre el sofrito. Remueve constantemente 2 minutos exactos hasta que los granos estén nacarados — translúcidos en los bordes, blancos en el centro. Este paso impermeabiliza el grano para absorción uniforme.', ingredients: 'Arroz albufera Tartana' },
+        { title: 'El caldo — momento crítico', time: '5 min', text: 'Vierte de golpe el caldo hirviendo + el azafrán infusionado (ratio 3,25:1 según Tartana). Distribuye el arroz uniformemente — solo en este momento. Coloca los muslos sobre el arroz. Prueba el punto de sal ahora: es el último momento para corregir. Fuego fuerte los primeros 5 min.', ingredients: 'Caldo de faisán, Azafrán' },
+        { title: 'Cocción sin tocar', time: '11 min', text: 'Baja a fuego medio. No remuevas en ningún momento. En el minuto 9 coloca las uvas crudas peladas repartidas sobre el arroz. En el minuto 15 coloca las pechugas encima con la piel hacia arriba — el vapor las terminará sin resecarlas. Deben quedar a 58–62°C en el centro, jugosas y ligeramente rosadas.', ingredients: 'Uvas crudas, Pechugas de faisán' },
+        { title: 'Socarrat del albufera', time: '1,5 min', text: 'En el minuto 16–17 sube al máximo 75–90 segundos. El albufera forma socarrat más rápido que el bomba — el margen entre perfecto y quemado es estrecho. Escucha el crepitar seco. El olor a caza caramelizada y uva tostada es la señal. Apaga.', ingredients: '—' },
+        { title: 'Reposo y presentación', time: '5 min', text: 'Cubre con papel de periódico 3 minutos exactos — el albufera no necesita más. Mientras, marca los dados de foie a fuego máximo sin grasa 20 seg/cara. Viste: pechugas al centro, foie en puntos simétricos, racimitos de uva en los bordes, hilo de reducción de Armagnac sobre el faisán y el foie, tomillo limón, pimienta gruesa y Maldon solo sobre la carne. Nunca sal ni reducción directamente sobre el arroz.', ingredients: 'Foie mi-cuit, Uvas moscatel, Reducción Armagnac, Tomillo limón, Maldon' },
+      ],
+    },
   ];
 
   const WATER_NAMES = {
