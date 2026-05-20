@@ -3326,5 +3326,48 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
 }
 </script>
+<script>
+(function () {
+  if (localStorage.getItem('pwa-dismissed')) return;
+  let deferredPrompt;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.innerHTML = `
+    <span>📲 Instala Maestro Arrocero en tu móvil</span>
+    <button id="pwa-install">Instalar</button>
+    <button id="pwa-close" aria-label="Cerrar">✕</button>`;
+  banner.style.cssText = `
+    display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+    background:#2A1F14;color:#F5E6D3;padding:.85rem 1rem;
+    display:flex;align-items:center;gap:.75rem;font-family:'DM Sans',sans-serif;
+    font-size:.9rem;box-shadow:0 -2px 12px rgba(0,0,0,.35);`;
+  banner.querySelector('span').style.cssText = 'flex:1';
+  banner.querySelector('#pwa-install').style.cssText = `
+    background:#C8864A;color:#fff;border:none;border-radius:6px;
+    padding:.45rem .9rem;font-size:.85rem;font-weight:500;cursor:pointer;white-space:nowrap;`;
+  banner.querySelector('#pwa-close').style.cssText = `
+    background:none;border:none;color:#C8BFB0;font-size:1.1rem;cursor:pointer;padding:0 .25rem;`;
+  document.body.appendChild(banner);
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    banner.style.display = 'flex';
+  });
+
+  banner.querySelector('#pwa-install').addEventListener('click', () => {
+    banner.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  });
+
+  banner.querySelector('#pwa-close').addEventListener('click', () => {
+    banner.style.display = 'none';
+    localStorage.setItem('pwa-dismissed', '1');
+  });
+
+  window.addEventListener('appinstalled', () => { banner.style.display = 'none'; });
+})();
+</script>
 </body>
 </html>
