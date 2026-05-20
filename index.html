@@ -707,6 +707,12 @@ body.cook-mode #screen-recipe .step-card    { padding: 1.25rem; }
   padding: 3px 9px;
   white-space: nowrap;
 }
+.rice-type-ratio.pending {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-style: italic;
+}
 .rice-type-body {
   display: none;
   padding: .75rem 1rem 1rem;
@@ -1194,11 +1200,11 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     <button class="water-type-btn selected" onclick="Water.selectType(this,'bomba',1.5)">
       <span class="wt-emoji">🌾</span>Bomba<span class="wt-ratio">ratio 1:1.5</span>
     </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.2)">
-      <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1.2</span>
+    <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.0)">
+      <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1</span>
     </button>
-    <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.0)">
-      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.0</span>
+    <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.2)">
+      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.2</span>
     </button>
     <button class="water-type-btn" onclick="Water.selectType(this,'balilla',1.1)">
       <span class="wt-emoji">🌿</span>Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
@@ -1675,7 +1681,7 @@ const Data = (() => {
       id: 'caldoso', name: 'Arroz Caldoso', emoji: '🍲', rating: 4.8, sugerida: true,
       desc: 'Meloso y con marisco fresco', difficulty: 'Media-alta', time: '50 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'redondo', ricePerPerson: 75, waterRatio: 1.2, cookMin: 15,
+      riceType: 'redondo', ricePerPerson: 75, waterRatio: 1.0, cookMin: 15,
       ingredients: [
         { name: 'Arroz redondo',     perPerson: 75,  unit: 'g' },
         { name: 'Gambas o cigalas',  perPerson: 100, unit: 'g' },
@@ -1728,7 +1734,7 @@ const Data = (() => {
       id: 'vegetal', name: 'Arroz de Verduras', emoji: '🌿',
       desc: 'Ligero, colorido y lleno de sabor', difficulty: 'Fácil', time: '35 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
-      riceType: 'albufera', ricePerPerson: 75, waterRatio: 1.0, cookMin: 16,
+      riceType: 'albufera', ricePerPerson: 75, waterRatio: 1.2, cookMin: 16,
       ingredients: [
         { name: 'Arroz Albufera',    perPerson: 75,   unit: 'g' },
         { name: 'Alcachofas',        perPerson: 60,   unit: 'g' },
@@ -2062,7 +2068,7 @@ const Data = (() => {
     {
       id: 'faisan-albufera', name: 'Faisán y Uva Moscatel', emoji: '🦚',
       desc: 'Arroz seco de faisán al Armagnac, uvas moscatel y foie mi-cuit. Paella 60 cm · Albufera Tartana D.O.', difficulty: 'Alta', time: '55 min + fondo (día anterior)',
-      riceType: 'albufera', ricePerPerson: 70, waterRatio: 3.25, cookMin: 16,
+      riceType: 'albufera', ricePerPerson: 70, waterRatio: 1.2, cookMin: 16,
       ingredients: [
         { name: 'Arroz albufera Tartana D.O.', perPerson: 70,   unit: 'g' },
         { name: 'Faisán — muslos y contramuslos', perPerson: 100, unit: 'g' },
@@ -3567,50 +3573,68 @@ const RiceGuide = (() => {
   const TYPES = [
     {
       id: 'bomba', emoji: '💥', name: 'Bomba',
-      ratio: 'ratio 1:1.5–1.8',
+      ratio: 'ratio 1:1.5',
       desc: 'La variedad reina de la paella valenciana. Absorbe el caldo en dos fases y aguanta la sobrecocción mejor que ninguna otra, soltando el almidón de fuera hacia dentro.',
       tags: ['Paella seca', 'Socarrat', 'Caldoso', 'Resistente']
     },
     {
       id: 'albufera', emoji: '🌊', name: 'Albufera',
-      ratio: 'ratio 1:2.5–3.5',
+      ratio: 'ratio 1:1.2',
       desc: 'Cruce entre Bomba y Senia, desarrollado en la Albufera de Valencia. Absorbe grandes cantidades de caldo, tiene un punto meloso natural y es ideal para arroces de autor con fondos intensos.',
       tags: ['Meloso', 'Alta absorción', 'Arroces de autor', 'Fondos potentes']
     },
     {
+      id: 'redondo', emoji: '⭕', name: 'Redondo',
+      ratio: 'ratio 1:1',
+      desc: 'Arroz de grano corto y redondo, muy común y accesible. Textura suave y cremosa. Ideal para arroces caldosos y melosos.',
+      tags: ['Caldoso', 'Meloso', 'Accesible']
+    },
+    {
+      id: 'balilla', emoji: '🌿', name: 'Balilla × Sollana',
+      ratio: 'ratio 1:1.1',
+      desc: 'Variedad tradicional valenciana, cruce entre Balilla y Sollana. Grano firme, buena absorción y excelente resultado en paellas secas.',
+      tags: ['Paella', 'Tradicional valenciana', 'Firme']
+    },
+    {
+      id: 'dinamita', emoji: '💣', name: 'Dinamita',
+      ratio: 'ratio 1:1.6',
+      desc: 'Variedad de alta absorción. Aguanta bien tiempos largos de cocción y caldos muy potentes. Perfecto para guisos y arroces de montaña.',
+      tags: ['Alta absorción', 'Guisos', 'Arroces de montaña']
+    },
+    {
       id: 'senia', emoji: '🌾', name: 'Senia',
-      ratio: 'ratio 1:1.6–2',
+      ratio: 'pendiente de configurar',
       desc: 'Arroz suave y cremoso por naturaleza. Libera almidón con facilidad, lo que le da una textura untuosa. Delicado: no perdona la sobrecocción. Ideal en arroces melosos y mariscos.',
       tags: ['Meloso', 'Cremoso', 'Mariscos', 'Delicado']
     },
     {
       id: 'bahia', emoji: '🏖️', name: 'Bahía',
-      ratio: 'ratio 1:1.5–1.7',
+      ratio: 'pendiente de configurar',
       desc: 'Similar a la Senia pero con más resistencia. Muy popular en Valencia por su precio y disponibilidad. Buen equilibrio entre absorción y textura firme.',
       tags: ['Paella', 'Equilibrado', 'Accesible']
     },
     {
       id: 'carnaroli', emoji: '🇮🇹', name: 'Carnaroli',
-      ratio: 'ratio 1:3–4',
+      ratio: 'pendiente de configurar',
       desc: 'El arroz del risotto italiano. Grano largo, alto contenido en amilosa, libera almidón lentamente y aguanta bien la cocción. Perfecto para arroces caldosos con mucho movimiento.',
       tags: ['Caldoso', 'Risotto', 'Grano largo', 'Mantecoso']
     },
     {
       id: 'arborio', emoji: '🫙', name: 'Arborio',
-      ratio: 'ratio 1:3–3.5',
+      ratio: 'pendiente de configurar',
       desc: 'Más común que el Carnaroli y más fácil de encontrar. Grano redondo y gordito, suelta mucho almidón. Textura muy cremosa pero se pasa más fácilmente.',
       tags: ['Risotto', 'Cremoso', 'Fácil de encontrar']
     },
     {
-      id: 'jazmín', emoji: '🌸', name: 'Jazmín / Jasmine',
-      ratio: 'ratio 1:1.5',
-      desc: 'Arroz aromático de grano largo originario de Tailandia. No absorbe caldos intensos con el mismo resultado que el bomba, pero sus notas florales lo hacen interesante en preparaciones asiáticas.',
+      id: 'jazmin', emoji: '🌸', name: 'Jazmín / Jasmine',
+      ratio: 'pendiente de configurar',
+      desc: 'Arroz aromático de grano largo originario de Tailandia. Sus notas florales lo hacen interesante en preparaciones asiáticas.',
       tags: ['Aromático', 'Cocina asiática', 'Grano largo', 'Floral']
     },
     {
       id: 'basmati', emoji: '🍚', name: 'Basmati',
-      ratio: 'ratio 1:1.5',
-      desc: 'El arroz aromático por excelencia de la cocina india y paquistaní. Grano muy largo, ligero y suelto tras la cocción. No apto para arroces con caldo que necesiten absorción.',
+      ratio: 'pendiente de configurar',
+      desc: 'El arroz aromático por excelencia de la cocina india y paquistaní. Grano muy largo, ligero y suelto tras la cocción.',
       tags: ['Aromático', 'Cocina india', 'Suelto', 'Ligero']
     },
   ];
@@ -3626,7 +3650,7 @@ const RiceGuide = (() => {
         <div class="rice-type-header" onclick="RiceGuide.toggle('${t.id}')">
           <span class="rice-type-emoji">${t.emoji}</span>
           <span class="rice-type-name">${t.name}</span>
-          <span class="rice-type-ratio">${t.ratio}</span>
+          <span class="rice-type-ratio${t.ratio === 'pendiente de configurar' ? ' pending' : ''}">${t.ratio}</span>
         </div>
         <div class="rice-type-body" id="rtb-${t.id}">
           <p>${t.desc}</p>
