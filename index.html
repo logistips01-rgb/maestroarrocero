@@ -547,7 +547,60 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 .step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 3px; }
 .step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
 
-/* ── 7c. MODAL COMPARTIR ──────────────────────────────────── */
+/* ── 7c. TEMPORIZADOR DE COCCIÓN (global) ─────────────────── */
+#cook-timer-bar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--rice-dark);
+  color: #fff;
+  padding: .5rem 1rem;
+  border-radius: 0 0 10px 10px;
+  margin: 0 -1rem .75rem;
+  align-items: center;
+  gap: .75rem;
+}
+#cook-timer-bar.visible { display: flex; }
+#cook-timer-bar.done    { background: var(--success); }
+#cook-timer-clock {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  min-width: 60px;
+}
+#cook-timer-label { flex: 1; font-size: .8rem; opacity: .85; }
+.cook-timer-btn {
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  border-radius: 6px;
+  padding: .3rem .7rem;
+  font-size: .78rem;
+  cursor: pointer;
+}
+
+/* ── 7d. MODO COCINA ──────────────────────────────────────── */
+#cook-mode-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: .28rem .75rem;
+  font-size: .75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+#cook-mode-btn.active {
+  background: var(--rice);
+  border-color: var(--rice);
+  color: #fff;
+}
+body.cook-mode .bottom-nav { display: none !important; }
+body.cook-mode #screen-recipe .step-card h3 { font-size: 1.15rem; }
+body.cook-mode #screen-recipe .step-card p  { font-size: 1rem; line-height: 1.75; }
+body.cook-mode #screen-recipe .step-card    { padding: 1.25rem; }
+
+/* ── 7e. MODAL COMPARTIR ──────────────────────────────────── */
 .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 0; }
 .share-sheet {
   background: #fff;
@@ -622,6 +675,62 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 .zero-actions { display: flex; gap: .6rem; width: 100%; }
 
 /* ── 10. PANTALLA: INSTRUCCIONES ──────────────────────────── */
+.rice-guide-section { margin-bottom: 2rem; }
+.rice-guide-section > h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  margin-bottom: .9rem;
+  color: var(--text);
+}
+.rice-type-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: .75rem;
+}
+.rice-type-header {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  padding: .875rem 1rem;
+  cursor: pointer;
+}
+.rice-type-header:hover { background: var(--surface); }
+.rice-type-emoji { font-size: 1.6rem; flex-shrink: 0; }
+.rice-type-name  { flex: 1; font-size: .95rem; font-weight: 500; }
+.rice-type-ratio {
+  font-size: .75rem;
+  background: var(--rice-light);
+  color: var(--rice-dark);
+  border-radius: 20px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.rice-type-body {
+  display: none;
+  padding: .75rem 1rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: .83rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.rice-type-body.open { display: block; }
+.rice-type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .6rem;
+}
+.rice-type-tag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: .75rem;
+  color: var(--text-muted);
+}
+
 .instructions-list { display: flex; flex-direction: column; gap: 1.25rem; }
 .instruction-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
 .instruction-card-header { display: flex; align-items: center; gap: .875rem; padding: 1rem; cursor: pointer; }
@@ -1005,7 +1114,14 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
         <div class="comensales-badge" id="comensales-badge">4 personas</div>
+        <button id="cook-mode-btn" onclick="CookMode.toggle()" title="Mantener pantalla encendida">🔥 Modo cocina</button>
       </div>
+    </div>
+    <div id="cook-timer-bar">
+      <div id="cook-timer-clock">00:00</div>
+      <div id="cook-timer-label">Cocción en marcha</div>
+      <button class="cook-timer-btn" id="cook-timer-toggle" onclick="CookTimer.toggle()">⏸ Pausar</button>
+      <button class="cook-timer-btn" onclick="CookTimer.stop()">✕</button>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
     <div id="step-display"></div>
@@ -1035,7 +1151,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     <hr class="divider">
     <div style="display:flex;gap:.6rem;">
       <button class="btn btn-secondary" style="flex:1" onclick="Share.open()">↗ Compartir</button>
-      <button class="btn" style="flex:2" onclick="Recipe.switchTab('guia')">Empezar a cocinar →</button>
+      <button class="btn" style="flex:2" onclick="CookTimer.startAndGo()">⏱ Empezar a cocinar →</button>
     </div>
   </div>
 </div>
@@ -1370,6 +1486,11 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
   <p class="note" style="margin-bottom:1.5rem">Aprende a sacarle el máximo partido a cada función de la app.</p>
 
   <div class="instructions-list" id="instructions-list"></div>
+
+  <div class="rice-guide-section" style="margin-top:2rem">
+    <h3>Tipos de <span style="color:var(--rice)">arroz</span></h3>
+    <div id="rice-guide-list"></div>
+  </div>
 </div>
 
 <!-- MODAL: Alerta fin de cronómetro -->
@@ -3312,13 +3433,221 @@ const App = (() => {
     Nav.onEnter('bascula', () => {
       Scale.switchTab('medir');
     });
-    Nav.onEnter('instrucciones', () => {});
+    Nav.onEnter('instrucciones', () => { RiceGuide.render(); });
   }
 
   return { init };
 })();
 
 App.init();
+
+/* ── COOK TIMER ─────────────────────────────────────────────
+   Cuenta atrás global del tiempo de cocción.
+   Se arranca desde el tab de ingredientes y flota en el
+   tab de guía mientras se cocina.
+──────────────────────────────────────────────────────────── */
+const CookTimer = (() => {
+  let totalSecs = 0;
+  let remaining = 0;
+  let running   = false;
+  let iv        = null;
+
+  function _fmt(s) {
+    const m = Math.floor(s / 60);
+    return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+  }
+
+  function _update() {
+    const bar    = document.getElementById('cook-timer-bar');
+    const clock  = document.getElementById('cook-timer-clock');
+    const toggle = document.getElementById('cook-timer-toggle');
+    if (!bar) return;
+    if (remaining <= 0) {
+      clock.textContent = '00:00';
+      bar.classList.add('done');
+      document.getElementById('cook-timer-label').textContent = '✓ Cocción lista';
+      if (toggle) toggle.style.display = 'none';
+      if (navigator.vibrate) navigator.vibrate([400,200,400,200,800]);
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0,.35,.7].forEach(t => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880;
+          g.gain.setValueAtTime(.4, ctx.currentTime+t);
+          g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+t+.3);
+          o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.3);
+        });
+      } catch(e){}
+      return;
+    }
+    clock.textContent = _fmt(remaining);
+    document.getElementById('cook-timer-label').textContent = running ? 'Cocción en marcha' : 'Pausado';
+    if (toggle) toggle.textContent = running ? '⏸ Pausar' : '▶ Continuar';
+  }
+
+  function start(minutes) {
+    stop();
+    totalSecs = minutes * 60;
+    remaining = totalSecs;
+    running   = true;
+    const bar = document.getElementById('cook-timer-bar');
+    if (bar) { bar.classList.remove('done'); bar.classList.add('visible'); }
+    const tog = document.getElementById('cook-timer-toggle');
+    if (tog) tog.style.display = '';
+    iv = setInterval(() => {
+      if (!running) return;
+      remaining--;
+      _update();
+      if (remaining <= 0) { clearInterval(iv); iv = null; running = false; }
+    }, 1000);
+    _update();
+  }
+
+  function toggle() {
+    if (remaining <= 0) return;
+    running = !running;
+    _update();
+  }
+
+  function stop() {
+    if (iv) { clearInterval(iv); iv = null; }
+    running = false; totalSecs = 0; remaining = 0;
+    const bar = document.getElementById('cook-timer-bar');
+    if (bar) { bar.classList.remove('visible','done'); }
+  }
+
+  function startAndGo() {
+    const r = Recipe._current();
+    if (r && r.cookMin) start(r.cookMin);
+    Recipe.switchTab('guia');
+  }
+
+  return { start, toggle, stop, startAndGo };
+})();
+
+/* ── COOK MODE ──────────────────────────────────────────────
+   Activa WakeLock para que la pantalla no se apague mientras
+   se cocina. Aplica clase CSS para texto más grande y oculta
+   la barra de navegación.
+──────────────────────────────────────────────────────────── */
+const CookMode = (() => {
+  let active   = false;
+  let wakeLock = null;
+
+  async function _acquireWakeLock() {
+    if ('wakeLock' in navigator) {
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+    }
+  }
+
+  function _releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+  }
+
+  function toggle() {
+    active = !active;
+    document.body.classList.toggle('cook-mode', active);
+    const btn = document.getElementById('cook-mode-btn');
+    if (btn) {
+      btn.classList.toggle('active', active);
+      btn.textContent = active ? '🔥 Modo activo' : '🔥 Modo cocina';
+    }
+    if (active) _acquireWakeLock();
+    else        _releaseWakeLock();
+  }
+
+  return { toggle };
+})();
+
+/* ── RICE GUIDE ─────────────────────────────────────────────
+   Guía de variedades de arroz con acordeón.
+──────────────────────────────────────────────────────────── */
+const RiceGuide = (() => {
+  const TYPES = [
+    {
+      id: 'bomba', emoji: '💥', name: 'Bomba',
+      ratio: 'ratio 1:1.5–1.8',
+      desc: 'La variedad reina de la paella valenciana. Absorbe el caldo en dos fases y aguanta la sobrecocción mejor que ninguna otra, soltando el almidón de fuera hacia dentro.',
+      tags: ['Paella seca', 'Socarrat', 'Caldoso', 'Resistente']
+    },
+    {
+      id: 'albufera', emoji: '🌊', name: 'Albufera',
+      ratio: 'ratio 1:2.5–3.5',
+      desc: 'Cruce entre Bomba y Senia, desarrollado en la Albufera de Valencia. Absorbe grandes cantidades de caldo, tiene un punto meloso natural y es ideal para arroces de autor con fondos intensos.',
+      tags: ['Meloso', 'Alta absorción', 'Arroces de autor', 'Fondos potentes']
+    },
+    {
+      id: 'senia', emoji: '🌾', name: 'Senia',
+      ratio: 'ratio 1:1.6–2',
+      desc: 'Arroz suave y cremoso por naturaleza. Libera almidón con facilidad, lo que le da una textura untuosa. Delicado: no perdona la sobrecocción. Ideal en arroces melosos y mariscos.',
+      tags: ['Meloso', 'Cremoso', 'Mariscos', 'Delicado']
+    },
+    {
+      id: 'bahia', emoji: '🏖️', name: 'Bahía',
+      ratio: 'ratio 1:1.5–1.7',
+      desc: 'Similar a la Senia pero con más resistencia. Muy popular en Valencia por su precio y disponibilidad. Buen equilibrio entre absorción y textura firme.',
+      tags: ['Paella', 'Equilibrado', 'Accesible']
+    },
+    {
+      id: 'carnaroli', emoji: '🇮🇹', name: 'Carnaroli',
+      ratio: 'ratio 1:3–4',
+      desc: 'El arroz del risotto italiano. Grano largo, alto contenido en amilosa, libera almidón lentamente y aguanta bien la cocción. Perfecto para arroces caldosos con mucho movimiento.',
+      tags: ['Caldoso', 'Risotto', 'Grano largo', 'Mantecoso']
+    },
+    {
+      id: 'arborio', emoji: '🫙', name: 'Arborio',
+      ratio: 'ratio 1:3–3.5',
+      desc: 'Más común que el Carnaroli y más fácil de encontrar. Grano redondo y gordito, suelta mucho almidón. Textura muy cremosa pero se pasa más fácilmente.',
+      tags: ['Risotto', 'Cremoso', 'Fácil de encontrar']
+    },
+    {
+      id: 'jazmín', emoji: '🌸', name: 'Jazmín / Jasmine',
+      ratio: 'ratio 1:1.5',
+      desc: 'Arroz aromático de grano largo originario de Tailandia. No absorbe caldos intensos con el mismo resultado que el bomba, pero sus notas florales lo hacen interesante en preparaciones asiáticas.',
+      tags: ['Aromático', 'Cocina asiática', 'Grano largo', 'Floral']
+    },
+    {
+      id: 'basmati', emoji: '🍚', name: 'Basmati',
+      ratio: 'ratio 1:1.5',
+      desc: 'El arroz aromático por excelencia de la cocina india y paquistaní. Grano muy largo, ligero y suelto tras la cocción. No apto para arroces con caldo que necesiten absorción.',
+      tags: ['Aromático', 'Cocina india', 'Suelto', 'Ligero']
+    },
+  ];
+
+  let openId = null;
+
+  function render() {
+    const el = document.getElementById('rice-guide-list');
+    if (!el || el.dataset.rendered) return;
+    el.dataset.rendered = '1';
+    el.innerHTML = TYPES.map(t => `
+      <div class="rice-type-card">
+        <div class="rice-type-header" onclick="RiceGuide.toggle('${t.id}')">
+          <span class="rice-type-emoji">${t.emoji}</span>
+          <span class="rice-type-name">${t.name}</span>
+          <span class="rice-type-ratio">${t.ratio}</span>
+        </div>
+        <div class="rice-type-body" id="rtb-${t.id}">
+          <p>${t.desc}</p>
+          <div class="rice-type-tags">${t.tags.map(tg => `<span class="rice-type-tag">${tg}</span>`).join('')}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function toggle(id) {
+    if (openId && openId !== id) {
+      document.getElementById('rtb-' + openId)?.classList.remove('open');
+    }
+    const body = document.getElementById('rtb-' + id);
+    if (!body) return;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    openId = isOpen ? null : id;
+  }
+
+  return { render, toggle };
+})();
 
 </script>
 <script>
