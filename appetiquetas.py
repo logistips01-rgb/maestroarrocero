@@ -3477,7 +3477,42 @@ elif menu == "🧠 Logística AI":
         coleccion_ai.add(documents=chunks, ids=ids, metadatas=metadatas)
         return len(chunks)
 
-    def buscar_contexto_ai(pregunta, n=20):
+    def construir_contexto_firebase():
+        """Vuelca todos los dataframes de session_state en texto para Claude."""
+        bloques = []
+
+        def df_a_texto(df, nombre, max_filas=2000):
+            if df is None or df.empty:
+                return ""
+            df2 = df.copy().head(max_filas)
+            lineas = [f"=== {nombre} ({len(df)} filas) ==="]
+            lineas.append(", ".join(df2.columns.tolist()))
+            for _, row in df2.iterrows():
+                lineas.append(" | ".join(
+                    f"{col}={val}" for col, val in row.items()
+                    if pd.notna(val) and str(val).strip() not in ("", "nan", "None")
+                ))
+            return "\n".join(lineas)
+
+        mapeo = [
+            (st.session_state.get("df_final"),           "Maestro Bandejas",        2000),
+            (st.session_state.get("df_etiquetas_final"),  "Maestro Etiquetas",       2000),
+            (st.session_state.get("df_materiales"),       "Componentes",             3000),
+            (st.session_state.get("df_paletizacion"),     "Paletizacion",             200),
+            (st.session_state.get("df_stock_pt"),         "Stock Producto Terminado", 500),
+            (st.session_state.get("df_produccion_pt"),    "Produccion PT",            500),
+            (st.session_state.get("df_ventas"),           "Ventas",                  1000),
+            (st.session_state.get("df_consumos"),         "Consumos",                 500),
+            (st.session_state.get("df_planificacion"),    "Planificacion",            500),
+        ]
+        for df, nombre, max_f in mapeo:
+            bloque = df_a_texto(df, nombre, max_f)
+            if bloque:
+                bloques.append(bloque)
+
+        return "\n\n".join(bloques) if bloques else "No hay datos cargados en Firebase."
+
+
         try:
             total = coleccion_ai.count()
             if total == 0:
@@ -3736,15 +3771,19 @@ elif menu == "🧠 Logística AI":
                                                         desc_extra.append(f"BANDEJA asociada al producto {ref_prod}: ref={bp['Codigo']} desc={rb.get('Descripcion','')} medidas={medidas_bp} uds_palet={rb.get('Unidades_palet','')}")
                                 contexto_enriquecido = '\n'.join(desc_extra) + '\n\n' + contexto_enriquecido
 
+                        if motor_ai == "claude":
+                            datos_contexto = construir_contexto_firebase()
+                        else:
+                            datos_contexto = f"""DATOS EXACTOS DE REFERENCIAS MENCIONADAS:
+{chr(10).join(contexto_extra) if contexto_extra else "No se encontraron referencias exactas."}
+
+DATOS RELEVANTES (búsqueda semántica):
+{contexto if contexto else "No hay datos indexados."}"""
+
                         system_prompt = f"""Eres un agente de logística inteligente de Aldelis, especializado en análisis de inventario, aprovisionamiento y planificación de producción.
 
-Archivos disponibles: {archivos_lista}
-
-DATOS EXACTOS DE REFERENCIAS MENCIONADAS:
-{chr(10).join(contexto_extra) if contexto_extra else "No se encontraron referencias exactas en los datos."}
-
-DATOS RELEVANTES ADICIONALES (búsqueda semántica):
-{contexto if contexto else "No hay datos indexados."}
+DATOS COMPLETOS DEL SISTEMA:
+{datos_contexto}
 
 INSTRUCCIONES:
 - Responde siempre en español, de forma concisa y práctica
