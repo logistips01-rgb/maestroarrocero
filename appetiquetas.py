@@ -3943,8 +3943,14 @@ INSTRUCCIONES:
                                 headers={"content-type": "application/json"},
                                 method="POST"
                             )
-                            with urllib.request.urlopen(req) as r:
-                                respuesta = _json.loads(r.read())["candidates"][0]["content"]["parts"][0]["text"]
+                            try:
+                                with urllib.request.urlopen(req) as r:
+                                    respuesta = _json.loads(r.read())["candidates"][0]["content"]["parts"][0]["text"]
+                            except urllib.error.HTTPError as he:
+                                if he.code == 429:
+                                    st.warning("⏳ Gemini: límite de peticiones alcanzado (429). Espera unos segundos y vuelve a intentarlo.")
+                                    st.stop()
+                                raise
 
                         else:
                             from groq import Groq as GroqClient
