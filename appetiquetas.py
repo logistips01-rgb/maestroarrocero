@@ -2632,7 +2632,8 @@ elif menu == "🏷️ Etiquetas":
                     st.success(f"✅ {len(df_env_up)} referencias de envase guardadas.")
 
     if st.button("🚀 Sincronizar Etiquetas"):
-        _stock_disponible = f_setq or st.session_state.get("df_stock_erp") is not None
+        _stock_erp = st.session_state.get("df_stock_erp")
+        _stock_disponible = f_setq is not None or _stock_erp is not None
         if not (f_metq and f_vent and _stock_disponible):
             st.error("Sube Maestro y Ventas. El stock se coge de Cargar Archivos o súbelo aquí.")
             st.stop()
@@ -2642,7 +2643,7 @@ elif menu == "🏷️ Etiquetas":
         if f_setq:
             s_etq = leer_excel(f_setq, "Stock Etiquetas")
         else:
-            s_etq = st.session_state.df_stock_erp.copy()
+            s_etq = _stock_erp.copy()
         if m_etq is None or ventas is None or s_etq is None:
             st.stop()
 
@@ -2732,7 +2733,7 @@ elif menu == "🏷️ Etiquetas":
         # ── UNIÓN FINAL ────────────────────────────────────────
         final_etq = pd.merge(m_etq, res_stock_etq, on='Referencia', how='left')
         final_etq = pd.merge(final_etq, consumo_mes, on='Referencia', how='left')
-        for col in ['Consumo_mes', 'Stock_interno', 'Stock_merca', 'Stock_txt']:
+        for col in ['Consumo_mes', 'Stock_interno', 'Stock_merca', 'Stock_txt', 'Stock_avitrans']:
             final_etq[col] = pd.to_numeric(final_etq[col], errors='coerce').fillna(0)
 
         st.session_state.df_etiquetas_final = final_etq
@@ -2791,6 +2792,8 @@ elif menu == "🏷️ Etiquetas":
 
         if 'Stock_avitrans' not in df_etq.columns:
             df_etq['Stock_avitrans'] = 0
+        else:
+            df_etq['Stock_avitrans'] = pd.to_numeric(df_etq['Stock_avitrans'], errors='coerce').fillna(0)
 
         def alerta_etq(row):
             consumo_mes  = row.get('Consumo_mes', 0)
