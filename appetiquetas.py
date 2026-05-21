@@ -401,8 +401,11 @@ def preprocesar_stock_erp(df):
     Renombra Ubicacion → Almacen, filtra almacenes relevantes y
     conserva solo las columnas necesarias."""
     df = df.copy()
-    # Si viene del ERP tiene 'Ubicacion' en lugar de 'Almacen'
-    if 'Ubicacion' in df.columns and 'Almacen' not in df.columns:
+    # El ERP puede tener 'Ubicacion' (ubicación específica: AL6, CAMARA BANDEJAS F19...)
+    # y 'Almacen' (agrupación de alto nivel: PLAZA, MERCAZARAGOZA...).
+    # Siempre usar 'Ubicacion' si existe, descartando la columna 'Almacen' del ERP.
+    if 'Ubicacion' in df.columns:
+        df = df.drop(columns=['Almacen'], errors='ignore')
         df = df.rename(columns={'Ubicacion': 'Almacen'})
     if 'Almacen' not in df.columns or 'Referencia' not in df.columns:
         return df
