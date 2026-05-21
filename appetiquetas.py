@@ -3594,7 +3594,7 @@ elif menu == "🧠 Logística AI":
 
         return "\n\n".join(bloques) if bloques else "No hay datos cargados en Firebase."
 
-
+    def buscar_contexto_ai(pregunta, n=20):
         try:
             total = coleccion_ai.count()
             if total == 0:
@@ -3725,7 +3725,11 @@ elif menu == "🧠 Logística AI":
             with st.chat_message("assistant"):
                 with st.spinner("Analizando..."):
                     try:
-                        contexto = buscar_contexto_ai(pregunta_actual)
+                        # Claude usa contexto directo de Firebase; Groq usa ChromaDB
+                        if motor_ai == "claude":
+                            contexto = ""
+                        else:
+                            contexto = buscar_contexto_ai(pregunta_actual)
                         archivos_lista = ", ".join(st.session_state.logistica_archivos.keys()) or "ninguno aún"
 
                         # Enriquecer contexto con búsqueda exacta de referencias
