@@ -870,8 +870,8 @@ st.sidebar.markdown("""
 # Menú según rol
 GRUPOS_ADMIN = {
     "Principal": ["📂 Cargar Archivos", "📊 Dashboard", "📈 Análisis", "🧠 Logística AI"],
-    "Gestión": ["🔗 Materiales", "🏷️ Etiquetas", "🚢 Tránsito", "📋 Pedidos"],
-    "Producción": ["🏪 Producto Terminado", "🏭 Planificación Producción", "🔍 Previsión y Obsoletos", "🤖 Agente IA"],
+    "Gestión": ["🔗 Materiales", "🏷️ Etiquetas", "🚢 Tránsito"],
+    "Producción": ["🔍 Previsión y Obsoletos"],
 }
 GRUPOS_ID = {"Etiquetas": ["🏷️ Etiquetas"]}
 GRUPOS_ALMACEN = {"Etiquetas": ["🏷️ Etiquetas"]}
