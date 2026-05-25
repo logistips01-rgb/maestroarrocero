@@ -1,0 +1,603 @@
+/* ============================================================
+   Aldelis Aprovisionamiento — Streamlit theme
+   ------------------------------------------------------------
+   Drop-in CSS for a Streamlit app. Inyecta así:
+
+       import streamlit as st
+       def inject_theme():
+           with open('theme.css') as f:
+               st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+       inject_theme()
+
+   Complemento en .streamlit/config.toml:
+       [theme]
+       primaryColor          = "#C8102E"
+       backgroundColor       = "#FBF8EF"
+       secondaryBackgroundColor = "#FFFFFF"
+       textColor             = "#2B2B2B"
+       font                  = "sans serif"
+
+   Cubre: tokens de marca, tipografía, sidebar, botones, tabs,
+   inputs, selectbox, métricas nativas, expander, dataframe,
+   radio y checkbox. Para componentes ricos (KPI con sparkline,
+   badges, tracker, hero) usa los helpers de COMPONENTS.md.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Open+Sans:wght@400;600;700&family=Oswald:wght@400;500;600;700&display=swap');
+
+/* ─── Tokens ─────────────────────────────────────────────── */
+:root, [data-testid="stAppViewContainer"] {
+  /* Brand */
+  --aldelis-red:        #C8102E;
+  --aldelis-red-deep:   #A30D26;
+  --aldelis-red-soft:   #FDECEE;
+  --aldelis-sand:       #E6D7A8;
+  --aldelis-sand-soft:  #F2E8C8;
+  --aldelis-sand-deep:  #C8B888;
+
+  /* Neutrals (warm, never pure cool gray) */
+  --ink:        #2B2B2B;
+  --fg-1:       #3F3F3F;
+  --fg-2:       #6B6B6B;
+  --fg-3:       #9A9A9A;
+  --canvas:     #FBF8EF;
+  --surface:    #FFFFFF;
+  --surface-2:  #FAF8F2;
+  --rule-1:     #ECE6D6;
+  --rule-2:     #D9D2BE;
+  --row-hover:  #FBF6E5;
+
+  /* Status palette */
+  --ok-bg:  #E9F3E4; --ok-fg:  #2F6B26; --ok-dot:  #4A8B3B;
+  --wait-bg:#FBEFD3; --wait-fg:#8A5A0A; --wait-dot:#E08A1A;
+  --hot-bg: #FDECEE; --hot-fg: #8E0A1F; --hot-dot: var(--aldelis-red);
+  --info-bg:#E2ECF8; --info-fg:#214E84; --info-dot:#2F6FB5;
+
+  /* Type */
+  --font-script:  'Pacifico', cursive;
+  --font-display: 'Oswald', 'Helvetica Neue', Arial, sans-serif;
+  --font-body:    'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-pill: 999px;
+
+  --tracking-display: 0.02em;
+  --tracking-heading: 0.04em;
+  --tracking-button:  0.10em;
+  --tracking-eyebrow: 0.14em;
+}
+
+/* ─── App canvas ─────────────────────────────────────────── */
+html, body, [data-testid="stAppViewContainer"] {
+  font-family: var(--font-body);
+  color: var(--fg-1);
+  background: var(--canvas);
+}
+
+[data-testid="stMain"] {
+  background: var(--canvas);
+}
+
+/* Hide Streamlit's default top decoration */
+[data-testid="stHeader"] {
+  background: transparent;
+  height: 0;
+}
+[data-testid="stDecoration"] { display: none; }
+footer { visibility: hidden; height: 0; }
+#MainMenu { visibility: hidden; }
+
+/* Page main padding — generous gutters */
+[data-testid="stMain"] .block-container {
+  max-width: 1480px;
+  padding: 24px 40px 80px;
+}
+
+/* ─── Typography defaults ────────────────────────────────── */
+h1, h2, h3, h4, h5, h6,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stMarkdownContainer"] h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-heading);
+  color: var(--ink);
+  line-height: 1.1;
+}
+h1, [data-testid="stMarkdownContainer"] h1 { font-size: 30px; letter-spacing: 0.015em; }
+h2, [data-testid="stMarkdownContainer"] h2 { font-size: 22px; }
+h3, [data-testid="stMarkdownContainer"] h3 { font-size: 16px; letter-spacing: 0.12em; }
+
+p, [data-testid="stMarkdownContainer"] p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--fg-1);
+}
+
+a, [data-testid="stMarkdownContainer"] a {
+  color: var(--aldelis-red);
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover { color: var(--aldelis-red-deep); }
+
+/* ─── Sidebar ────────────────────────────────────────────── */
+[data-testid="stSidebar"] {
+  background: #1E2733;
+  border-right: 1px solid rgba(255,255,255,.05);
+  width: 264px !important;
+  min-width: 264px !important;
+}
+[data-testid="stSidebar"] * { color: #C9CFD7; }
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] { padding-top: 12px; }
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 { color: #fff; }
+
+/* Sidebar: nav radio rendered as nav list */
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] > div {
+  background: transparent;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {
+  gap: 1px;
+  display: flex;
+  flex-direction: column;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #C9CFD7;
+  background: transparent;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+  position: relative;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:hover {
+  background: rgba(255,255,255,.05); color: #fff;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label[data-checked="true"] {
+  background: rgba(200, 16, 46, .14);
+  color: #fff;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label[data-checked="true"]::before {
+  content: "";
+  position: absolute; left: 0; top: 7px; bottom: 7px; width: 3px;
+  background: var(--aldelis-red); border-radius: 0 2px 2px 0;
+}
+/* Hide the radio dot itself; the row is the affordance */
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label > div:first-child { display: none; }
+
+/* Sidebar inputs (search, selectbox) */
+[data-testid="stSidebar"] [data-baseweb="input"],
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  color: #E5E8EC !important;
+}
+[data-testid="stSidebar"] [data-baseweb="input"] input::placeholder {
+  color: rgba(255,255,255,.35);
+}
+
+/* Sidebar section headings (use ###### in markdown for these) */
+[data-testid="stSidebar"] h6,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h6 {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.42) !important;
+  margin: 14px 4px 6px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.stButton > button,
+.stDownloadButton > button,
+.stFormSubmitButton > button {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-button);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--fg-1);
+  border: 1px solid var(--rule-1);
+  box-shadow: none;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.stButton > button:hover,
+.stDownloadButton > button:hover {
+  background: var(--canvas);
+  border-color: var(--rule-2);
+  color: var(--ink);
+}
+
+/* Primary — use `st.button(label, type="primary")` */
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button[kind="primary"] {
+  background: var(--aldelis-red);
+  color: #fff;
+  border-color: var(--aldelis-red);
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+}
+.stButton > button[kind="primary"]:hover {
+  background: var(--aldelis-red-deep);
+  border-color: var(--aldelis-red-deep);
+}
+
+/* Secondary (default kind) keeps outline.
+   For an outline-red CTA, use the helper outline_button(label) — pure HTML. */
+
+/* ─── Tabs (st.tabs) ─────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 2px;
+  border-bottom: 1px solid var(--rule-1);
+}
+.stTabs [data-baseweb="tab"] {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+  color: var(--fg-2);
+  padding: 12px 18px;
+  background: transparent;
+}
+.stTabs [data-baseweb="tab"]:hover { color: var(--ink); }
+.stTabs [aria-selected="true"] {
+  color: var(--aldelis-red) !important;
+}
+.stTabs [data-baseweb="tab-highlight"] {
+  background-color: var(--aldelis-red) !important;
+  height: 2px;
+}
+
+/* ─── Inputs (text, number, date, search) ────────────────── */
+.stTextInput input, .stNumberInput input, .stDateInput input,
+[data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
+  font-family: var(--font-body);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--fg-1);
+  border-radius: var(--radius-md);
+}
+[data-baseweb="input"], [data-baseweb="textarea"] {
+  background: var(--surface) !important;
+  border: 1px solid var(--rule-1) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+}
+[data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within {
+  border-color: var(--aldelis-red) !important;
+  box-shadow: 0 0 0 3px var(--aldelis-red-soft) !important;
+}
+.stTextInput label, .stNumberInput label, .stDateInput label,
+.stSelectbox label, .stMultiSelect label, .stRadio > label {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-2) !important;
+}
+
+/* Selectbox */
+.stSelectbox [data-baseweb="select"] > div {
+  background: var(--surface) !important;
+  border: 1px solid var(--rule-1) !important;
+  border-radius: var(--radius-md) !important;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+/* Checkbox */
+.stCheckbox [data-baseweb="checkbox"] [aria-checked="true"] {
+  background: var(--aldelis-red) !important;
+  border-color: var(--aldelis-red) !important;
+}
+
+/* ─── Metric (st.metric) ─────────────────────────────────── */
+[data-testid="stMetric"] {
+  background: var(--surface);
+  border: 1px solid var(--rule-1);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px 14px;
+  position: relative;
+  overflow: hidden;
+}
+[data-testid="stMetric"]::before {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--aldelis-red); opacity: 0;
+  transition: opacity 220ms ease;
+}
+[data-testid="stMetric"]:hover::before { opacity: 1; }
+[data-testid="stMetric"]:hover { border-color: var(--rule-2); }
+
+[data-testid="stMetricLabel"] p {
+  font-family: var(--font-display);
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--fg-2) !important;
+  margin-bottom: 6px !important;
+}
+[data-testid="stMetricValue"] {
+  font-family: var(--font-display);
+  font-size: 32px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  color: var(--ink) !important;
+  line-height: 1 !important;
+}
+[data-testid="stMetricDelta"] {
+  font-family: var(--font-display);
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  margin-top: 6px !important;
+}
+
+/* ─── Expander (st.expander) ─────────────────────────────── */
+[data-testid="stExpander"] {
+  border: 1px solid var(--rule-1) !important;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+[data-testid="stExpander"] summary {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 12px 16px;
+}
+
+/* ─── Radio (when NOT in sidebar — used as segment control) */
+[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] > label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--rule-1);
+  color: var(--fg-1);
+  cursor: pointer;
+}
+[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] > label[data-checked="true"] {
+  background: var(--ink); border-color: var(--ink); color: #fff;
+}
+[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] > label > div:first-child { display: none; }
+
+/* ─── Dataframe (st.dataframe / st.data_editor) ──────────── */
+[data-testid="stDataFrame"], [data-testid="stDataEditor"] {
+  border: 1px solid var(--rule-1) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
+}
+[data-testid="stDataFrame"] [role="columnheader"],
+[data-testid="stDataEditor"] [role="columnheader"] {
+  background: var(--surface-2) !important;
+  font-family: var(--font-display);
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--fg-2) !important;
+  border-bottom: 1px solid var(--rule-2) !important;
+}
+[data-testid="stDataFrame"] [role="row"]:hover [role="gridcell"] {
+  background: var(--row-hover) !important;
+}
+
+/* ─── AgGrid (custom theme class .ag-theme-aldelis) ──────── */
+.ag-theme-aldelis {
+  --ag-foreground-color: var(--fg-1);
+  --ag-background-color: var(--surface);
+  --ag-header-background-color: var(--surface-2);
+  --ag-header-foreground-color: var(--fg-2);
+  --ag-odd-row-background-color: var(--surface);
+  --ag-row-hover-color: var(--row-hover);
+  --ag-selected-row-background-color: var(--aldelis-red-soft);
+  --ag-border-color: var(--rule-1);
+  --ag-row-border-color: var(--rule-1);
+  --ag-font-family: var(--font-body);
+  --ag-font-size: 13px;
+  --ag-header-foreground-color: var(--fg-2);
+  --ag-header-cell-hover-background-color: var(--surface-2);
+  --ag-borders: solid 1px;
+  --ag-borders-row: solid 1px;
+  --ag-cell-horizontal-padding: 14px;
+  --ag-grid-size: 6px;
+  --ag-list-item-height: 32px;
+  --ag-row-height: 44px;
+  --ag-header-height: 40px;
+  border: 1px solid var(--rule-1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ag-theme-aldelis .ag-header-cell-label {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ─── Toast / alert ──────────────────────────────────────── */
+[data-testid="stAlert"] {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--rule-1);
+  padding: 14px 16px;
+  font-family: var(--font-body);
+}
+
+/* ─── Helpers used by COMPONENTS.md (HTML helpers) ──────── */
+
+/* Page header */
+.al-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; flex-wrap: wrap; }
+.al-eyebrow {
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--fg-2);
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.al-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--aldelis-red); display: inline-block; }
+.al-title {
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 500;
+  letter-spacing: 0.015em; text-transform: uppercase;
+  color: var(--ink); margin: 2px 0 6px;
+}
+.al-sub { font-size: 13.5px; color: var(--fg-2); margin: 0; }
+
+/* KPI cards (custom HTML — bypass st.metric) */
+.al-kpi {
+  background: var(--surface);
+  border: 1px solid var(--rule-1);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative; overflow: hidden;
+  transition: border-color 220ms ease;
+}
+.al-kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--aldelis-red); opacity: 0; transition: opacity 220ms ease; }
+.al-kpi:hover::before { opacity: 1; }
+.al-kpi:hover { border-color: var(--rule-2); }
+.al-kpi-head { display: flex; align-items: center; justify-content: space-between; }
+.al-kpi-label {
+  font-family: var(--font-display);
+  font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fg-2);
+}
+.al-kpi-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--canvas);
+  display: grid; place-items: center; color: var(--fg-2);
+  font-size: 14px;
+}
+.al-kpi-icon.red   { background: var(--aldelis-red-soft); color: var(--aldelis-red-deep); }
+.al-kpi-icon.sand  { background: var(--aldelis-sand-soft); color: #6e5a1c; }
+.al-kpi-icon.green { background: var(--ok-bg); color: var(--ok-fg); }
+.al-kpi-icon.blue  { background: var(--info-bg); color: var(--info-fg); }
+.al-kpi-value {
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 500;
+  letter-spacing: 0.01em; color: var(--ink);
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.al-kpi-value .unit { font-size: 14px; color: var(--fg-2); margin-left: 4px; }
+.al-kpi-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.al-kpi-trend {
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.al-kpi-trend.up   { color: var(--ok-fg); }
+.al-kpi-trend.down { color: var(--hot-fg); }
+.al-kpi-trend.flat { color: var(--fg-2); }
+.al-kpi-spark { width: 80px; height: 22px; }
+
+/* Badges */
+.al-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px; white-space: nowrap;
+}
+.al-badge .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.al-badge.ok   { background: var(--ok-bg);   color: var(--ok-fg);   } .al-badge.ok   .dot { background: var(--ok-dot); }
+.al-badge.wait { background: var(--wait-bg); color: var(--wait-fg); } .al-badge.wait .dot { background: var(--wait-dot); }
+.al-badge.hot  { background: var(--hot-bg);  color: var(--hot-fg);  } .al-badge.hot  .dot { background: var(--hot-dot); }
+.al-badge.info { background: var(--info-bg); color: var(--info-fg); } .al-badge.info .dot { background: var(--info-dot); }
+
+/* Panel (use as wrapper around any block) */
+.al-panel {
+  background: var(--surface);
+  border: 1px solid var(--rule-1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.al-panel-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule-1);
+}
+.al-panel-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink); margin: 0;
+}
+.al-panel-sub { font-size: 12px; color: var(--fg-2); margin-top: 2px; }
+.al-panel-body { padding: 18px; }
+
+/* Tracker */
+.al-tracker { display: grid; grid-template-columns: repeat(5, 1fr); padding: 14px 4px; gap: 0; }
+.al-trk { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 6px 0; }
+.al-trk::before { content: ""; position: absolute; left: 50%; top: 18px; width: 100%; height: 2px; background: var(--rule-1); }
+.al-trk:first-child::before { display: none; }
+.al-trk .knob { position: relative; z-index: 1; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 2px solid var(--rule-1); display: grid; place-items: center; color: var(--fg-3); font-size: 11px; }
+.al-trk.done .knob { background: var(--aldelis-red); border-color: var(--aldelis-red); color: #fff; }
+.al-trk.done::before { background: var(--aldelis-red); }
+.al-trk.active .knob { background: #fff; border-color: var(--aldelis-red); color: var(--aldelis-red); box-shadow: 0 0 0 4px var(--aldelis-red-soft); }
+.al-trk .lbl { font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-2); text-align: center; }
+.al-trk.done .lbl, .al-trk.active .lbl { color: var(--ink); }
+.al-trk .date { font-size: 10.5px; color: var(--fg-3); text-align: center; }
+.al-trk.done .date, .al-trk.active .date { color: var(--fg-2); }
+
+/* Hero block for detail page */
+.al-hero {
+  background: var(--surface);
+  border: 1px solid var(--rule-1);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  position: relative; overflow: hidden;
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.al-hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px; background: radial-gradient(closest-side, var(--aldelis-sand-soft), transparent 70%); pointer-events: none; }
+.al-hero-code { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-2); position: relative; z-index: 1; }
+.al-hero-title { font-family: var(--font-display); font-size: 26px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.015em; color: var(--ink); margin: 4px 0 8px; line-height: 1.05; position: relative; z-index: 1; }
+.al-hero-meta { font-size: 12.5px; color: var(--fg-2); display: flex; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
+.al-hero-meta b { color: var(--ink); font-weight: 600; }
+.al-hero-amount { text-align: right; position: relative; z-index: 1; }
+.al-hero-amount .l { font-family: var(--font-display); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-2); }
+.al-hero-amount .v { font-family: var(--font-display); font-size: 32px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.al-hero-amount .s { font-size: 12px; color: var(--fg-2); }
+
+/* Provider cell (inside AgGrid renderer) */
+.al-prov { display: flex; align-items: center; gap: 10px; }
+.al-prov-avatar { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 600; font-size: 11px; color: #fff; flex: 0 0 26px; }
+.al-prov-name { display: flex; flex-direction: column; min-width: 0; }
+.al-prov-name b { font-size: 13px; color: var(--ink); font-weight: 600; line-height: 1.2; }
+.al-prov-name span { font-size: 11px; color: var(--fg-2); }
+
+/* Progress cell (inside AgGrid renderer) */
+.al-progress { display: flex; align-items: center; gap: 8px; min-width: 110px; }
+.al-progress .bar { flex: 1; height: 5px; background: var(--rule-1); border-radius: 999px; overflow: hidden; }
+.al-progress .bar > i { display: block; height: 100%; background: var(--ok-dot); border-radius: inherit; }
+.al-progress .bar > i.late { background: var(--aldelis-red); }
+.al-progress .bar > i.wait { background: var(--wait-dot); }
+.al-progress .val { font-family: var(--font-display); font-weight: 500; font-size: 11px; color: var(--fg-2); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
