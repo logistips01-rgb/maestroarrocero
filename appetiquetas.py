@@ -2914,13 +2914,17 @@ elif menu == "🏷️ Etiquetas":
         )
 
         # Filtros
-        col_f1, col_f2 = st.columns([2,2])
+        col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
         with col_f1:
             filtro_etq = st.selectbox("Filtrar por estado:", ["Todos", "🔴 Solo alertas", "🟡 Amarillo", "🟢 Solo OK"], key="fetq")
         with col_f2:
             buscar_etq = st.text_input("Buscar referencia:", key="betq")
+        with col_f3:
+            solo_con_consumo = st.checkbox("Solo con consumo", value=True)
 
         vista_etq = df_etq.copy()
+        if solo_con_consumo:
+            vista_etq = vista_etq[vista_etq['CDM_mes'] > 0]
         if filtro_etq == "🔴 Solo alertas":
             vista_etq = vista_etq[vista_etq['Estado'].str.startswith("🔴")]
         elif filtro_etq == "🟡 Amarillo":
