@@ -1155,6 +1155,15 @@ if menu == "📂 Cargar Archivos":
         st.session_state.df_consumos = c
         guardar_snapshot(final, c)
 
+        # Guardar snapshot diario en Firebase para Var_semana
+        try:
+            fecha_snap = datetime.now().strftime('%Y-%m-%d')
+            cols_snap = [c for c in ['Referencia', 'Descripcion', 'Stock_interno', 'Stock_merca',
+                                     'Stock_txt', 'Unidades_palet', 'Cdm'] if c in final.columns]
+            df_a_firebase(final[cols_snap], 'bandejas_snapshots', fecha_snap)
+        except Exception:
+            pass
+
         # Guardar en Firebase
         with st.spinner("Guardando en Firebase..."):
             ok1, e1 = df_a_firebase(final, 'bandejas', 'df_final')
@@ -1361,24 +1370,25 @@ elif menu == "📊 Dashboard":
         if r['CDM_pal'] > 0 else 999, axis=1
     )
 
-    # --- Variación vs semana anterior (desde SQLite) ---
+    # --- Variación vs semana anterior (desde Firebase snapshots) ---
     df['Var_semana'] = 0
     try:
-        con = sqlite3.connect(DB_PATH)
-        fechas = pd.read_sql("SELECT DISTINCT fecha FROM snapshots ORDER BY fecha DESC LIMIT 8", con)
-        fechas_list = fechas['fecha'].tolist()
-        if len(fechas_list) >= 7:
-            fecha_semana = fechas_list[6]
-            stock_ant = pd.read_sql(
-                f"SELECT referencia, stock_interno, unidades_palet FROM snapshots WHERE fecha='{fecha_semana}'", con
-            )
-            stock_ant['u_p'] = stock_ant['unidades_palet'].clip(lower=1)
-            stock_ant['pal_ant'] = (stock_ant['stock_interno'] / stock_ant['u_p']).round()
-            stock_ant = stock_ant[['referencia', 'pal_ant']].rename(columns={'referencia': 'Referencia'})
+        from datetime import timedelta
+        today = datetime.now().date()
+        stock_ant = None
+        for days_back in range(5, 10):
+            fecha_try = (today - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            snap, _err = firebase_a_df('bandejas_snapshots', fecha_try)
+            if snap is not None and not snap.empty and 'Referencia' in snap.columns:
+                stock_ant = snap.copy()
+                break
+        if stock_ant is not None:
+            u_p = stock_ant['Unidades_palet'].clip(lower=1) if 'Unidades_palet' in stock_ant.columns else 1
+            stock_ant['pal_ant'] = (pd.to_numeric(stock_ant.get('Stock_interno', 0), errors='coerce').fillna(0) / u_p).round()
+            stock_ant = stock_ant[['Referencia', 'pal_ant']]
             df = df.merge(stock_ant, on='Referencia', how='left')
             df['Var_semana'] = (df['Pal_Interno'] - df['pal_ant'].fillna(df['Pal_Interno'])).round().astype(int)
             df = df.drop(columns=['pal_ant'])
-        con.close()
     except Exception:
         pass
 
