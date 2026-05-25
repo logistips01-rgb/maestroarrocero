@@ -1351,8 +1351,8 @@ elif menu == "📊 Dashboard":
         var_cdm    = row.get('Var_CDM', 0) or 0
 
         # Ajustar CDM efectivo según variación de consumo reciente
-        # Solo se aplica si la variación supera ±25%
-        if abs(var_cdm) >= 25:
+        # Solo se aplica si la variación supera ±15%
+        if abs(var_cdm) >= 15:
             cdm = cdm * (1 + var_cdm / 100)
             cdm = max(cdm, 0.01)
 
