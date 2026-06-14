@@ -3691,6 +3691,19 @@ const CookTimer = (() => {
     } catch(e){}
   }
 
+  function _beepWarning() {
+    if (navigator.vibrate) navigator.vibrate([120,80,120]);
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 660;
+      g.gain.setValueAtTime(.25, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .25);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + .25);
+    } catch(e){}
+  }
+
   function _stopInterval() {
     if (iv) { clearInterval(iv); iv = null; }
     running = false;
@@ -3701,7 +3714,12 @@ const CookTimer = (() => {
     const next = document.getElementById('cto-next-btn');
     if (!currentRecipe) return;
     if (prev) prev.disabled = currentStepIdx === 0;
-    if (next) next.disabled = currentStepIdx === currentRecipe.steps.length - 1;
+    if (next) {
+      const isLast = currentStepIdx === currentRecipe.steps.length - 1;
+      next.textContent = isLast ? 'Fin ✓' : 'Siguiente →';
+      next.onclick = isLast ? () => CookTimer.hide() : () => CookTimer.nextStep();
+      next.disabled = false;
+    }
   }
 
   function _loadStep(idx) {
@@ -3734,7 +3752,12 @@ const CookTimer = (() => {
     if (clock)  clock.textContent  = _fmt(totalSecs);
     if (status) status.textContent = 'listo para iniciar';
     if (btn)    btn.textContent    = '▶ Iniciar';
-    if (arc)  { arc.classList.remove('done'); arc.style.strokeDashoffset = '0'; }
+    if (arc) {
+      arc.classList.remove('done');
+      arc.style.transition = 'none';
+      arc.style.strokeDashoffset = '0';
+      requestAnimationFrame(() => { arc.style.transition = ''; });
+    }
 
     _updateNavButtons();
   }
@@ -3756,8 +3779,9 @@ const CookTimer = (() => {
       _stopInterval();
       return;
     }
+    if (remaining === 5) _beepWarning();
     if (clock)  clock.textContent  = _fmt(remaining);
-    if (status) status.textContent = 'cocinando';
+    if (status) status.textContent = remaining <= 5 ? '⚡ casi listo' : 'cocinando';
     _arc((totalSecs - remaining) / totalSecs);
   }
 
