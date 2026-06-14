@@ -680,6 +680,82 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 }
 #cto-back-btn:hover { color: rgba(255,255,255,.7); }
 
+#cto-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+#cto-step-counter {
+  font-size: .72rem;
+  color: rgba(255,255,255,.35);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+#cto-recipe-name {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--saffron);
+}
+
+#cto-step-content {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+#cto-step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  color: #fff;
+  margin-bottom: .5rem;
+}
+#cto-step-text {
+  font-size: .85rem;
+  color: rgba(255,255,255,.6);
+  line-height: 1.6;
+  margin-bottom: .75rem;
+}
+#cto-step-ing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  justify-content: center;
+}
+.cto-ing-tag {
+  background: rgba(200,134,74,.15);
+  border: 1px solid rgba(200,134,74,.3);
+  color: var(--rice);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+  font-size: .75rem;
+}
+
+.cto-nav {
+  display: flex;
+  gap: .5rem;
+  width: 100%;
+  align-items: center;
+}
+.cto-nav button {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.65);
+  border-radius: 10px;
+  padding: .75rem .9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.cto-nav button:disabled { opacity: .25; cursor: default; }
+.cto-nav button:not(:disabled):hover { background: rgba(255,255,255,.14); }
+#cto-pause-btn {
+  flex: 1 1 auto;
+}
 
 /* ── 7d. MODO COCINA (activado por el timer overlay) ─────── */
 body.cook-mode .bottom-nav { display: none !important; }
@@ -1759,7 +1835,7 @@ const Data = (() => {
         { name: 'Sal',               perPerson: 2,    unit: 'g' },
       ],
       steps: [
-        { title: 'Preparar el fuego', time: '5 min',  text: 'Enciende la paellera a fuego medio-alto. Añade el aceite y caliéntalo hasta que brille.',                                                                                                                                                      ingredients: 'Aceite de oliva' },
+        { title: 'Preparar el fuego', time: '1 min',  text: 'Enciende la paellera a fuego medio-alto. Añade el aceite y caliéntalo hasta que brille.',                                                                                                                                                      ingredients: 'Aceite de oliva' },
         { title: 'Dorar las carnes',  time: '12 min', text: 'Sofríe el pollo y el conejo hasta que estén bien dorados. La carne debe quedar sellada para retener los jugos. Aparta hacia los lados.',                                                                                                       ingredients: 'Pollo, Conejo' },
         { title: 'Sofrito base',      time: '8 min',  text: 'En el centro sofríe la judía verde y el garrofó 3 minutos. Añade el tomate y cocina hasta que se evapore el agua.',                                                                                                                            ingredients: 'Judía verde, Garrofó, Tomate' },
         { title: 'Especias',          time: '1 min',  text: 'Añade el pimentón dulce y remueve rápidamente. Solo unos segundos. Mezcla con la carne.',                                                                                                                                                       ingredients: 'Pimentón dulce' },
@@ -3545,23 +3621,33 @@ App.init();
   el.id = 'cook-timer-overlay';
   const R = 100, C = 2 * Math.PI * R;
   el.innerHTML = `
-    <div id="cto-title">Arroz — <span id="cto-total-min"></span> minutos</div>
+    <div id="cto-header">
+      <span id="cto-step-counter">Paso 1 de 1</span>
+      <span id="cto-recipe-name"></span>
+    </div>
     <div id="cto-ring-wrap">
       <svg viewBox="0 0 220 220" width="220" height="220">
         <circle id="cto-ring-bg"  cx="110" cy="110" r="${R}"/>
         <circle id="cto-ring-arc" cx="110" cy="110" r="${R}"
           stroke-dasharray="${C.toFixed(1)}"
-          stroke-dashoffset="${C.toFixed(1)}"/>
+          stroke-dashoffset="0"/>
       </svg>
       <div id="cto-time-inner">
-        <div id="cto-clock">00:00</div>
-        <div id="cto-status">cocinando</div>
+        <div id="cto-clock">--:--</div>
+        <div id="cto-status">listo para iniciar</div>
       </div>
     </div>
-    <div id="cto-tip"><strong>🔥 Fuego ALTO</strong><span id="cto-tip-text"></span></div>
-    <div id="cto-phases"><h4>Fases</h4><div id="cto-phase-list"></div></div>
+    <div id="cto-step-content">
+      <div id="cto-step-title"></div>
+      <div id="cto-step-text"></div>
+      <div id="cto-step-ing"></div>
+    </div>
     <div id="cto-actions">
-      <button id="cto-pause-btn" onclick="CookTimer.toggle()">⏸ Pausar</button>
+      <div class="cto-nav">
+        <button id="cto-prev-btn" onclick="CookTimer.prevStep()">← Anterior</button>
+        <button id="cto-pause-btn" onclick="CookTimer.toggle()">▶ Iniciar</button>
+        <button id="cto-next-btn" onclick="CookTimer.nextStep()">Siguiente →</button>
+      </div>
       <button id="cto-back-btn" onclick="CookTimer.hide()">‹ Volver a la receta</button>
     </div>`;
   document.body.appendChild(el);
@@ -3571,20 +3657,14 @@ App.init();
    Temporizador fullscreen con anillo SVG, fases y consejos.
 ──────────────────────────────────────────────────────────── */
 const CookTimer = (() => {
+  let currentRecipe = null;
+  let currentStepIdx = 0;
   let totalSecs = 0;
   let remaining = 0;
   let running   = false;
   let iv        = null;
   let wakeLock  = null;
   const R = 100, C = 2 * Math.PI * R;
-
-  const TIPS = [
-    'Mantén fuego ALTO los primeros 8 minutos. No toques el arroz.',
-    'Dos toques permitidos: a los 5 min (echar sal si falta) y a los 10 min (vestir y colocar carnes reservadas).',
-    'Escucha el chisporroteo — cuando baje de intensidad el agua se está acabando.',
-    'El socarrat se forma en los últimos 2 minutos. Sube el fuego brevemente y retira.',
-    'No remuevas nunca. El arroz necesita quietud para cocinarse en su propio vapor.',
-  ];
 
   function _fmt(s) {
     const m = Math.floor(s / 60);
@@ -3611,98 +3691,130 @@ const CookTimer = (() => {
     } catch(e){}
   }
 
-  function _update() {
+  function _stopInterval() {
+    if (iv) { clearInterval(iv); iv = null; }
+    running = false;
+  }
+
+  function _updateNavButtons() {
+    const prev = document.getElementById('cto-prev-btn');
+    const next = document.getElementById('cto-next-btn');
+    if (!currentRecipe) return;
+    if (prev) prev.disabled = currentStepIdx === 0;
+    if (next) next.disabled = currentStepIdx === currentRecipe.steps.length - 1;
+  }
+
+  function _loadStep(idx) {
+    if (!currentRecipe) return;
+    _stopInterval();
+    currentStepIdx = idx;
+    const step = currentRecipe.steps[idx];
+    const mins = parseInt(step.time) || 2;
+    totalSecs = mins * 60;
+    remaining = totalSecs;
+
+    const counter = document.getElementById('cto-step-counter');
+    if (counter) counter.textContent = 'Paso ' + (idx + 1) + ' de ' + currentRecipe.steps.length;
+
+    const title = document.getElementById('cto-step-title');
+    const text  = document.getElementById('cto-step-text');
+    const ing   = document.getElementById('cto-step-ing');
+    if (title) title.textContent = step.title;
+    if (text)  text.textContent  = step.text || '';
+    if (ing) {
+      ing.innerHTML = (step.ingredients && step.ingredients.length)
+        ? step.ingredients.map(i => '<span class="cto-ing-tag">' + i.name + '</span>').join('')
+        : '';
+    }
+
     const clock  = document.getElementById('cto-clock');
     const status = document.getElementById('cto-status');
     const btn    = document.getElementById('cto-pause-btn');
-    if (!clock) return;
+    const arc    = document.getElementById('cto-ring-arc');
+    if (clock)  clock.textContent  = _fmt(totalSecs);
+    if (status) status.textContent = 'listo para iniciar';
+    if (btn)    btn.textContent    = '▶ Iniciar';
+    if (arc)  { arc.classList.remove('done'); arc.style.strokeDashoffset = '0'; }
+
+    _updateNavButtons();
+  }
+
+  function _tick() {
+    if (!running) return;
+    remaining--;
+    const clock  = document.getElementById('cto-clock');
+    const status = document.getElementById('cto-status');
+    const btn    = document.getElementById('cto-pause-btn');
 
     if (remaining <= 0) {
-      clock.textContent = '00:00';
+      if (clock)  clock.textContent  = '00:00';
       if (status) status.textContent = '✓ listo';
-      if (btn) btn.textContent = '✓ Cocción completada';
+      if (btn)    btn.textContent    = '✓ Completado';
       document.getElementById('cto-ring-arc')?.classList.add('done');
       _arc(1);
       _beepVibrate();
+      _stopInterval();
       return;
     }
-    clock.textContent = _fmt(remaining);
-    const pct = (totalSecs - remaining) / totalSecs;
-    _arc(pct);
-    if (status) status.textContent = running ? 'cocinando' : 'pausado';
-    if (btn) btn.textContent = running ? '⏸ Pausar' : '▶ Continuar';
-  }
-
-  function _renderPhases(recipe) {
-    const el = document.getElementById('cto-phase-list');
-    if (!el || !recipe) return;
-    const elapsed = totalSecs - remaining;
-    let acc = 0;
-    el.innerHTML = recipe.steps.map(s => {
-      const mins = parseInt(s.time) || 2;
-      const done = elapsed >= acc * 60;
-      acc += mins;
-      return `<div class="cto-phase${done ? ' done' : ''}">
-        <div class="cto-phase-dot"></div>
-        <span>${s.title} <small style="opacity:.5">${s.time}</small></span>
-      </div>`;
-    }).join('');
+    if (clock)  clock.textContent  = _fmt(remaining);
+    if (status) status.textContent = 'cocinando';
+    _arc((totalSecs - remaining) / totalSecs);
   }
 
   function show(recipe) {
     const ov = document.getElementById('cook-timer-overlay');
     if (!ov) return;
+    currentRecipe = recipe;
     ov.classList.add('visible');
     document.body.classList.add('cook-mode');
     if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(wl => { wakeLock = wl; }).catch(() => {});
-    const tm = document.getElementById('cto-total-min');
-    if (tm) tm.textContent = recipe.cookMin;
-    const tipEl = document.getElementById('cto-tip-text');
-    if (tipEl) tipEl.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
-    _renderPhases(recipe);
-    _update();
+    const nameEl = document.getElementById('cto-recipe-name');
+    if (nameEl) nameEl.textContent = recipe.name;
+    _loadStep(0);
   }
 
   function hide() {
     document.getElementById('cook-timer-overlay')?.classList.remove('visible');
     document.body.classList.remove('cook-mode');
+    _stopInterval();
     if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
-  }
-
-  function start(minutes, recipe) {
-    stop();
-    totalSecs = minutes * 60;
-    remaining = totalSecs;
-    running   = true;
-    document.getElementById('cto-ring-arc')?.classList.remove('done');
-    iv = setInterval(() => {
-      if (!running) return;
-      remaining--;
-      _update();
-      _renderPhases(recipe);
-      if (remaining <= 0) { clearInterval(iv); iv = null; running = false; }
-    }, 1000);
-    show(recipe);
   }
 
   function toggle() {
     if (remaining <= 0) return;
-    running = !running;
-    _update();
+    if (!running) {
+      running = true;
+      const btn    = document.getElementById('cto-pause-btn');
+      const status = document.getElementById('cto-status');
+      if (btn)    btn.textContent    = '⏸ Pausar';
+      if (status) status.textContent = 'cocinando';
+      document.getElementById('cto-ring-arc')?.classList.remove('done');
+      iv = setInterval(_tick, 1000);
+    } else {
+      _stopInterval();
+      const btn    = document.getElementById('cto-pause-btn');
+      const status = document.getElementById('cto-status');
+      if (btn)    btn.textContent    = '▶ Continuar';
+      if (status) status.textContent = 'pausado';
+    }
   }
 
-  function stop() {
-    if (iv) { clearInterval(iv); iv = null; }
-    running = false; totalSecs = 0; remaining = 0;
-    hide();
+  function nextStep() {
+    if (!currentRecipe || currentStepIdx >= currentRecipe.steps.length - 1) return;
+    _loadStep(currentStepIdx + 1);
+  }
+
+  function prevStep() {
+    if (!currentRecipe || currentStepIdx <= 0) return;
+    _loadStep(currentStepIdx - 1);
   }
 
   function startAndGo() {
     const r = Recipe._current();
-    if (r && r.cookMin) start(r.cookMin, r);
+    if (r) show(r);
   }
 
-  return { start, toggle, stop, startAndGo, hide };
+  return { toggle, hide, nextStep, prevStep, startAndGo };
 })();
 
 /* ── COOK MODE ──────────────────────────────────────────────
