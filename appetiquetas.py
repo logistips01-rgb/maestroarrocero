@@ -384,13 +384,89 @@ ROL = st.session_state.get("rol_usuario", "admin")
 # ─────────────────────────────────────────────
 # COLUMNAS ESPERADAS (fuente de verdad única)
 # ─────────────────────────────────────────────
-COL_MAESTRO   = ['Referencia', 'Descripcion', 'Lead_time', 'Stock_seguridad', 'Unidades_palet', 'Incremento']
+COL_MAESTRO        = ['Referencia', 'Descripcion', 'Lead_time', 'Stock_seguridad', 'Unidades_palet', 'Incremento']
+COL_MAESTRO_OPT    = ['Situacion']   # columnas opcionales del maestro
 COL_STOCK     = ['Referencia', 'Almacen', 'Cantidad']
 COL_CONSUMOS  = ['Referencia', 'Fecha', 'Cantidad']
 
-ALMACENES_INT   = {'AL6', 'AL6SGA', 'AL6 SGA'}
-ALMACENES_MERCA = {'ARENTO', 'CAMARA BANDEJAS F19'}
-ALMACENES_TXT   = {'TXT'}
+ALMACENES_INT      = {'AL6', 'AL6SGA', 'AL6 SGA'}
+ALMACENES_MERCA    = {'ARENTO', 'CAMARA BANDEJAS F19'}
+ALMACENES_TXT      = {'TXT'}
+ALMACENES_AVITRANS = {'AVITRANS'}
+
+# Almacenes válidos en el archivo ERP (columna Ubicacion)
+ALMACENES_VALIDOS  = ALMACENES_INT | ALMACENES_MERCA | ALMACENES_TXT | ALMACENES_AVITRANS
+
+def preprocesar_stock_erp(df):
+    """Adapta el archivo de stock del ERP al formato estándar de la app.
+    Renombra Ubicacion → Almacen, filtra almacenes relevantes y
+    conserva solo las columnas necesarias."""
+    df = df.copy()
+    # El ERP puede tener 'Ubicacion' (ubicación específica: AL6, CAMARA BANDEJAS F19...)
+    # y 'Almacen' (agrupación de alto nivel: PLAZA, MERCAZARAGOZA...).
+    # Siempre usar 'Ubicacion' si existe, descartando la columna 'Almacen' del ERP.
+    if 'Ubicacion' in df.columns:
+        df = df.drop(columns=['Almacen'], errors='ignore')
+        df = df.rename(columns={'Ubicacion': 'Almacen'})
+    if 'Almacen' not in df.columns or 'Referencia' not in df.columns:
+        return df
+    # Normalizar: quitar todo tipo de whitespace (incluido \xa0) y pasar a mayúsculas
+    df['Almacen'] = (
+        df['Almacen']
+        .astype(str)
+        .str.replace(r'\s+', ' ', regex=True)   # colapsar múltiples espacios/tabs/nbsp
+        .str.strip()
+        .str.upper()
+    )
+    VALIDOS_UPPER = {a.upper() for a in ALMACENES_VALIDOS}
+    df = df[df['Almacen'].isin(VALIDOS_UPPER)]
+    cols = [c for c in ['Referencia', 'Almacen', 'Cantidad'] if c in df.columns]
+    return df[cols]
+
+
+def preprocesar_transito_erp(df):
+    """Adapta el archivo de tránsito del ERP al formato estándar (Referencia, Descripcion, Cantidad).
+    Mapea COD→Referencia, DESCRIPCION→Descripcion, filtra Cantidad>0 y descarta columnas sobrantes.
+    Tolerante a variaciones de nombre: busca por posición si los nombres no coinciden."""
+    df = df.copy()
+    # Mapa de nombres alternativos → nombre canónico
+    alias = {
+        'COD':         'Referencia',
+        'CODIGO':      'Referencia',
+        'ARTICULO':    'Referencia',
+        'ART':         'Referencia',
+        'REF':         'Referencia',
+        'REFERENCIA':  'Referencia',
+        'DESCRIPCION': 'Descripcion',
+        'DESCRIPCIÓN': 'Descripcion',
+        'DESC':        'Descripcion',
+        'CANTIDAD':    'Cantidad',
+        'UNIDADES':    'Cantidad',
+        'PEDIDO':      'Cantidad',
+    }
+    rename_map = {}
+    for col in df.columns:
+        key = str(col).strip().upper()
+        if key in alias and alias[key] not in rename_map.values():
+            rename_map[col] = alias[key]
+    df = df.rename(columns=rename_map)
+
+    # Si no se encontró Referencia por nombre, intentar por posición (columna C = índice 2)
+    cols = list(df.columns)
+    if 'Referencia' not in df.columns and len(cols) >= 3:
+        df = df.rename(columns={cols[2]: 'Referencia'})
+    if 'Cantidad' not in df.columns and len(cols) >= 5:
+        df = df.rename(columns={cols[4]: 'Cantidad'})
+
+    if 'Referencia' not in df.columns or 'Cantidad' not in df.columns:
+        return df
+
+    df['Referencia'] = df['Referencia'].astype(str).str.strip().str.upper()
+    df['Cantidad']   = pd.to_numeric(df['Cantidad'], errors='coerce').fillna(0)
+    df = df[df['Cantidad'] > 0]
+
+    keep = [c for c in ['Referencia', 'Descripcion', 'Cantidad'] if c in df.columns]
+    return df[keep]
 
 # ─────────────────────────────────────────────
 # SESSION STATE
@@ -427,6 +503,7 @@ if not st.session_state.firebase_cargado:
         ("df_ventas",          "etiquetas",          "df_ventas"),
         ("df_transito_etq",    "etiquetas",          "df_transito_etq"),
         ("df_envase",          "etiquetas",          "df_envase"),
+        # df_stock_erp NO se persiste en Firebase (archivo ERP muy grande)
         ("df_pedidos",         "pedidos",            "df_pedidos"),
         ("df_planificacion",   "planificacion",      "df_planificacion"),
         ("df_paletizacion",    "logistica",          "df_paletizacion"),
@@ -488,6 +565,8 @@ if 'df_planificacion' not in st.session_state:
     st.session_state.df_planificacion = None
 if 'df_stock_pt' not in st.session_state:
     st.session_state.df_stock_pt = None
+if 'df_stock_erp' not in st.session_state:
+    st.session_state.df_stock_erp = None
 if 'df_produccion_pt' not in st.session_state:
     st.session_state.df_produccion_pt = None
 if 'df_plan_produccion' not in st.session_state:
@@ -719,6 +798,7 @@ def normalizar_columnas(df):
         'stock_seguridad': 'Stock_seguridad',
         'unidades_palet':  'Unidades_palet',
         'incremento':      'Incremento',
+        'situacion':       'Situacion',
         'almacen':         'Almacen',
         'cantidad':        'Cantidad',
         'fecha':           'Fecha',
@@ -870,8 +950,8 @@ st.sidebar.markdown("""
 # Menú según rol
 GRUPOS_ADMIN = {
     "Principal": ["📂 Cargar Archivos", "📊 Dashboard", "📈 Análisis", "🧠 Logística AI"],
-    "Gestión": ["🔗 Materiales", "🏷️ Etiquetas", "🚢 Tránsito", "📋 Pedidos"],
-    "Producción": ["🏪 Producto Terminado", "🏭 Planificación Producción", "🔍 Previsión y Obsoletos", "🤖 Agente IA"],
+    "Gestión": ["🔗 Materiales", "🏷️ Etiquetas", "🚢 Tránsito"],
+    "Producción": ["🔍 Previsión y Obsoletos"],
 }
 GRUPOS_ID = {"Etiquetas": ["🏷️ Etiquetas"]}
 GRUPOS_ALMACEN = {"Etiquetas": ["🏷️ Etiquetas"]}
@@ -975,6 +1055,20 @@ if menu == "📂 Cargar Archivos":
         s = normalizar_columnas(s)
         c = normalizar_columnas(c)
 
+        # --- Diagnóstico pre-filtro ---
+        col_alm = 'Almacen' if 'Almacen' in s.columns else ('Ubicacion' if 'Ubicacion' in s.columns else None)
+        if col_alm:
+            alm_raw = sorted(s[col_alm].astype(str).str.replace(r'\s+', ' ', regex=True).str.strip().str.upper().dropna().unique().tolist())
+            st.caption(f"📋 Almacenes en el archivo ERP: {', '.join(alm_raw)}")
+
+        # --- Preprocesar stock ERP (renombra Ubicacion→Almacen, normaliza y filtra) ---
+        s = preprocesar_stock_erp(s)
+
+        # --- Guardar stock ERP compartido para etiquetas (solo sesión, no Firebase) ---
+        st.session_state.df_stock_erp = s.copy()
+        almacenes_filtrados = sorted(s['Almacen'].dropna().unique().tolist()) if 'Almacen' in s.columns else []
+        st.info(f"✅ Almacenes usados tras filtro: {', '.join(almacenes_filtrados)}")
+
         # --- Validar columnas ---
         errores = (
             columnas_faltantes(m, COL_MAESTRO,  "Maestro") +
@@ -995,9 +1089,10 @@ if menu == "📂 Cargar Archivos":
         res_stock = (
             s.groupby('Referencia')
              .apply(lambda g: pd.Series({
-                 'Stock_interno': g.loc[g['Almacen'].isin(ALMACENES_INT),   'Cantidad'].sum(),
-                 'Stock_merca':   g.loc[g['Almacen'].isin(ALMACENES_MERCA), 'Cantidad'].sum(),
-                 'Stock_txt':     g.loc[g['Almacen'].isin(ALMACENES_TXT),   'Cantidad'].sum(),
+                 'Stock_interno':  g.loc[g['Almacen'].isin(ALMACENES_INT),      'Cantidad'].sum(),
+                 'Stock_merca':    g.loc[g['Almacen'].isin(ALMACENES_MERCA),    'Cantidad'].sum(),
+                 'Stock_txt':      g.loc[g['Almacen'].isin(ALMACENES_TXT),      'Cantidad'].sum(),
+                 'Stock_avitrans': g.loc[g['Almacen'].isin(ALMACENES_AVITRANS), 'Cantidad'].sum(),
              }))
              .reset_index()
         )
@@ -1044,7 +1139,8 @@ if menu == "📂 Cargar Archivos":
         st.write(f"CDM resultado: {c12_cdm['Cdm'].values}")
 
         # --- Quedarse solo con las columnas necesarias del Maestro ---
-        m = m[COL_MAESTRO]
+        cols_m = COL_MAESTRO + [c for c in COL_MAESTRO_OPT if c in m.columns]
+        m = m[cols_m]
 
         # --- Unión: solo referencias presentes en Maestro Y Stock ---
         final = pd.merge(m, res_stock, on='Referencia', how='inner')
@@ -1058,6 +1154,15 @@ if menu == "📂 Cargar Archivos":
         st.session_state.df_final = final
         st.session_state.df_consumos = c
         guardar_snapshot(final, c)
+
+        # Guardar snapshot diario en Firebase para Var_semana
+        try:
+            fecha_snap = datetime.now().strftime('%Y-%m-%d')
+            cols_snap = [c for c in ['Referencia', 'Descripcion', 'Stock_interno', 'Stock_merca',
+                                     'Stock_txt', 'Unidades_palet', 'Cdm'] if c in final.columns]
+            df_a_firebase(final[cols_snap], 'bandejas_snapshots', fecha_snap)
+        except Exception:
+            pass
 
         # Guardar en Firebase
         with st.spinner("Guardando en Firebase..."):
@@ -1207,6 +1312,33 @@ elif menu == "📊 Dashboard":
     df['En_transito2'] = df['En_transito2'].fillna(0)
     if 'Stock_avitrans' not in df.columns:
         df['Stock_avitrans'] = 0
+    if 'Situacion' not in df.columns:
+        df['Situacion'] = 'ACTIVA'
+    else:
+        df['Situacion'] = df['Situacion'].astype(str).str.strip().str.upper().replace('NAN', 'ACTIVA').fillna('ACTIVA')
+
+    # --- Variación consumo reciente vs CDM (necesaria antes de calcular_alerta) ---
+    df['Var_CDM'] = 0.0
+    if st.session_state.df_consumos is not None:
+        try:
+            cons_v = st.session_state.df_consumos.copy()
+            cons_v['Fecha'] = pd.to_datetime(cons_v['Fecha'], errors='coerce').dt.normalize()
+            cons_v['Cantidad'] = pd.to_numeric(cons_v['Cantidad'], errors='coerce').fillna(0).abs()
+            ult = cons_v.groupby('Referencia')['Fecha'].max().reset_index().rename(columns={'Fecha': 'UltFecha'})
+            cons_v = cons_v.merge(ult, on='Referencia')
+            cons_ult = (
+                cons_v[cons_v['Fecha'] == cons_v['UltFecha']]
+                .groupby('Referencia')['Cantidad'].sum()
+                .reset_index().rename(columns={'Cantidad': 'Cons_ult'})
+            )
+            df = df.merge(cons_ult, on='Referencia', how='left')
+            u_p_v = df['Unidades_palet'].clip(lower=1)
+            cons_pal_v = df['Cons_ult'].fillna(0) / u_p_v
+            cdm_ref_v  = df['Cdm'].clip(lower=0.01)
+            df['Var_CDM'] = ((cons_pal_v - cdm_ref_v) / cdm_ref_v * 100).round(0).fillna(0).astype(int)
+            df = df.drop(columns=['Cons_ult'])
+        except Exception:
+            df['Var_CDM'] = 0
 
     # --- Calcular palets y alerta ---
     def calcular_alerta(row):
@@ -1215,6 +1347,14 @@ elif menu == "📊 Dashboard":
         seg        = row['Stock_seguridad']   # ya en palets
         cdm        = row['Cdm']               # ya en palets/día
         incremento = row.get('Incremento', 0) or 0
+        situacion  = row.get('Situacion', 'ACTIVA')
+        var_cdm    = row.get('Var_CDM', 0) or 0
+
+        # Ajustar CDM efectivo según variación de consumo reciente
+        # Solo se aplica si la variación supera ±15%
+        if abs(var_cdm) >= 15:
+            cdm = cdm * (1 + var_cdm / 100)
+            cdm = max(cdm, 0.01)
 
         pal_int       = round(row['Stock_interno']         / u_p)
         pal_merca     = round(row['Stock_merca']           / u_p)
@@ -1225,16 +1365,19 @@ elif menu == "📊 Dashboard":
         seg_pal       = round(seg)
         cdm_pal       = math.ceil(cdm)
 
-        # Stock disponible cuando llegue el nuevo pedido:
-        # interno + tránsitos (llegan hoy) - consumo durante lead_time
+        # MERCA: stock operativo = Merca (ARENTO + CAMARA BANDEJAS F19)
+        # ACTIVA/BAJA: stock operativo = Interno (AL6 + AL6 SGA)
+        stock_op = pal_merca if situacion == 'MERCA' else pal_int
+
         necesidad_bruta = cdm * lead
-        stock_final = pal_int + pal_transito + pal_transito2 - necesidad_bruta
+        stock_final = stock_op + pal_transito + pal_transito2 - necesidad_bruta
 
         # Alerta: no llegamos al stock de seguridad
         if stock_final < seg:
             pedido = math.ceil(seg - stock_final + incremento)
-            dias_stock_actual = (pal_int / cdm) if cdm > 0 else 999
-            if dias_stock_actual < lead:
+            dias_stock_actual = (stock_op / cdm) if cdm > 0 else 999
+            # Rojo si: ya estamos por debajo del stock de seguridad, o no llegamos al lead time
+            if stock_op < seg or dias_stock_actual < lead:
                 return pal_int, pal_merca, pal_txt, pal_avitrans, pal_transito, pal_transito2, seg_pal, cdm_pal, f"🔴 COMPRAR: {pedido} Pal.", "#721c24"
             else:
                 return pal_int, pal_merca, pal_txt, pal_avitrans, pal_transito, pal_transito2, seg_pal, cdm_pal, f"🟡 COMPRAR: {pedido} Pal.", "#856404"
@@ -1251,45 +1394,53 @@ elif menu == "📊 Dashboard":
         lambda row: pd.Series(calcular_alerta(row)), axis=1
     )
 
-    # --- Días de cobertura (stock total / CDM) ---
+    # --- Días de cobertura (stock operativo / CDM) ---
     df['Dias_stock'] = df.apply(
-        lambda r: round(r['Pal_Interno'] / r['CDM_pal'])
+        lambda r: round((r['Pal_Merca'] if r['Situacion'] == 'MERCA' else r['Pal_Interno']) / r['CDM_pal'])
         if r['CDM_pal'] > 0 else 999, axis=1
     )
 
-    # --- Variación vs semana anterior (desde SQLite) ---
+    # --- Variación vs semana anterior (desde Firebase snapshots) ---
     df['Var_semana'] = 0
     try:
-        con = sqlite3.connect(DB_PATH)
-        fechas = pd.read_sql("SELECT DISTINCT fecha FROM snapshots ORDER BY fecha DESC LIMIT 8", con)
-        fechas_list = fechas['fecha'].tolist()
-        if len(fechas_list) >= 7:
-            fecha_semana = fechas_list[6]
-            stock_ant = pd.read_sql(
-                f"SELECT referencia, stock_interno, unidades_palet FROM snapshots WHERE fecha='{fecha_semana}'", con
-            )
-            stock_ant['u_p'] = stock_ant['unidades_palet'].clip(lower=1)
-            stock_ant['pal_ant'] = (stock_ant['stock_interno'] / stock_ant['u_p']).round()
-            stock_ant = stock_ant[['referencia', 'pal_ant']].rename(columns={'referencia': 'Referencia'})
+        from datetime import timedelta
+        today = datetime.now().date()
+        stock_ant = None
+        for days_back in range(5, 10):
+            fecha_try = (today - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            snap, _err = firebase_a_df('bandejas_snapshots', fecha_try)
+            if snap is not None and not snap.empty and 'Referencia' in snap.columns:
+                stock_ant = snap.copy()
+                break
+        if stock_ant is not None:
+            u_p = stock_ant['Unidades_palet'].clip(lower=1) if 'Unidades_palet' in stock_ant.columns else 1
+            stock_ant['pal_ant'] = (pd.to_numeric(stock_ant.get('Stock_interno', 0), errors='coerce').fillna(0) / u_p).round()
+            stock_ant = stock_ant[['Referencia', 'pal_ant']]
             df = df.merge(stock_ant, on='Referencia', how='left')
             df['Var_semana'] = (df['Pal_Interno'] - df['pal_ant'].fillna(df['Pal_Interno'])).round().astype(int)
             df = df.drop(columns=['pal_ant'])
-        con.close()
     except Exception:
         pass
 
     # --- Filtros rápidos ---
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        filtro = st.selectbox("Filtrar por estado:", ["Todos", "🔴 Solo alertas", "🟢 Solo OK"])
+        filtro = st.selectbox("Filtrar por estado:", ["Todos", "🔴 Solo alertas", "🟡 Amarillo", "🟢 Solo OK"])
     with col2:
         buscar = st.text_input("Buscar referencia:")
+    with col3:
+        mostrar_bajas = st.checkbox("Mostrar referencias BAJA", value=False)
 
     vista = df.copy()
+    # Ocultar BAJA por defecto
+    if not mostrar_bajas:
+        vista = vista[vista['Situacion'] != 'BAJA']
     if filtro == "🔴 Solo alertas":
         vista = vista[vista['Estado'].str.startswith("🔴")]
+    elif filtro == "🟡 Amarillo":
+        vista = vista[vista['Estado'].str.startswith("🟡")]
     elif filtro == "🟢 Solo OK":
-        vista = vista[vista['Estado'] == "🟢 OK"]
+        vista = vista[vista['Estado'].str.startswith("🟢")]
     if buscar:
         vista = vista[vista['Referencia'].str.contains(buscar, case=False, na=False)]
 
@@ -1325,7 +1476,7 @@ elif menu == "📊 Dashboard":
     # --- Tabla coloreada ---
     cols_mostrar = [
         'Referencia', 'Descripcion', 'Unidades_palet',
-        'Seg_pal', 'CDM_pal', 'Dias_stock', 'Var_semana',
+        'Seg_pal', 'CDM_pal', 'Var_CDM', 'Dias_stock', 'Var_semana',
         'Pal_Interno', 'Pal_Merca', 'Pal_TXT', 'Pal_Avitrans', 'Pal_Transito', 'Pal_Transito2',
         'Pedido_pal', 'Estado'
     ]
@@ -1352,6 +1503,21 @@ elif menu == "📊 Dashboard":
                 val = row.get(col, "")
                 if col == 'Estado':
                     cells += f'<td style="padding:8px 12px;">{estado_badge}</td>'
+                elif col == 'Var_CDM':
+                    v = int(val) if val else 0
+                    if v > 20:
+                        style = "font-weight:700;color:#E74C3C;"
+                        txt = f"▲ +{v}%"
+                    elif v > 0:
+                        style = "font-weight:600;color:#E08A1A;"
+                        txt = f"▲ +{v}%"
+                    elif v < 0:
+                        style = "color:#27AE60;"
+                        txt = f"▼ {v}%"
+                    else:
+                        style = "color:#aaa;"
+                        txt = "—"
+                    cells += f'<td style="padding:8px 12px;{style}">{txt}</td>'
                 elif col == 'Pedido_pal':
                     v = int(val) if val else 0
                     style = "font-weight:600;color:#E74C3C;" if v > 0 else "color:#aaa;"
@@ -1444,14 +1610,15 @@ elif menu == "🚢 Tránsito":
                 f_t = st.file_uploader(f"Excel de {label} (.xlsx)", type="xlsx", key=f"file_{key}")
                 if f_t and st.button(f"📥 Cargar Excel", key=f"btn_{key}"):
                     df_t = pd.read_excel(f_t)
-                    df_t = normalizar_columnas(df_t)
-                    if columnas_faltantes(df_t, ['Referencia', 'Cantidad'], label) == []:
-                        df_t['Referencia'] = df_t['Referencia'].astype(str).str.strip()
-                        df_t['Cantidad']   = pd.to_numeric(df_t['Cantidad'], errors='coerce').fillna(0)
-                        st.session_state[key] = df_t[['Referencia', 'Cantidad']]
+                    df_t = preprocesar_transito_erp(df_t)
+                    if 'Referencia' not in df_t.columns or 'Cantidad' not in df_t.columns:
+                        st.error("❌ No se encontraron columnas Referencia/Cantidad en el archivo.")
+                    else:
+                        cols_save = [c for c in ['Referencia', 'Cantidad'] if c in df_t.columns]
+                        st.session_state[key] = df_t[cols_save]
                         coleccion_t = 'etiquetas' if key == 'df_transito_etq' else 'bandejas'
-                        df_a_firebase(df_t[['Referencia', 'Cantidad']], coleccion_t, key)
-                        st.success(f"✅ {label} cargado.")
+                        df_a_firebase(df_t[cols_save], coleccion_t, key)
+                        st.success(f"✅ {label} cargado: {len(df_t)} referencias.")
                         st.rerun()
             st.subheader(f"Listado actual - {label}")
             if st.session_state[key].empty:
@@ -1549,7 +1716,7 @@ elif menu == "📈 Análisis":
     st.subheader("📅 Movimientos por Día (última semana)")
 
     cons['DiaSemana'] = cons['Fecha'].dt.day_name()
-    cons['Semana']    = cons['Fecha'].dt.isocalendar().week.astype(int)
+    cons['Semana']    = cons['Fecha'].dt.isocalendar().week.fillna(0).astype(int)
 
     ultima_semana = cons['Semana'].max()
     cons_semana   = cons[cons['Semana'] == ultima_semana].copy()
@@ -2583,7 +2750,12 @@ elif menu == "🏷️ Etiquetas":
         f_vent = st.file_uploader("2. Ventas del mes (.xlsx)", type="xlsx", key="vent")
         st.caption("Columnas: Referencia, Unidades (acumulado mensual)")
     with col_c3:
-        f_setq = st.file_uploader("3. Stock Actual (.xlsx)", type="xlsx", key="setq")
+        if st.session_state.get("df_stock_erp") is not None:
+            st.success("✅ Stock ERP cargado desde Cargar Archivos")
+            f_setq = None
+        else:
+            f_setq = st.file_uploader("3. Stock Actual (.xlsx)", type="xlsx", key="setq")
+            st.caption("O súbelo en Cargar Archivos y se compartirá aquí automáticamente")
     with col_c4:
         f_env = st.file_uploader("4. Etiquetas por envase (.xlsx)", type="xlsx", key="fenv")
         st.caption("Columnas: Referencia, Etiquetas_envase")
@@ -2599,13 +2771,18 @@ elif menu == "🏷️ Etiquetas":
                     st.success(f"✅ {len(df_env_up)} referencias de envase guardadas.")
 
     if st.button("🚀 Sincronizar Etiquetas"):
-        if not (f_metq and f_vent and f_setq):
-            st.error("Sube los 3 archivos.")
+        _stock_erp = st.session_state.get("df_stock_erp")
+        _stock_disponible = f_setq is not None or _stock_erp is not None
+        if not (f_metq and f_vent and _stock_disponible):
+            st.error("Sube Maestro y Ventas. El stock se coge de Cargar Archivos o súbelo aquí.")
             st.stop()
 
-        m_etq  = leer_excel(f_metq,  "Maestro Etiquetas")
-        ventas = leer_excel(f_vent,  "Ventas")
-        s_etq  = leer_excel(f_setq,  "Stock Etiquetas")
+        m_etq  = leer_excel(f_metq, "Maestro Etiquetas")
+        ventas = leer_excel(f_vent, "Ventas")
+        if f_setq:
+            s_etq = leer_excel(f_setq, "Stock Etiquetas")
+        else:
+            s_etq = _stock_erp.copy()
         if m_etq is None or ventas is None or s_etq is None:
             st.stop()
 
@@ -2629,14 +2806,15 @@ elif menu == "🏷️ Etiquetas":
         m_etq['Esetiquetadecaja'] = m_etq['Esetiquetadecaja'].astype(str).str.strip().str.lower().fillna('')
 
         # ── STOCK ─────────────────────────────────────────────
-        s_etq['Almacen']  = s_etq['Almacen'].astype(str).str.strip()
+        s_etq = preprocesar_stock_erp(s_etq)
         s_etq['Cantidad'] = pd.to_numeric(s_etq['Cantidad'], errors='coerce').fillna(0)
         res_stock_etq = (
             s_etq.groupby('Referencia')
              .apply(lambda g: pd.Series({
-                 'Stock_interno': g.loc[g['Almacen'].isin(ALMACENES_INT),   'Cantidad'].sum(),
-                 'Stock_merca':   g.loc[g['Almacen'].isin(ALMACENES_MERCA), 'Cantidad'].sum(),
-                 'Stock_txt':     g.loc[g['Almacen'].isin(ALMACENES_TXT),   'Cantidad'].sum(),
+                 'Stock_interno':  g.loc[g['Almacen'].isin(ALMACENES_INT),      'Cantidad'].sum(),
+                 'Stock_merca':    g.loc[g['Almacen'].isin(ALMACENES_MERCA),    'Cantidad'].sum(),
+                 'Stock_txt':      g.loc[g['Almacen'].isin(ALMACENES_TXT),      'Cantidad'].sum(),
+                 'Stock_avitrans': g.loc[g['Almacen'].isin(ALMACENES_AVITRANS), 'Cantidad'].sum(),
              }))
              .reset_index()
         )
@@ -2694,7 +2872,7 @@ elif menu == "🏷️ Etiquetas":
         # ── UNIÓN FINAL ────────────────────────────────────────
         final_etq = pd.merge(m_etq, res_stock_etq, on='Referencia', how='left')
         final_etq = pd.merge(final_etq, consumo_mes, on='Referencia', how='left')
-        for col in ['Consumo_mes', 'Stock_interno', 'Stock_merca', 'Stock_txt']:
+        for col in ['Consumo_mes', 'Stock_interno', 'Stock_merca', 'Stock_txt', 'Stock_avitrans']:
             final_etq[col] = pd.to_numeric(final_etq[col], errors='coerce').fillna(0)
 
         st.session_state.df_etiquetas_final = final_etq
@@ -2715,13 +2893,14 @@ elif menu == "🏷️ Etiquetas":
             f_tetq = st.file_uploader("Subir Excel de Tránsito (.xlsx)", type="xlsx", key="tetq")
             if f_tetq and st.button("📥 Cargar Tránsito"):
                 df_tetq = pd.read_excel(f_tetq)
-                df_tetq = normalizar_columnas(df_tetq)
-                df_tetq['Referencia'] = df_tetq['Referencia'].astype(str).str.strip().str.upper()
-                df_tetq['Cantidad']   = pd.to_numeric(df_tetq['Cantidad'], errors='coerce').fillna(0)
-                st.session_state.df_transito_etq = df_tetq[['Referencia', 'Cantidad']]
-                df_a_firebase(st.session_state.df_transito_etq, 'etiquetas', 'df_transito_etq')
-                st.success("✅ Tránsito de etiquetas cargado.")
-                st.rerun()
+                df_tetq = preprocesar_transito_erp(df_tetq)
+                if 'Referencia' not in df_tetq.columns or 'Cantidad' not in df_tetq.columns:
+                    st.error("❌ No se encontraron columnas Referencia/Cantidad en el archivo.")
+                else:
+                    st.session_state.df_transito_etq = df_tetq[['Referencia', 'Cantidad']]
+                    df_a_firebase(st.session_state.df_transito_etq, 'etiquetas', 'df_transito_etq')
+                    st.success(f"✅ Tránsito de etiquetas cargado: {len(df_tetq)} referencias.")
+                    st.rerun()
         with col_te2:
             if not st.session_state.df_transito_etq.empty:
                 st.dataframe(st.session_state.df_transito_etq, use_container_width=True)
@@ -2751,9 +2930,14 @@ elif menu == "🏷️ Etiquetas":
         df_etq = df_etq.merge(t_etq, on='Referencia', how='left')
         df_etq['En_transito'] = df_etq['En_transito'].fillna(0)
 
+        if 'Stock_avitrans' not in df_etq.columns:
+            df_etq['Stock_avitrans'] = 0
+        else:
+            df_etq['Stock_avitrans'] = pd.to_numeric(df_etq['Stock_avitrans'], errors='coerce').fillna(0)
+
         def alerta_etq(row):
             consumo_mes  = row.get('Consumo_mes', 0)
-            stock_total  = row['Stock_interno'] + row['Stock_merca'] + row['Stock_txt'] + row['En_transito']
+            stock_total  = row['Stock_interno'] + row['Stock_merca'] + row['Stock_txt'] + row.get('Stock_avitrans', 0) + row['En_transito']
             transito_ud  = int(row['En_transito'])
             consumo_2sem = consumo_mes / 2  # Lead time = 2 semanas
 
@@ -2770,28 +2954,33 @@ elif menu == "🏷️ Etiquetas":
                 pedido = math.ceil(stock_objetivo - stock_total + consumo_2sem)
                 estado_base = f"COMPRAR: {int(pedido)} Ud."
                 # Rojo si stock < 2 semanas, amarillo si no
+                avit = int(row.get('Stock_avitrans', 0))
                 if stock_total < consumo_2sem:
-                    return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), transito_ud, int(consumo_mes), int(pedido), f"🔴 {estado_base}", "#721c24"
+                    return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), avit, transito_ud, int(consumo_mes), int(pedido), f"🔴 {estado_base}", "#721c24"
                 else:
-                    return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), transito_ud, int(consumo_mes), int(pedido), f"🟡 {estado_base}", "#856404"
+                    return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), avit, transito_ud, int(consumo_mes), int(pedido), f"🟡 {estado_base}", "#856404"
 
             msg = "🟢 OK"
             if transito_ud > 0:
                 msg += f" (🚢 {transito_ud} en tránsito)"
-            return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), transito_ud, int(consumo_mes), 0, msg, "#155724"
+            return int(stock_total), int(row['Stock_interno']), int(row['Stock_merca']), int(row['Stock_txt']), int(row.get('Stock_avitrans', 0)), transito_ud, int(consumo_mes), 0, msg, "#155724"
 
-        df_etq[['Stock_total', 'Stk_Interno', 'Stk_Merca', 'Stk_TXT', 'Transito_ud', 'CDM_mes', 'Pedido_ud', 'Estado', 'Color']] = df_etq.apply(
+        df_etq[['Stock_total', 'Stk_Interno', 'Stk_Merca', 'Stk_TXT', 'Stk_Avitrans', 'Transito_ud', 'CDM_mes', 'Pedido_ud', 'Estado', 'Color']] = df_etq.apply(
             lambda row: pd.Series(alerta_etq(row)), axis=1
         )
 
         # Filtros
-        col_f1, col_f2 = st.columns([2,2])
+        col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
         with col_f1:
             filtro_etq = st.selectbox("Filtrar por estado:", ["Todos", "🔴 Solo alertas", "🟡 Amarillo", "🟢 Solo OK"], key="fetq")
         with col_f2:
             buscar_etq = st.text_input("Buscar referencia:", key="betq")
+        with col_f3:
+            solo_con_consumo = st.checkbox("Solo con consumo", value=True)
 
         vista_etq = df_etq.copy()
+        if solo_con_consumo:
+            vista_etq = vista_etq[vista_etq['CDM_mes'] > 0]
         if filtro_etq == "🔴 Solo alertas":
             vista_etq = vista_etq[vista_etq['Estado'].str.startswith("🔴")]
         elif filtro_etq == "🟡 Amarillo":
@@ -2814,7 +3003,7 @@ elif menu == "🏷️ Etiquetas":
         me5.metric("Stk Interno", total_int_etq)
         me6.metric("Stk TXT", total_txt_etq)
 
-        cols_etq = ['Referencia', 'Descripcion', 'CDM_mes', 'Stk_Interno', 'Stk_Merca', 'Stk_TXT', 'Transito_ud', 'Pedido_ud', 'Estado']
+        cols_etq = ['Referencia', 'Descripcion', 'CDM_mes', 'Stk_Interno', 'Stk_Merca', 'Stk_TXT', 'Stk_Avitrans', 'Transito_ud', 'Pedido_ud', 'Estado']
 
         def render_etq_table(df_vista, cols):
             badge_map = {
@@ -3440,7 +3629,7 @@ elif menu == "🏭 Planificación Producción":
 # ══════════════════════════════════════════════
 elif menu == "🧠 Logística AI":
     st.header("🧠 Logística AI")
-    st.caption("Agente inteligente con memoria semántica - llama-3.3-70b-versatile")
+    st.caption("Agente inteligente con memoria semántica · Claude Sonnet / Llama 3.3 70B")
 
     # ── Inicializar ChromaDB ──────────────────
     @st.cache_resource
@@ -3476,6 +3665,41 @@ elif menu == "🧠 Logística AI":
         metadatas = [{"archivo": nombre} for _ in chunks]
         coleccion_ai.add(documents=chunks, ids=ids, metadatas=metadatas)
         return len(chunks)
+
+    def construir_contexto_firebase():
+        """Vuelca todos los dataframes de session_state en texto para Claude."""
+        bloques = []
+
+        def df_a_texto(df, nombre, max_filas=2000):
+            if df is None or df.empty:
+                return ""
+            df2 = df.copy().head(max_filas)
+            lineas = [f"=== {nombre} ({len(df)} filas) ==="]
+            lineas.append(", ".join(df2.columns.tolist()))
+            for _, row in df2.iterrows():
+                lineas.append(" | ".join(
+                    f"{col}={val}" for col, val in row.items()
+                    if pd.notna(val) and str(val).strip() not in ("", "nan", "None")
+                ))
+            return "\n".join(lineas)
+
+        mapeo = [
+            (st.session_state.get("df_final"),           "Maestro Bandejas",        2000),
+            (st.session_state.get("df_etiquetas_final"),  "Maestro Etiquetas",       2000),
+            (st.session_state.get("df_materiales"),       "Componentes",             3000),
+            (st.session_state.get("df_paletizacion"),     "Paletizacion",             200),
+            (st.session_state.get("df_stock_pt"),         "Stock Producto Terminado", 500),
+            (st.session_state.get("df_produccion_pt"),    "Produccion PT",            500),
+            (st.session_state.get("df_ventas"),           "Ventas",                  1000),
+            (st.session_state.get("df_consumos"),         "Consumos",                 500),
+            (st.session_state.get("df_planificacion"),    "Planificacion",            500),
+        ]
+        for df, nombre, max_f in mapeo:
+            bloque = df_a_texto(df, nombre, max_f)
+            if bloque:
+                bloques.append(bloque)
+
+        return "\n\n".join(bloques) if bloques else "No hay datos cargados en Firebase."
 
     def buscar_contexto_ai(pregunta, n=20):
         try:
@@ -3569,6 +3793,16 @@ elif menu == "🧠 Logística AI":
 
     # ── Chat principal ────────────────────────
     with col_main:
+        # Selector de modelo
+        MODELOS_AI = {
+            "🟣 Claude Sonnet (Anthropic)": "claude",
+            "🔵 Gemini 2.0 Flash (Google)": "gemini",
+            "🟡 Llama 3.3 70B (Groq)":     "groq",
+        }
+        modelo_sel = st.radio("Modelo IA:", list(MODELOS_AI.keys()),
+                              horizontal=True, key="logistica_modelo")
+        motor_ai = MODELOS_AI[modelo_sel]
+        st.caption("Claude / Gemini: análisis profundo con datos completos · Groq: respuesta rápida")
         # Preguntas rápidas
         st.subheader("💡 Preguntas rápidas")
         preguntas = [
@@ -3599,8 +3833,11 @@ elif menu == "🧠 Logística AI":
             with st.chat_message("assistant"):
                 with st.spinner("Analizando..."):
                     try:
-                        from groq import Groq as GroqClient
-                        contexto = buscar_contexto_ai(pregunta_actual)
+                        # Claude y Gemini usan contexto directo de Firebase; Groq usa ChromaDB
+                        if motor_ai in ("claude", "gemini"):
+                            contexto = ""
+                        else:
+                            contexto = buscar_contexto_ai(pregunta_actual)
                         archivos_lista = ", ".join(st.session_state.logistica_archivos.keys()) or "ninguno aún"
 
                         # Enriquecer contexto con búsqueda exacta de referencias
@@ -3728,15 +3965,19 @@ elif menu == "🧠 Logística AI":
                                                         desc_extra.append(f"BANDEJA asociada al producto {ref_prod}: ref={bp['Codigo']} desc={rb.get('Descripcion','')} medidas={medidas_bp} uds_palet={rb.get('Unidades_palet','')}")
                                 contexto_enriquecido = '\n'.join(desc_extra) + '\n\n' + contexto_enriquecido
 
+                        if motor_ai in ("claude", "gemini"):
+                            datos_contexto = construir_contexto_firebase()
+                        else:
+                            datos_contexto = f"""DATOS EXACTOS DE REFERENCIAS MENCIONADAS:
+{chr(10).join(contexto_extra) if contexto_extra else "No se encontraron referencias exactas."}
+
+DATOS RELEVANTES (búsqueda semántica):
+{contexto if contexto else "No hay datos indexados."}"""
+
                         system_prompt = f"""Eres un agente de logística inteligente de Aldelis, especializado en análisis de inventario, aprovisionamiento y planificación de producción.
 
-Archivos disponibles: {archivos_lista}
-
-DATOS EXACTOS DE REFERENCIAS MENCIONADAS:
-{chr(10).join(contexto_extra) if contexto_extra else "No se encontraron referencias exactas en los datos."}
-
-DATOS RELEVANTES ADICIONALES (búsqueda semántica):
-{contexto if contexto else "No hay datos indexados."}
+DATOS COMPLETOS DEL SISTEMA:
+{datos_contexto}
 
 INSTRUCCIONES:
 - Responde siempre en español, de forma concisa y práctica
@@ -3751,17 +3992,86 @@ INSTRUCCIONES:
 - Si cruzas datos de varios archivos, explícalo brevemente
 - Si no encuentras la info, dilo claramente"""
 
-                        groq_client = GroqClient(api_key=GROQ_API_KEY)
-                        mensajes = [{"role": "system", "content": system_prompt}]
-                        mensajes += st.session_state.logistica_historial[-10:]
+                        mensajes_hist = st.session_state.logistica_historial[-10:]
 
-                        resp = groq_client.chat.completions.create(
-                            model="llama-3.3-70b-versatile",
-                            messages=mensajes,
-                            max_tokens=1500,
-                            temperature=0.3
-                        )
-                        respuesta = resp.choices[0].message.content
+                        import urllib.request, json as _json
+
+                        if motor_ai == "claude":
+                            ANTHROPIC_KEY = get_password("ANTHROPIC_API_KEY", "")
+                            if not ANTHROPIC_KEY:
+                                st.warning("❌ ANTHROPIC_API_KEY no configurada en Secrets")
+                                st.stop()
+                            ant_msgs = [{"role": m["role"], "content": m["content"]}
+                                        for m in mensajes_hist if isinstance(m.get("content"), str)]
+                            if ant_msgs and ant_msgs[0]["role"] != "user":
+                                ant_msgs = ant_msgs[1:]
+                            payload = _json.dumps({
+                                "model": "claude-sonnet-4-6",
+                                "max_tokens": 2048,
+                                "system": system_prompt,
+                                "messages": ant_msgs,
+                            }).encode()
+                            req = urllib.request.Request(
+                                "https://api.anthropic.com/v1/messages",
+                                data=payload,
+                                headers={
+                                    "x-api-key": ANTHROPIC_KEY,
+                                    "anthropic-version": "2023-06-01",
+                                    "content-type": "application/json",
+                                },
+                                method="POST"
+                            )
+                            with urllib.request.urlopen(req) as r:
+                                respuesta = _json.loads(r.read())["content"][0]["text"]
+
+                        elif motor_ai == "gemini":
+                            GEMINI_KEY = get_password("GEMINI_API_KEY", "")
+                            if not GEMINI_KEY:
+                                st.warning("❌ GEMINI_API_KEY no configurada en Secrets")
+                                st.stop()
+                            # Gemini usa role "model" en lugar de "assistant"
+                            gem_msgs = []
+                            for m in mensajes_hist:
+                                if not isinstance(m.get("content"), str):
+                                    continue
+                                role = "model" if m["role"] == "assistant" else "user"
+                                gem_msgs.append({"role": role, "parts": [{"text": m["content"]}]})
+                            # Asegurar que empieza por user
+                            while gem_msgs and gem_msgs[0]["role"] != "user":
+                                gem_msgs = gem_msgs[1:]
+                            payload = _json.dumps({
+                                "system_instruction": {"parts": [{"text": system_prompt}]},
+                                "contents": gem_msgs,
+                                "generationConfig": {"maxOutputTokens": 2048, "temperature": 0.3},
+                            }).encode()
+                            req = urllib.request.Request(
+                                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}",
+                                data=payload,
+                                headers={"content-type": "application/json"},
+                                method="POST"
+                            )
+                            try:
+                                with urllib.request.urlopen(req) as r:
+                                    respuesta = _json.loads(r.read())["candidates"][0]["content"]["parts"][0]["text"]
+                            except urllib.error.HTTPError as he:
+                                if he.code == 429:
+                                    st.warning("⏳ Gemini: límite de peticiones alcanzado (429). Espera unos segundos y vuelve a intentarlo.")
+                                    st.stop()
+                                raise
+
+                        else:
+                            from groq import Groq as GroqClient
+                            groq_client = GroqClient(api_key=GROQ_API_KEY)
+                            mensajes = [{"role": "system", "content": system_prompt}]
+                            mensajes += mensajes_hist
+                            resp = groq_client.chat.completions.create(
+                                model="llama-3.3-70b-versatile",
+                                messages=mensajes,
+                                max_tokens=1500,
+                                temperature=0.3
+                            )
+                            respuesta = resp.choices[0].message.content
+
                         st.write(respuesta)
                         st.session_state.logistica_historial.append({"role": "assistant", "content": respuesta})
                     except Exception as e:
