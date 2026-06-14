@@ -1,4 +1,4 @@
-const CACHE = 'maestro-arrocero-v1';
+const CACHE = 'maestro-arrocero-v2';
 
 const PRECACHE = [
   '/',
