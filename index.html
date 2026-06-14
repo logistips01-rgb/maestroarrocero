@@ -2344,15 +2344,15 @@ const Recipe = (() => {
       return `<li><span>${ing.name}</span><span class="ing-amount">${disp}</span></li>`;
     }).join('');
 
-    // Agua = ratio base + evaporación del equipo activo
-    const base  = Math.round(r.ricePerPerson * n * r.waterRatio);
+    // Agua = ratio seleccionado en Config + evaporación del equipo activo
+    const base  = Math.round(r.ricePerPerson * n * Water.getRatio());
     const prof  = Store.getActiveProfile();
     const evap  = prof?.evapPerMin ?? null;
     const extra = evap !== null ? Math.round(evap * r.cookMin) : 0;
     document.getElementById('ing-agua').innerHTML = (base + extra) + ' <small>ml</small>';
     document.getElementById('ing-agua-tip').textContent = evap !== null
-      ? `Base ${base} ml + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${r.cookMin} min) — ${prof.name}`
-      : 'Calibra la evaporación de tu equipo en la sección Agua.';
+      ? `Base ${base} ml (ratio 1:${Water.getRatio()}) + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${r.cookMin} min) — ${prof.name}`
+      : `Base ${base} ml (ratio 1:${Water.getRatio()}). Calibra la evaporación de tu equipo en Config.`;
   }
 
   function updateComensales(v) {
@@ -2458,7 +2458,7 @@ const Water = (() => {
     const prof = Store.getActiveProfile();
     const evap = prof?.evapPerMin ?? null;
     if (evap !== null) {
-      const cookMin = 18; // estimación genérica para la calculadora; la receta usa el valor exacto
+      const cookMin = 15;
       const extra   = Math.round(evap * cookMin);
       document.getElementById('agua-cal').innerHTML      = (std + extra) + ' <small>ml</small>';
       document.getElementById('agua-evap-tip').textContent = `Base + ${extra} ml evap. (${evap.toFixed(1)} ml/min × ${cookMin} min) — ${prof.name}`;
@@ -2470,7 +2470,7 @@ const Water = (() => {
     }
   }
 
-  return { selectType, calc };
+  return { selectType, calc, getRatio: () => currentRatio };
 })();
 
 
