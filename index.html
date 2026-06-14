@@ -1215,13 +1215,13 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
   </div>
 
   <label>Gramos de arroz</label>
-  <input type="number" id="arroz-gramos" value="320" min="50" max="5000" oninput="Water.calc()">
+  <input type="number" id="arroz-gramos" value="400" min="50" max="5000" oninput="Water.calc()">
 
-  <label>O ajusta por comensales <span style="font-weight:300">(80 g/persona)</span></label>
+  <label>O ajusta por comensales <span style="font-weight:300">(100 g/persona)</span></label>
   <div class="slider-row">
     <input type="range" min="1" max="20" value="4" id="agua-comensales"
       oninput="document.getElementById('agua-com-val').textContent=this.value;
-               document.getElementById('arroz-gramos').value=this.value*80;
+               document.getElementById('arroz-gramos').value=this.value*100;
                Water.calc()">
     <span id="agua-com-val">4</span>
   </div>
