@@ -1372,10 +1372,24 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
       </div>
     </div>
   </div>
-</div>
 
-<!-- PANTALLA: NIVELADOR -->
+  <hr class="divider">
+  <h2 class="section-title" style="margin-bottom:.75rem">Herramientas <span>de cocina</span></h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+    <button class="btn btn-secondary btn-full" style="flex-direction:column;gap:4px;padding:1rem;height:auto" onclick="Nav.goTo('nivel')">
+      <span style="font-size:1.5rem">🫙</span>
+      <span style="font-size:.85rem;font-weight:500">Nivelador</span>
+      <span style="font-size:.72rem;opacity:.7;font-weight:400">Nivelador de paella</span>
+    </button>
+    <button class="btn btn-secondary btn-full" style="flex-direction:column;gap:4px;padding:1rem;height:auto" onclick="Nav.goTo('bascula')">
+      <span style="font-size:1.5rem">⚖️</span>
+      <span style="font-size:.85rem;font-weight:500">Báscula táctil</span>
+      <span style="font-size:.72rem;opacity:.7;font-weight:400">Experimental</span>
+    </button>
+  </div>
+</div>
 <div id="screen-nivel" class="screen">
+  <button class="btn btn-ghost btn-sm" style="margin-bottom:1rem" onclick="Nav.goTo('agua')">← Config.</button>
   <h2 class="section-title">Nivelador de <span>paella</span></h2>
   <p class="note" style="margin-bottom:1.25rem">Coloca el móvil sobre la paella. Pulsa <strong>Establecer punto 0</strong> para calibrar la posición de referencia de tu superficie.</p>
 
@@ -1422,6 +1436,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 
 <!-- PANTALLA: BÁSCULA EXPERIMENTAL -->
 <div id="screen-bascula" class="screen">
+  <button class="btn btn-ghost btn-sm" style="margin-bottom:1rem" onclick="Nav.goTo('agua')">← Config.</button>
   <h2 class="section-title">Báscula <span>táctil</span></h2>
   <div class="scale-experimental-badge">⚗️ Experimental — precisión orientativa</div>
 
