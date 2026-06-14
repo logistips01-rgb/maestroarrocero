@@ -547,37 +547,139 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 .step-timer-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 3px; }
 .step-timer-bar { height: 100%; background: var(--rice); border-radius: 2px; transition: width 1s linear; }
 
-/* ── 7c. TEMPORIZADOR DE COCCIÓN (global) ─────────────────── */
-#cook-timer-bar {
+/* ── 7c. TEMPORIZADOR PANTALLA COMPLETA ───────────────────── */
+#cook-timer-overlay {
   display: none;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--rice-dark);
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #0d1117;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1.5rem 2rem;
+  overflow-y: auto;
+}
+#cook-timer-overlay.visible { display: flex; }
+
+#cto-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  color: rgba(255,255,255,.5);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+#cto-ring-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin-bottom: 2rem;
+  flex-shrink: 0;
+}
+#cto-ring-wrap svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+#cto-ring-bg  { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 8; }
+#cto-ring-arc { fill: none; stroke: var(--rice); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
+#cto-ring-arc.done { stroke: var(--success); }
+#cto-time-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+#cto-clock {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.2rem;
   color: #fff;
-  padding: .5rem 1rem;
-  border-radius: 0 0 10px 10px;
-  margin: 0 -1rem .75rem;
+  line-height: 1;
+}
+#cto-status {
+  font-size: .72rem;
+  color: rgba(255,255,255,.45);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+#cto-tip {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  font-size: .85rem;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+#cto-tip strong { color: var(--saffron); display: block; margin-bottom: .3rem; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
+
+#cto-phases {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 2rem;
+}
+#cto-phases h4 {
+  font-size: .7rem;
+  color: rgba(255,255,255,.3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+.cto-phase {
+  display: flex;
   align-items: center;
   gap: .75rem;
+  padding: .5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: .83rem;
+  color: rgba(255,255,255,.35);
 }
-#cook-timer-bar.visible { display: flex; }
-#cook-timer-bar.done    { background: var(--success); }
-#cook-timer-clock {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  min-width: 60px;
+.cto-phase-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  flex-shrink: 0;
 }
-#cook-timer-label { flex: 1; font-size: .8rem; opacity: .85; }
-.cook-timer-btn {
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.3);
+.cto-phase.done .cto-phase-dot { background: var(--success); }
+.cto-phase.done { color: rgba(255,255,255,.5); text-decoration: line-through; }
+
+#cto-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  max-width: 400px;
+}
+#cto-pause-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
   color: #fff;
-  border-radius: 6px;
-  padding: .3rem .7rem;
-  font-size: .78rem;
+  border-radius: 10px;
+  padding: .9rem 2rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  font-weight: 500;
   cursor: pointer;
+  width: 100%;
+  letter-spacing: .03em;
 }
+#cto-back-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.4);
+  font-size: .85rem;
+  cursor: pointer;
+  padding: .5rem;
+}
+#cto-back-btn:hover { color: rgba(255,255,255,.7); }
+
 
 /* ── 7d. MODO COCINA ──────────────────────────────────────── */
 #cook-mode-btn {
@@ -1122,12 +1224,6 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
         <div class="comensales-badge" id="comensales-badge">4 personas</div>
         <button id="cook-mode-btn" onclick="CookMode.toggle()" title="Mantener pantalla encendida">🔥 Modo cocina</button>
       </div>
-    </div>
-    <div id="cook-timer-bar">
-      <div id="cook-timer-clock">00:00</div>
-      <div id="cook-timer-label">Cocción en marcha</div>
-      <button class="cook-timer-btn" id="cook-timer-toggle" onclick="CookTimer.toggle()">⏸ Pausar</button>
-      <button class="cook-timer-btn" onclick="CookTimer.stop()">✕</button>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
     <div id="step-display"></div>
@@ -3462,67 +3558,152 @@ const App = (() => {
 
 App.init();
 
+/* ── COOK TIMER OVERLAY HTML (inyectado en body) ─────────── */
+(function() {
+  const el = document.createElement('div');
+  el.id = 'cook-timer-overlay';
+  const R = 100, C = 2 * Math.PI * R;
+  el.innerHTML = `
+    <div id="cto-title">Arroz — <span id="cto-total-min"></span> minutos</div>
+    <div id="cto-ring-wrap">
+      <svg viewBox="0 0 220 220" width="220" height="220">
+        <circle id="cto-ring-bg"  cx="110" cy="110" r="${R}"/>
+        <circle id="cto-ring-arc" cx="110" cy="110" r="${R}"
+          stroke-dasharray="${C.toFixed(1)}"
+          stroke-dashoffset="${C.toFixed(1)}"/>
+      </svg>
+      <div id="cto-time-inner">
+        <div id="cto-clock">00:00</div>
+        <div id="cto-status">cocinando</div>
+      </div>
+    </div>
+    <div id="cto-tip"><strong>🔥 Fuego ALTO</strong><span id="cto-tip-text"></span></div>
+    <div id="cto-phases"><h4>Fases</h4><div id="cto-phase-list"></div></div>
+    <div id="cto-actions">
+      <button id="cto-pause-btn" onclick="CookTimer.toggle()">⏸ Pausar</button>
+      <button id="cto-back-btn" onclick="CookTimer.hide()">‹ Volver a la receta</button>
+    </div>`;
+  document.body.appendChild(el);
+})();
+
 /* ── COOK TIMER ─────────────────────────────────────────────
-   Cuenta atrás global del tiempo de cocción.
-   Se arranca desde el tab de ingredientes y flota en el
-   tab de guía mientras se cocina.
+   Temporizador fullscreen con anillo SVG, fases y consejos.
 ──────────────────────────────────────────────────────────── */
 const CookTimer = (() => {
   let totalSecs = 0;
   let remaining = 0;
   let running   = false;
   let iv        = null;
+  const R = 100, C = 2 * Math.PI * R;
+
+  const TIPS = [
+    'Mantén fuego ALTO los primeros 8 minutos. No toques el arroz.',
+    'Dos toques permitidos: a los 5 min (echar sal si falta) y a los 10 min (vestir y colocar carnes reservadas).',
+    'Escucha el chisporroteo — cuando baje de intensidad el agua se está acabando.',
+    'El socarrat se forma en los últimos 2 minutos. Sube el fuego brevemente y retira.',
+    'No remuevas nunca. El arroz necesita quietud para cocinarse en su propio vapor.',
+  ];
 
   function _fmt(s) {
     const m = Math.floor(s / 60);
     return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
   }
 
+  function _arc(pct) {
+    const el = document.getElementById('cto-ring-arc');
+    if (el) el.style.strokeDashoffset = (C * (1 - pct)).toFixed(1);
+  }
+
+  function _beepVibrate() {
+    if (navigator.vibrate) navigator.vibrate([400,200,400,200,800]);
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0,.35,.7].forEach(t => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(.4, ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+t+.3);
+        o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.3);
+      });
+    } catch(e){}
+  }
+
   function _update() {
-    const bar    = document.getElementById('cook-timer-bar');
-    const clock  = document.getElementById('cook-timer-clock');
-    const toggle = document.getElementById('cook-timer-toggle');
-    if (!bar) return;
+    const clock  = document.getElementById('cto-clock');
+    const status = document.getElementById('cto-status');
+    const btn    = document.getElementById('cto-pause-btn');
+    if (!clock) return;
+
     if (remaining <= 0) {
       clock.textContent = '00:00';
-      bar.classList.add('done');
-      document.getElementById('cook-timer-label').textContent = '✓ Cocción lista';
-      if (toggle) toggle.style.display = 'none';
-      if (navigator.vibrate) navigator.vibrate([400,200,400,200,800]);
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0,.35,.7].forEach(t => {
-          const o = ctx.createOscillator(), g = ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.frequency.value = 880;
-          g.gain.setValueAtTime(.4, ctx.currentTime+t);
-          g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+t+.3);
-          o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.3);
-        });
-      } catch(e){}
+      if (status) status.textContent = '✓ listo';
+      if (btn) btn.textContent = '✓ Cocción completada';
+      document.getElementById('cto-ring-arc')?.classList.add('done');
+      _arc(1);
+      _beepVibrate();
       return;
     }
     clock.textContent = _fmt(remaining);
-    document.getElementById('cook-timer-label').textContent = running ? 'Cocción en marcha' : 'Pausado';
-    if (toggle) toggle.textContent = running ? '⏸ Pausar' : '▶ Continuar';
+    const pct = (totalSecs - remaining) / totalSecs;
+    _arc(pct);
+    if (status) status.textContent = running ? 'cocinando' : 'pausado';
+    if (btn) btn.textContent = running ? '⏸ Pausar' : '▶ Continuar';
   }
 
-  function start(minutes) {
+  function _renderPhases(recipe) {
+    const el = document.getElementById('cto-phase-list');
+    if (!el || !recipe) return;
+    const elapsed = totalSecs - remaining;
+    let acc = 0;
+    el.innerHTML = recipe.steps.map(s => {
+      const mins = parseInt(s.time) || 2;
+      const done = elapsed >= acc * 60;
+      acc += mins;
+      return `<div class="cto-phase${done ? ' done' : ''}">
+        <div class="cto-phase-dot"></div>
+        <span>${s.title} <small style="opacity:.5">${s.time}</small></span>
+      </div>`;
+    }).join('');
+  }
+
+  function show(recipe) {
+    const ov = document.getElementById('cook-timer-overlay');
+    if (!ov) return;
+    ov.classList.add('visible');
+    document.body.classList.add('cook-mode');
+    // Título
+    const tm = document.getElementById('cto-total-min');
+    if (tm) tm.textContent = recipe.cookMin;
+    // Tip aleatorio
+    const tipEl = document.getElementById('cto-tip-text');
+    if (tipEl) tipEl.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+    // Fases
+    _renderPhases(recipe);
+    _update();
+  }
+
+  function hide() {
+    document.getElementById('cook-timer-overlay')?.classList.remove('visible');
+    document.body.classList.remove('cook-mode');
+    const btn = document.getElementById('cook-mode-btn');
+    if (btn) { btn.classList.remove('active'); btn.textContent = '🔥 Modo cocina'; }
+  }
+
+  function start(minutes, recipe) {
     stop();
     totalSecs = minutes * 60;
     remaining = totalSecs;
     running   = true;
-    const bar = document.getElementById('cook-timer-bar');
-    if (bar) { bar.classList.remove('done'); bar.classList.add('visible'); }
-    const tog = document.getElementById('cook-timer-toggle');
-    if (tog) tog.style.display = '';
+    document.getElementById('cto-ring-arc')?.classList.remove('done');
     iv = setInterval(() => {
       if (!running) return;
       remaining--;
       _update();
+      _renderPhases(recipe);
       if (remaining <= 0) { clearInterval(iv); iv = null; running = false; }
     }, 1000);
-    _update();
+    show(recipe);
   }
 
   function toggle() {
@@ -3534,17 +3715,15 @@ const CookTimer = (() => {
   function stop() {
     if (iv) { clearInterval(iv); iv = null; }
     running = false; totalSecs = 0; remaining = 0;
-    const bar = document.getElementById('cook-timer-bar');
-    if (bar) { bar.classList.remove('visible','done'); }
+    hide();
   }
 
   function startAndGo() {
     const r = Recipe._current();
-    if (r && r.cookMin) start(r.cookMin);
-    Recipe.switchTab('guia');
+    if (r && r.cookMin) start(r.cookMin, r);
   }
 
-  return { start, toggle, stop, startAndGo };
+  return { start, toggle, stop, startAndGo, hide };
 })();
 
 /* ── COOK MODE ──────────────────────────────────────────────
