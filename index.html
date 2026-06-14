@@ -681,26 +681,8 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 #cto-back-btn:hover { color: rgba(255,255,255,.7); }
 
 
-/* ── 7d. MODO COCINA ──────────────────────────────────────── */
-#cook-mode-btn {
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
-  padding: .28rem .75rem;
-  font-size: .75rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-}
-#cook-mode-btn.active {
-  background: var(--rice);
-  border-color: var(--rice);
-  color: #fff;
-}
+/* ── 7d. MODO COCINA (activado por el timer overlay) ─────── */
 body.cook-mode .bottom-nav { display: none !important; }
-body.cook-mode #screen-recipe .step-card h3 { font-size: 1.15rem; }
-body.cook-mode #screen-recipe .step-card p  { font-size: 1rem; line-height: 1.75; }
-body.cook-mode #screen-recipe .step-card    { padding: 1.25rem; }
 
 /* ── 7e. MODAL COMPARTIR ──────────────────────────────────── */
 .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 0; }
@@ -1222,7 +1204,6 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
         <div class="comensales-badge" id="comensales-badge">4 personas</div>
-        <button id="cook-mode-btn" onclick="CookMode.toggle()" title="Mantener pantalla encendida">🔥 Modo cocina</button>
       </div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
@@ -3594,6 +3575,7 @@ const CookTimer = (() => {
   let remaining = 0;
   let running   = false;
   let iv        = null;
+  let wakeLock  = null;
   const R = 100, C = 2 * Math.PI * R;
 
   const TIPS = [
@@ -3672,13 +3654,11 @@ const CookTimer = (() => {
     if (!ov) return;
     ov.classList.add('visible');
     document.body.classList.add('cook-mode');
-    // Título
+    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(wl => { wakeLock = wl; }).catch(() => {});
     const tm = document.getElementById('cto-total-min');
     if (tm) tm.textContent = recipe.cookMin;
-    // Tip aleatorio
     const tipEl = document.getElementById('cto-tip-text');
     if (tipEl) tipEl.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
-    // Fases
     _renderPhases(recipe);
     _update();
   }
@@ -3686,8 +3666,7 @@ const CookTimer = (() => {
   function hide() {
     document.getElementById('cook-timer-overlay')?.classList.remove('visible');
     document.body.classList.remove('cook-mode');
-    const btn = document.getElementById('cook-mode-btn');
-    if (btn) { btn.classList.remove('active'); btn.textContent = '🔥 Modo cocina'; }
+    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
   }
 
   function start(minutes, recipe) {
@@ -3731,34 +3710,6 @@ const CookTimer = (() => {
    se cocina. Aplica clase CSS para texto más grande y oculta
    la barra de navegación.
 ──────────────────────────────────────────────────────────── */
-const CookMode = (() => {
-  let active   = false;
-  let wakeLock = null;
-
-  async function _acquireWakeLock() {
-    if ('wakeLock' in navigator) {
-      try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
-    }
-  }
-
-  function _releaseWakeLock() {
-    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
-  }
-
-  function toggle() {
-    active = !active;
-    document.body.classList.toggle('cook-mode', active);
-    const btn = document.getElementById('cook-mode-btn');
-    if (btn) {
-      btn.classList.toggle('active', active);
-      btn.textContent = active ? '🔥 Modo activo' : '🔥 Modo cocina';
-    }
-    if (active) _acquireWakeLock();
-    else        _releaseWakeLock();
-  }
-
-  return { toggle };
-})();
 
 /* ── RICE GUIDE ─────────────────────────────────────────────
    Guía de variedades de arroz con acordeón.
