@@ -1,4 +1,4 @@
-const CACHE = 'maestro-arrocero-v3';
+const CACHE = 'maestro-arrocero-v4';
 
 const PRECACHE = [
   '/',
@@ -52,6 +52,21 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Network-first para documentos HTML: así las actualizaciones se ven
+  // al instante. Si no hay red, se sirve la copia cacheada (offline).
+  if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() => caches.match(e.request).then(c => c || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // Cache-first para el resto de recursos estáticos (imágenes, fuentes…).
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
@@ -60,8 +75,6 @@ self.addEventListener('fetch', e => {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
         return res;
-      }).catch(() => {
-        if (e.request.destination === 'document') return caches.match('/index.html');
       });
     })
   );
