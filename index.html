@@ -1648,7 +1648,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
       <button class="btn btn-full" id="scale-cal-btn" onclick="Scale.calAction()">Capturar punto 1</button>
     </div>
 
-    <div class="result-box" style="margin-top:1rem" id="scale-cal-result" style="display:none">
+    <div class="result-box" style="margin-top:1rem;display:none" id="scale-cal-result">
       <div id="scale-cal-result-content"></div>
     </div>
   </div>
@@ -3177,6 +3177,7 @@ const Share = (() => {
     // Resetear a estado inicial
     document.getElementById('share-preview').style.display  = 'none';
     document.getElementById('share-actions').style.display  = 'none';
+    document.getElementById('share-close-btn').style.display = '';
     document.getElementById('share-overlay').style.display  = 'flex';
   }
 
@@ -3740,8 +3741,8 @@ const CookTimer = (() => {
     if (title) title.textContent = step.title;
     if (text)  text.textContent  = step.text || '';
     if (ing) {
-      ing.innerHTML = (step.ingredients && step.ingredients.length)
-        ? step.ingredients.map(i => '<span class="cto-ing-tag">' + i.name + '</span>').join('')
+      ing.innerHTML = (step.ingredients && step.ingredients !== '—')
+        ? step.ingredients.split(',').map(s => '<span class="cto-ing-tag">' + s.trim() + '</span>').join('')
         : '';
     }
 
@@ -3973,7 +3974,7 @@ if ('serviceWorker' in navigator) {
   banner.style.cssText = `
     display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
     background:#2A1F14;color:#F5E6D3;padding:.85rem 1rem;
-    display:flex;align-items:center;gap:.75rem;font-family:'DM Sans',sans-serif;
+    align-items:center;gap:.75rem;font-family:'DM Sans',sans-serif;
     font-size:.9rem;box-shadow:0 -2px 12px rgba(0,0,0,.35);`;
   banner.querySelector('span').style.cssText = 'flex:1';
   banner.querySelector('#pwa-install').style.cssText = `
@@ -3990,6 +3991,7 @@ if ('serviceWorker' in navigator) {
   });
 
   banner.querySelector('#pwa-install').addEventListener('click', () => {
+    if (!deferredPrompt) return;
     banner.style.display = 'none';
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
