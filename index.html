@@ -1192,9 +1192,9 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 
 <!-- NAVEGACIÓN SUPERIOR — logo + toggle tema -->
 <nav>
-  <div class="nav-logo">🍳 Maestro <span>Arrocero</span></div>
+  <div class="nav-logo">Maestro <span>Arrocero</span></div>
   <button class="theme-toggle" id="theme-toggle" onclick="Theme.toggle()">
-    <span class="tt-icon" id="theme-icon">🌙</span>
+    <span class="tt-icon" id="theme-icon"></span>
     <span id="theme-label">Oscuro</span>
   </button>
 </nav>
@@ -1214,7 +1214,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     <img src="img/valenciana.jpg" alt="Paella Valenciana">
     <div class="home-hero-grad"></div>
     <div class="home-hero-ct">
-      <div class="home-hero-eyebrow">⭐ Receta destacada</div>
+      <div class="home-hero-eyebrow">Receta destacada</div>
       <div class="home-hero-name">Paella Valenciana</div>
       <div class="home-hero-row">
         <span class="home-hero-stars">★ 4.9</span>
@@ -1243,7 +1243,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     ">
       <div>
         <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#D4781A;margin-bottom:.3rem">Nueva sección</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#F0EBE3">🔥 Maestro <span style="color:#E8A020">Brasas</span></div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#F0EBE3">Maestro <span style="color:#E8A020">Brasas</span></div>
         <div style="font-size:.78rem;color:rgba(240,235,227,.5);margin-top:.25rem">12 recetas · Aliños · Cortes · Guías de carbón y leña</div>
       </div>
       <div style="background:#D4781A;color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:500;white-space:nowrap;flex-shrink:0;">Abrir →</div>
@@ -1310,7 +1310,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     <hr class="divider">
     <div style="display:flex;gap:.6rem;">
       <button class="btn btn-secondary" style="flex:1" onclick="Share.open()">↗ Compartir</button>
-      <button class="btn" style="flex:2" onclick="CookTimer.startAndGo()">⏱ Empezar a cocinar →</button>
+      <button class="btn" style="flex:2" onclick="CookTimer.startAndGo()">Empezar a cocinar →</button>
     </div>
   </div>
 </div>
@@ -1321,16 +1321,16 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     <h3>Compartir</h3>
     <div class="share-options">
       <button class="share-opt" onclick="Share.prepare('ingredientes')">
-        <span class="so-icon">🧺</span>Lista de ingredientes
+        Lista de ingredientes
       </button>
       <button class="share-opt" onclick="Share.prepare('receta')">
-        <span class="so-icon">📋</span>Receta completa
+        Receta completa
       </button>
     </div>
     <div id="share-preview" class="share-preview" style="display:none"></div>
     <div class="share-actions" id="share-actions" style="display:none">
-      <button class="btn btn-secondary" style="flex:1" onclick="Share.copy()">📋 Copiar</button>
-      <button class="btn btn-water"     style="flex:1" onclick="Share.whatsapp()">💬 WhatsApp</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="Share.copy()">Copiar</button>
+      <button class="btn btn-water"     style="flex:1" onclick="Share.whatsapp()">WhatsApp</button>
       <button class="btn btn-ghost btn-sm" onclick="Share.close()">✕</button>
     </div>
     <button class="btn btn-ghost btn-full" onclick="Share.close()" id="share-close-btn">Cancelar</button>
@@ -1351,19 +1351,19 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 
   <div class="water-type-grid">
     <button class="water-type-btn selected" onclick="Water.selectType(this,'bomba',1.5)">
-      <span class="wt-emoji">🌾</span>Bomba<span class="wt-ratio">ratio 1:1.5</span>
+      Bomba<span class="wt-ratio">ratio 1:1.5</span>
     </button>
     <button class="water-type-btn" onclick="Water.selectType(this,'redondo',1.0)">
       <span class="wt-emoji">⭕</span>Redondo<span class="wt-ratio">ratio 1:1</span>
     </button>
     <button class="water-type-btn" onclick="Water.selectType(this,'albufera',1.2)">
-      <span class="wt-emoji">🏞️</span>Albufera<span class="wt-ratio">ratio 1:1.2</span>
+      Albufera<span class="wt-ratio">ratio 1:1.2</span>
     </button>
     <button class="water-type-btn" onclick="Water.selectType(this,'balilla',1.1)">
-      <span class="wt-emoji">🌿</span>Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
+      Balilla×Sollana<span class="wt-ratio">ratio 1:1.1</span>
     </button>
     <button class="water-type-btn" onclick="Water.selectType(this,'dinamita',1.6)">
-      <span class="wt-emoji">💥</span>Dinamita<span class="wt-ratio">ratio 1:1.6</span>
+      Dinamita<span class="wt-ratio">ratio 1:1.6</span>
     </button>
   </div>
 
@@ -1428,23 +1428,23 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 
       <label>Tipo de quemador / fuego</label>
       <div class="burner-grid">
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','🔥')">
-          <span class="b-emoji">🔥</span>Paellero gas
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'paellero_gas','')">
+          Paellero gas
         </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','⚡')">
-          <span class="b-emoji">⚡</span>Vitrocerámica
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'vitro','')">
+          Vitrocerámica
         </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','🧲')">
-          <span class="b-emoji">🧲</span>Inducción
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'induccion','')">
+          Inducción
         </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','🪵')">
-          <span class="b-emoji">🪵</span>Leña
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'lena','')">
+          Leña
         </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','🫧')">
-          <span class="b-emoji">🫧</span>Cocina gas
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'cocina_gas','')">
+          Cocina gas
         </button>
-        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','🍳')">
-          <span class="b-emoji">🍳</span>Otro
+        <button class="burner-btn" onclick="Equipment.selectBurner(this,'otro','')">
+          Otro
         </button>
       </div>
       <input type="hidden" id="eq-burner">
@@ -1469,7 +1469,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
   <!-- Fase 1: Setup (instrucciones + arranque) -->
   <div id="cal-phase-setup">
     <div class="cal-box">
-      <h4>🧪 Prueba de evaporación</h4>
+      <h4>Prueba de evaporación</h4>
       <p>Mide cuánta agua evapora tu equipo activo por minuto para sumarla automáticamente al cálculo de agua de cada receta.</p>
       <p><strong>Cómo hacerlo:</strong> llena la paella con agua (ej. 3 litros), pon el fuego a tope y pulsa iniciar. El cronómetro contará 15 minutos hacia atrás. Mantén la pantalla encendida.</p>
     </div>
@@ -1494,7 +1494,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
           <small>restantes</small>
         </div>
       </div>
-      <div class="countdown-state" id="cal-state-text">🔥 Fuego al máximo — no apagues la pantalla</div>
+      <div class="countdown-state" id="cal-state-text">Fuego al máximo — no apagues la pantalla</div>
       <button class="btn btn-danger" onclick="Calibration.cancel()">✕ Cancelar prueba</button>
     </div>
   </div>
@@ -1530,12 +1530,10 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
   <h2 class="section-title" style="margin-bottom:.75rem">Herramientas <span>de cocina</span></h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
     <button class="btn btn-secondary btn-full" style="flex-direction:column;gap:4px;padding:1rem;height:auto" onclick="Nav.goTo('nivel')">
-      <span style="font-size:1.5rem">🫙</span>
       <span style="font-size:.85rem;font-weight:500">Nivelador</span>
       <span style="font-size:.72rem;opacity:.7;font-weight:400">Nivelador de paella</span>
     </button>
     <button class="btn btn-secondary btn-full" style="flex-direction:column;gap:4px;padding:1rem;height:auto" onclick="Nav.goTo('bascula')">
-      <span style="font-size:1.5rem">⚖️</span>
       <span style="font-size:.85rem;font-weight:500">Báscula táctil</span>
       <span style="font-size:.72rem;opacity:.7;font-weight:400">Experimental</span>
     </button>
@@ -1570,13 +1568,13 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 
     <!-- Punto 0 -->
     <div class="zero-actions">
-      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">🎯 Establecer punto 0</button>
+      <button class="btn btn-water" style="flex:2" onclick="Gyro.setZero()">Establecer punto 0</button>
       <button class="btn btn-ghost" style="flex:1" onclick="Gyro.resetZero()">↺ Resetear</button>
     </div>
     <div class="note" id="zero-status" style="text-align:center">Sin punto 0 — usando horizontal absoluta</div>
 
     <div id="sensor-denied" class="sensor-denied" style="display:none;width:100%">
-      <p>⚠️ Tu navegador necesita permiso para el giroscopio.<br><br>
+      <p>Tu navegador necesita permiso para el giroscopio.<br><br>
          En iOS: Ajustes → Safari → Acceso al movimiento y orientación.<br>
          En Android debería funcionar automáticamente.</p>
       <br>
@@ -1591,12 +1589,12 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 <div id="screen-bascula" class="screen">
   <button class="btn btn-ghost btn-sm" style="margin-bottom:1rem" onclick="Nav.goTo('agua')">← Config.</button>
   <h2 class="section-title">Báscula <span>táctil</span></h2>
-  <div class="scale-experimental-badge">⚗️ Experimental — precisión orientativa</div>
+  <div class="scale-experimental-badge">Experimental — precisión orientativa</div>
 
   <!-- Tabs: medir / calibrar -->
   <div class="inner-tabs">
-    <button class="inner-tab active" onclick="Scale.switchTab('medir')">⚖️ Pesar</button>
-    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">🔧 Calibrar</button>
+    <button class="inner-tab active" onclick="Scale.switchTab('medir')">Pesar</button>
+    <button class="inner-tab"        onclick="Scale.switchTab('calibrar')">Calibrar</button>
   </div>
 
   <!-- TAB: MEDIR -->
@@ -1610,7 +1608,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
          ontouchstart="Scale.onTouchStart(event)"
          ontouchmove="Scale.onTouchMove(event)"
          ontouchend="Scale.onTouchEnd(event)">
-      <div class="scale-pad-icon" id="scale-pad-icon">🫴</div>
+      <div class="scale-pad-icon" id="scale-pad-icon"></div>
       <div class="scale-pad-hint" id="scale-pad-hint">Apoya aquí el objeto a pesar</div>
     </div>
 
@@ -1631,7 +1629,7 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
     </div>
 
     <div class="scale-disclaimer">
-      ⚠️ Esta báscula usa el área de contacto táctil para estimar el peso. La precisión depende del dispositivo, del objeto y de la calibración. No usar para medidas críticas. Margen de error típico: ±20-80 g.
+      Esta báscula usa el área de contacto táctil para estimar el peso. La precisión depende del dispositivo, del objeto y de la calibración. No usar para medidas críticas. Margen de error típico: ±20-80 g.
     </div>
   </div>
 
@@ -1670,7 +1668,6 @@ body.dark .tag-pending               { background: rgba(200,134,74,.15); }
 <!-- MODAL: Alerta fin de cronómetro -->
 <div id="alert-overlay" class="alert-overlay" style="display:none">
   <div class="alert-box">
-    <div class="alert-icon">🔥</div>
     <h3>¡Apaga el fuego!</h3>
     <p>Han pasado los 15 minutos. Apaga el fuego ahora y deja reposar 5 minutos antes de medir el agua restante.</p>
     <button class="btn btn-full" onclick="Calibration.goToMeasure()">Entendido — voy a medir</button>
@@ -1708,7 +1705,7 @@ const Theme = (() => {
     document.body.classList.toggle('dark', dark);
     const icon  = document.getElementById('theme-icon');
     const label = document.getElementById('theme-label');
-    if (icon)  icon.textContent  = dark ? '☀️' : '🌙';
+    if (icon)  icon.textContent  = dark ? '' : '';
     if (label) label.textContent = dark ? 'Claro' : 'Oscuro';
   }
 
@@ -1799,7 +1796,7 @@ function imgUrl(id) { return PHOTOS.has(id) ? 'img/' + id + '.jpg' : ''; }
 const Data = (() => {
   const RECIPES = [
     {
-      id: 'valenciana', name: 'Paella Valenciana', emoji: '🥘', rating: 4.9, sugerida: true,
+      id: 'valenciana', name: 'Paella Valenciana', emoji: '', rating: 4.9, sugerida: true,
       desc: 'La receta tradicional con pollo y conejo', difficulty: 'Media', time: '55 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 1.5, cookMin: 15,
@@ -1827,7 +1824,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'caldoso', name: 'Arroz Caldoso', emoji: '🍲', rating: 4.8, sugerida: true,
+      id: 'caldoso', name: 'Arroz Caldoso', emoji: '', rating: 4.8, sugerida: true,
       desc: 'Meloso y con marisco fresco', difficulty: 'Media-alta', time: '50 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
       riceType: 'redondo', ricePerPerson: 75, waterRatio: 1.0, cookMin: 15,
@@ -1854,7 +1851,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'negro', name: 'Arroz Negro', emoji: '🦑', rating: 4.7, sugerida: true,
+      id: 'negro', name: 'Arroz Negro', emoji: '', rating: 4.7, sugerida: true,
       desc: 'Con tinta de calamar y alioli', difficulty: 'Media', time: '45 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 1.5, cookMin: 18,
@@ -1880,7 +1877,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'vegetal', name: 'Arroz de Verduras', emoji: '🌿',
+      id: 'vegetal', name: 'Arroz de Verduras', emoji: '',
       desc: 'Ligero, colorido y lleno de sabor', difficulty: 'Fácil', time: '35 min',
       reelUrl: '', // ej: 'https://www.instagram.com/reel/XXXXXXX/'
       riceType: 'albufera', ricePerPerson: 75, waterRatio: 1.2, cookMin: 16,
@@ -1907,7 +1904,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'marisco', name: 'Arroz de Marisco', emoji: '🦞',
+      id: 'marisco', name: 'Arroz de Marisco', emoji: '',
       desc: 'Arroz meloso con marisco fresco', difficulty: 'Media-alta', time: '50 min',
       reelUrl: 'https://www.instagram.com/p/DF3Fnh3NEqk/',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 1.5, cookMin: 18,
@@ -1931,7 +1928,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'chuleton', name: 'Arroz de Chuletón', emoji: '🥩',
+      id: 'chuleton', name: 'Arroz de Chuletón', emoji: '',
       desc: 'Arroz meloso con chuletón de vaca madurada', difficulty: 'Media', time: '60 min',
       reelUrl: 'https://www.instagram.com/p/DNYQBV7s0f4/',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 1.5, cookMin: 15,
@@ -1952,7 +1949,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'carrilleras', name: 'Arroz de Carrilleras', emoji: '🫀',
+      id: 'carrilleras', name: 'Arroz de Carrilleras', emoji: '',
       desc: 'Arroz meloso con carrilleras de cerdo ibérico', difficulty: 'Media', time: '55 min',
       reelUrl: 'https://www.instagram.com/p/DUyB3-NDB_x/',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 1.5, cookMin: 15,
@@ -1976,7 +1973,7 @@ const Data = (() => {
 
     /* ── ARROCES DE AUTOR · CAMPEONATO ──────────────────────── */
     {
-      id: 'gamba-alcachofa', name: 'Gamba Roja y Alcachofa', emoji: '🦐',
+      id: 'gamba-alcachofa', name: 'Gamba Roja y Alcachofa', emoji: '',
       desc: 'Arroz seco de gamba roja, alcachofas confitadas y azafrán', difficulty: 'Alta', time: '75 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2002,7 +1999,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'conejo-setas', name: 'Conejo de Monte y Setas', emoji: '🐇',
+      id: 'conejo-setas', name: 'Conejo de Monte y Setas', emoji: '',
       desc: 'Arroz seco de conejo de monte, setas de temporada y romero', difficulty: 'Alta', time: '90 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2029,7 +2026,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'bacalao-pilpil', name: 'Bacalao y Pil Pil', emoji: '🐟',
+      id: 'bacalao-pilpil', name: 'Bacalao y Pil Pil', emoji: '',
       desc: 'Arroz seco de bacalao desalado, pil pil ligero y pimiento choricero', difficulty: 'Alta', time: '65 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.2, cookMin: 18,
       ingredients: [
@@ -2054,7 +2051,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'pato-naranja', name: 'Pato Confitado y Naranja', emoji: '🦆',
+      id: 'pato-naranja', name: 'Pato Confitado y Naranja', emoji: '',
       desc: 'Arroz seco de pato confitado, naranja sanguina y especias dulces', difficulty: 'Alta', time: '90 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2079,7 +2076,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'verduras-trufa', name: 'Verduras Asadas y Trufa', emoji: '🍄',
+      id: 'verduras-trufa', name: 'Verduras Asadas y Trufa', emoji: '',
       desc: 'Arroz seco de verduras asadas, trufa de verano y aceite de hierbas', difficulty: 'Media', time: '80 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2105,7 +2102,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'costilla-iberica', name: 'Costilla Ibérica y Mojo', emoji: '🍖',
+      id: 'costilla-iberica', name: 'Costilla Ibérica y Mojo', emoji: '',
       desc: 'Arroz seco de costilla ibérica glaseada, mojo rojo y pimentón de la Vera', difficulty: 'Alta', time: '90 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.3, cookMin: 18,
       ingredients: [
@@ -2132,7 +2129,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'rabo-toro', name: 'Rabo de Toro y Pedro Ximénez', emoji: '🥩',
+      id: 'rabo-toro', name: 'Rabo de Toro y Pedro Ximénez', emoji: '',
       desc: 'Arroz seco de rabo de toro estofado, azafrán y Pedro Ximénez', difficulty: 'Alta', time: '4 h + 25 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.2, cookMin: 18,
       ingredients: [
@@ -2159,7 +2156,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'sepia-negra', name: 'Arroz Negro de Sepia y Ajo Negro', emoji: '🦑',
+      id: 'sepia-negra', name: 'Arroz Negro de Sepia y Ajo Negro', emoji: '',
       desc: 'Arroz seco negro de sepia, alioli de ajo negro y limón encurtido', difficulty: 'Alta', time: '70 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2186,7 +2183,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'cordero-ras', name: 'Cordero Lechal y Ras el Hanout', emoji: '🐑',
+      id: 'cordero-ras', name: 'Cordero Lechal y Ras el Hanout', emoji: '',
       desc: 'Arroz seco de cordero lechal, ras el hanout y yogur de menta', difficulty: 'Alta', time: '80 min',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.5, cookMin: 18,
       ingredients: [
@@ -2215,7 +2212,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'faisan-albufera', name: 'Faisán y Uva Moscatel', emoji: '🦚',
+      id: 'faisan-albufera', name: 'Faisán y Uva Moscatel', emoji: '',
       desc: 'Arroz seco de faisán al Armagnac, uvas moscatel y foie mi-cuit. Paella 60 cm · Albufera Tartana D.O.', difficulty: 'Alta', time: '55 min + fondo (día anterior)',
       riceType: 'albufera', ricePerPerson: 70, waterRatio: 1.2, cookMin: 16,
       ingredients: [
@@ -2249,7 +2246,7 @@ const Data = (() => {
 
     /* ── AVES NOBLES · CAMPEONATO ────────────────────────────── */
     {
-      id: 'capon-castanas', name: 'Capón y Castañas', emoji: '🍗',
+      id: 'capon-castanas', name: 'Capón y Castañas', emoji: '',
       desc: 'Arroz seco de capón, castañas y vino rancio', difficulty: 'Alta', time: '80 min + fondo (día anterior)',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.4, cookMin: 18,
       ingredients: [
@@ -2275,7 +2272,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'pularda-foie', name: 'Pularda y Foie Mi-Cuit', emoji: '🍗',
+      id: 'pularda-foie', name: 'Pularda y Foie Mi-Cuit', emoji: '',
       desc: 'Arroz seco de pularda, foie mi-cuit, manzana asada y tomillo limón', difficulty: 'Alta', time: '75 min + fondo (día anterior)',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.3, cookMin: 18,
       ingredients: [
@@ -2302,7 +2299,7 @@ const Data = (() => {
       ],
     },
     {
-      id: 'pintada-pera', name: 'Pintada y Pera Conferencia', emoji: '🦃',
+      id: 'pintada-pera', name: 'Pintada y Pera Conferencia', emoji: '',
       desc: 'Arroz seco de pintada, pera conferencia asada y mostaza antigua — propuesta libre', difficulty: 'Alta', time: '75 min + fondo (día anterior)',
       riceType: 'bomba', ricePerPerson: 100, waterRatio: 2.4, cookMin: 18,
       ingredients: [
@@ -2339,12 +2336,12 @@ const Data = (() => {
   };
 
   const BURNER_LABELS = {
-    paellero_gas: '🔥 Paellero gas',
-    vitro:        '⚡ Vitrocerámica',
-    induccion:    '🧲 Inducción',
-    lena:         '🪵 Leña',
-    cocina_gas:   '🫧 Cocina gas',
-    otro:         '🍳 Otro',
+    paellero_gas: 'Paellero gas',
+    vitro:        'Vitrocerámica',
+    induccion:    'Inducción',
+    lena:         'Leña',
+    cocina_gas:   'Cocina gas',
+    otro:         'Otro',
   };
 
   return {
@@ -2410,7 +2407,7 @@ const Recipe = (() => {
       cats.innerHTML = Data.recipes.map(function(r, i) {
         var imgSrc = imgUrl(r.id);
         return '<div class="home-cat' + (i===0?' active':'') + '" onclick="Recipe.open(\'' + r.id + '\')">'
-          + '<div class="home-cat-circle">' + (imgSrc ? '<img src="' + imgSrc + '" loading="lazy" alt="' + r.name + '">' : r.emoji) + '</div>'
+          + '<div class="home-cat-circle">' + (imgSrc ? '<img src="' + imgSrc + '" loading="lazy" alt="' + r.name + '">' : r.name.charAt(0)) + '</div>'
           + '<div class="home-cat-name">' + r.name.split(' ').pop() + '</div>'
           + '</div>';
       }).join('');
@@ -2437,7 +2434,7 @@ const Recipe = (() => {
   function open(id) {
     currentRecipe = Data.getRecipe(id);
     if (!currentRecipe) {
-      alert('🍚 Receta próximamente...');
+      alert('Receta próximamente...');
       return;
     }
     currentStep   = 0;
@@ -2451,14 +2448,14 @@ const Recipe = (() => {
     var heroReel  = document.getElementById('recipe-reel-hero');
     var imgSrc    = imgUrl(currentRecipe.id);
     if (imgSrc) { heroImg.src = imgSrc; heroImg.style.display = 'block'; heroEmoji.textContent = ''; }
-    else        { heroImg.style.display = 'none'; heroEmoji.textContent = currentRecipe.emoji; }
+    else        { heroImg.style.display = 'none'; heroEmoji.textContent = currentRecipe.name.charAt(0); }
     heroName.textContent = currentRecipe.name;
     heroMeta.textContent = currentRecipe.difficulty + ' · ' + currentRecipe.time;
     if (currentRecipe.reelUrl) { heroReel.href = currentRecipe.reelUrl; heroReel.style.display = ''; }
     else { heroReel.style.display = 'none'; }
 
     document.getElementById('recipe-title-step').textContent = currentRecipe.name;
-    document.getElementById('recipe-subtitle-step').textContent = '⏱ ' + currentRecipe.time;
+    document.getElementById('recipe-subtitle-step').textContent = '' + currentRecipe.time;
     document.getElementById('comensal-slider').value = 4;
     document.getElementById('comensal-val').textContent = 4;
     Nav.goToRecipe();
@@ -2520,10 +2517,10 @@ const Recipe = (() => {
           <div class="step-body">
             <h3>${s.title}</h3>
             <p>${s.text}</p>
-            <span class="step-timing">⏱ ${s.time}</span>
+            <span class="step-timing">${s.time}</span>
           </div>
         </div>
-        ${s.ingredients !== '—' ? `<div class="step-ingredients">🧂 ${s.ingredients}</div>` : ''}
+        ${s.ingredients !== '—' ? `<div class="step-ingredients">${s.ingredients}</div>` : ''}
       </div>
       ${hasTimer ? `
       <div class="step-timer" id="step-timer-widget">
@@ -2621,7 +2618,7 @@ const Equipment = (() => {
     const profiles = Store.getProfiles();
     const list     = document.getElementById('profiles-list');
     if (!profiles.length) {
-      list.innerHTML = `<div class="empty-state"><div class="es-icon">🍳</div>Aún no tienes equipos. Añade uno abajo para calibrar la evaporación.</div>`;
+      list.innerHTML = `<div class="empty-state">Aún no tienes equipos. Añade uno abajo para calibrar la evaporación.</div>`;
       return;
     }
     list.innerHTML = profiles.map(p => {
@@ -2629,15 +2626,15 @@ const Equipment = (() => {
       const calOk    = p.evapPerMin != null;
       return `
         <div class="profile-card ${isActive ? 'active-profile' : ''}" onclick="Equipment.setActive('${p.id}')">
-          <div class="profile-icon">${p.burnerEmoji || '🍳'}</div>
+          <div class="profile-icon">${p.burnerEmoji || ''}</div>
           <div class="profile-info">
             <div class="profile-name">${p.name}</div>
             <div class="profile-meta">${p.diam ? p.diam + ' cm' : '—'} · ${Data.burnerLabels[p.burner] || '—'}</div>
-            ${calOk ? `<div class="profile-meta" style="color:var(--success)">⌀ ${p.evapPerMin.toFixed(1)} ml/min evaporación</div>` : ''}
+            ${calOk ? `<div class="profile-meta" style="color:var(--success)">${p.evapPerMin.toFixed(1)} ml/min evaporación</div>` : ''}
           </div>
           <span class="profile-badge ${calOk ? 'ok' : 'pending'}">${calOk ? 'Calibrado ✓' : 'Sin calibrar'}</span>
           <div class="profile-actions" onclick="event.stopPropagation()">
-            <button class="btn btn-ghost btn-sm" onclick="Equipment.showForm('${p.id}')">✎</button>
+            <button class="btn btn-ghost btn-sm" onclick="Equipment.showForm('${p.id}')"></button>
             <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="Equipment.remove('${p.id}')">✕</button>
           </div>
         </div>`;
@@ -2721,7 +2718,7 @@ const Equipment = (() => {
     const burner = document.getElementById('eq-burner').value;
     if (!name) { alert('Pon un nombre al equipo.'); return; }
 
-    const burnerEmoji = document.querySelector('.burner-btn.sel')?.querySelector('.b-emoji')?.textContent || '🍳';
+    const burnerEmoji = document.querySelector('.burner-btn.sel')?.querySelector('.b-emoji')?.textContent || '';
 
     if (editingId) {
       const existing = Store.getProfiles().find(x => x.id === editingId);
@@ -2838,9 +2835,9 @@ const Calibration = (() => {
     const arc = document.getElementById('cal-arc');
     if (arc) arc.style.strokeDashoffset = CIRCUMFERENCE * (1 - (DURATION_SECS - seconds) / DURATION_SECS);
     document.getElementById('cal-state-text').textContent =
-      seconds > 600 ? '🔥 Fuego al máximo — no apagues la pantalla' :
-      seconds > 300 ? '🔥 A mitad de la prueba, sigue así' :
-                      '🔥 ¡Ya casi! Aguanta un poco más';
+      seconds > 600 ? 'Fuego al máximo — no apagues la pantalla' :
+      seconds > 300 ? 'A mitad de la prueba, sigue así' :
+                      '¡Ya casi! Aguanta un poco más';
   }
 
   // ── Fase 2 → 3: ir a medir
@@ -2978,7 +2975,7 @@ const Gyro = (() => {
     zeroBeta  = smoothBeta;
     zeroGamma = smoothGamma;
     hasZero   = true;
-    if (elZeroStatus) elZeroStatus.textContent = `🎯 Punto 0 establecido (β${zeroBeta.toFixed(1)}° γ${zeroGamma.toFixed(1)}°)`;
+    if (elZeroStatus) elZeroStatus.textContent = `Punto 0 establecido (β${zeroBeta.toFixed(1)}° γ${zeroGamma.toFixed(1)}°)`;
   }
 
   // ── Resetea el punto 0 (vuelve a horizontal absoluta)
@@ -3022,12 +3019,12 @@ const Gyro = (() => {
         elBubbleCenter.style.background = '#4A7C59';
       } else if (angle < 4) {
         elStatus.className       = 'level-status warn';
-        elStatus.textContent     = '⚠ Ajusta ligeramente';
+        elStatus.textContent     = 'Ajusta ligeramente';
         elAngleDir.textContent   = 'inclinación leve';
         elBubbleCenter.style.background = 'var(--saffron)';
       } else {
         elStatus.className       = 'level-status bad';
-        elStatus.textContent     = '✗ No está nivelada';
+        elStatus.textContent     = 'No está nivelada';
         elAngleDir.textContent   = 'inclinación pronunciada';
         elBubbleCenter.style.background = 'var(--danger)';
       }
@@ -3092,7 +3089,7 @@ const StepTimer = (() => {
     } else if (running) {
       el.className      = 'step-timer-display running';
       if (state) state.textContent = 'En marcha…';
-      if (btn)   btn.textContent   = '⏸ Pausar';
+      if (btn)   btn.textContent   = 'Pausar';
     } else {
       el.className      = 'step-timer-display';
       if (state) state.textContent = 'Pausado';
@@ -3191,16 +3188,16 @@ const Share = (() => {
       const extra = evap ? Math.round(evap * r.cookMin) : 0;
       const agua  = base + extra;
       currentText =
-        `🍚 ${r.name} — ${n} persona${n > 1 ? 's' : ''}\n\n` +
+        `${r.name} — ${n} persona${n > 1 ? 's' : ''}\n\n` +
         `INGREDIENTES\n${lines.join('\n')}\n\n` +
-        `💧 Agua necesaria: ${agua} ml` +
+        `Agua necesaria: ${agua} ml` +
         (evap ? ` (ratio + evaporación ${prof.name})` : '') +
         `\n\n— Maestro Arrocero`;
     } else {
       const steps = r.steps.map((s, i) =>
         `${i + 1}. ${s.title} (${s.time})\n   ${s.text}`).join('\n\n');
       currentText =
-        `🍚 ${r.name}\n⏱ ${r.time} · ${r.difficulty}\n\n` +
+        `${r.name}\n${r.time} · ${r.difficulty}\n\n` +
         `PASOS\n${steps}\n\n— Maestro Arrocero`;
     }
 
@@ -3329,10 +3326,10 @@ const Scale = (() => {
     if (!pad) return;
     pad.classList.toggle('active', active);
     if (active) {
-      icon.textContent = '📲';
+      icon.textContent = '';
       hint.textContent = 'Manteniendo…';
     } else {
-      icon.textContent = '🫴';
+      icon.textContent = '';
       hint.textContent = 'Apoya aquí el objeto a pesar';
     }
   }
@@ -3468,21 +3465,21 @@ const Instructions = (() => {
   const GUIDES = [
     {
       id:        'calibracion',
-      icon:      '🧪',
+      icon:      '',
       title:     'Cómo calibrar la evaporación',
       desc:      'Aprende a hacer la prueba de evaporación para que la app calcule el agua exacta según tu equipo y tu fuego.',
       youtubeId: '', // ej: 'dQw4w9WgXcQ'
     },
     {
       id:        'nivelador',
-      icon:      '📐',
+      icon:      '',
       title:     'Cómo usar el nivelador',
       desc:      'Coloca el móvil correctamente sobre la paella y aprende a establecer el punto 0 para compensar superficies irregulares.',
       youtubeId: '',
     },
     {
       id:        'agua',
-      icon:      '💧',
+      icon:      '',
       title:     'El cálculo del agua',
       desc:      'Entiende cómo funciona el ratio de arroz y cómo la calibración personal mejora los resultados de cada receta.',
       youtubeId: '',
@@ -3509,7 +3506,7 @@ const Instructions = (() => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen loading="lazy"></iframe>`
             : `<div style="background:var(--surface);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--text-muted);font-size:.85rem">
-                 <span style="font-size:2rem">🎬</span>Vídeo próximamente
+                 Vídeo próximamente
                </div>`
           }
           <div class="instruction-desc">${g.desc}</div>
@@ -3763,7 +3760,7 @@ const CookTimer = (() => {
     }
     if (remaining === 5) _beepWarning();
     if (clock)  clock.textContent  = _fmt(remaining);
-    if (status) status.textContent = remaining <= 5 ? '⚡ casi listo' : 'cocinando';
+    if (status) status.textContent = remaining <= 5 ? 'casi listo' : 'cocinando';
     _arc((totalSecs - remaining) / totalSecs);
   }
 
@@ -3792,7 +3789,7 @@ const CookTimer = (() => {
       running = true;
       const btn    = document.getElementById('cto-pause-btn');
       const status = document.getElementById('cto-status');
-      if (btn)    btn.textContent    = '⏸ Pausar';
+      if (btn)    btn.textContent    = 'Pausar';
       if (status) status.textContent = 'cocinando';
       document.getElementById('cto-ring-arc')?.classList.remove('done');
       iv = setInterval(_tick, 1000);
@@ -3835,13 +3832,13 @@ const CookTimer = (() => {
 const RiceGuide = (() => {
   const TYPES = [
     {
-      id: 'bomba', emoji: '💥', name: 'Bomba',
+      id: 'bomba', emoji: '', name: 'Bomba',
       ratio: 'ratio 1:1.5',
       desc: 'La variedad reina de la paella valenciana. Absorbe el caldo en dos fases y aguanta la sobrecocción mejor que ninguna otra, soltando el almidón de fuera hacia dentro.',
       tags: ['Paella seca', 'Socarrat', 'Caldoso', 'Resistente']
     },
     {
-      id: 'albufera', emoji: '🌊', name: 'Albufera',
+      id: 'albufera', emoji: '', name: 'Albufera',
       ratio: 'ratio 1:1.2',
       desc: 'Cruce entre Bomba y Senia, desarrollado en la Albufera de Valencia. Absorbe grandes cantidades de caldo, tiene un punto meloso natural y es ideal para arroces de autor con fondos intensos.',
       tags: ['Meloso', 'Alta absorción', 'Arroces de autor', 'Fondos potentes']
@@ -3853,49 +3850,49 @@ const RiceGuide = (() => {
       tags: ['Caldoso', 'Meloso', 'Accesible']
     },
     {
-      id: 'balilla', emoji: '🌿', name: 'Balilla × Sollana',
+      id: 'balilla', emoji: '', name: 'Balilla × Sollana',
       ratio: 'ratio 1:1.1',
       desc: 'Variedad tradicional valenciana, cruce entre Balilla y Sollana. Grano firme, buena absorción y excelente resultado en paellas secas.',
       tags: ['Paella', 'Tradicional valenciana', 'Firme']
     },
     {
-      id: 'dinamita', emoji: '💣', name: 'Dinamita',
+      id: 'dinamita', emoji: '', name: 'Dinamita',
       ratio: 'ratio 1:1.6',
       desc: 'Variedad de alta absorción. Aguanta bien tiempos largos de cocción y caldos muy potentes. Perfecto para guisos y arroces de montaña.',
       tags: ['Alta absorción', 'Guisos', 'Arroces de montaña']
     },
     {
-      id: 'senia', emoji: '🌾', name: 'Senia',
+      id: 'senia', emoji: '', name: 'Senia',
       ratio: 'pendiente de configurar',
       desc: 'Arroz suave y cremoso por naturaleza. Libera almidón con facilidad, lo que le da una textura untuosa. Delicado: no perdona la sobrecocción. Ideal en arroces melosos y mariscos.',
       tags: ['Meloso', 'Cremoso', 'Mariscos', 'Delicado']
     },
     {
-      id: 'bahia', emoji: '🏖️', name: 'Bahía',
+      id: 'bahia', emoji: '', name: 'Bahía',
       ratio: 'pendiente de configurar',
       desc: 'Similar a la Senia pero con más resistencia. Muy popular en Valencia por su precio y disponibilidad. Buen equilibrio entre absorción y textura firme.',
       tags: ['Paella', 'Equilibrado', 'Accesible']
     },
     {
-      id: 'carnaroli', emoji: '🇮🇹', name: 'Carnaroli',
+      id: 'carnaroli', emoji: '', name: 'Carnaroli',
       ratio: 'pendiente de configurar',
       desc: 'El arroz del risotto italiano. Grano largo, alto contenido en amilosa, libera almidón lentamente y aguanta bien la cocción. Perfecto para arroces caldosos con mucho movimiento.',
       tags: ['Caldoso', 'Risotto', 'Grano largo', 'Mantecoso']
     },
     {
-      id: 'arborio', emoji: '🫙', name: 'Arborio',
+      id: 'arborio', emoji: '', name: 'Arborio',
       ratio: 'pendiente de configurar',
       desc: 'Más común que el Carnaroli y más fácil de encontrar. Grano redondo y gordito, suelta mucho almidón. Textura muy cremosa pero se pasa más fácilmente.',
       tags: ['Risotto', 'Cremoso', 'Fácil de encontrar']
     },
     {
-      id: 'jazmin', emoji: '🌸', name: 'Jazmín / Jasmine',
+      id: 'jazmin', emoji: '', name: 'Jazmín / Jasmine',
       ratio: 'pendiente de configurar',
       desc: 'Arroz aromático de grano largo originario de Tailandia. Sus notas florales lo hacen interesante en preparaciones asiáticas.',
       tags: ['Aromático', 'Cocina asiática', 'Grano largo', 'Floral']
     },
     {
-      id: 'basmati', emoji: '🍚', name: 'Basmati',
+      id: 'basmati', emoji: '', name: 'Basmati',
       ratio: 'pendiente de configurar',
       desc: 'El arroz aromático por excelencia de la cocina india y paquistaní. Grano muy largo, ligero y suelto tras la cocción.',
       tags: ['Aromático', 'Cocina india', 'Suelto', 'Ligero']
@@ -3911,7 +3908,7 @@ const RiceGuide = (() => {
     el.innerHTML = TYPES.map(t => `
       <div class="rice-type-card">
         <div class="rice-type-header" onclick="RiceGuide.toggle('${t.id}')">
-          <span class="rice-type-emoji">${t.emoji}</span>
+          <span class="rice-type-emoji">${t.name.charAt(0)}</span>
           <span class="rice-type-name">${t.name}</span>
           <span class="rice-type-ratio${t.ratio === 'pendiente de configurar' ? ' pending' : ''}">${t.ratio}</span>
         </div>
@@ -3949,7 +3946,7 @@ if ('serviceWorker' in navigator) {
   const banner = document.createElement('div');
   banner.id = 'pwa-banner';
   banner.innerHTML = `
-    <span>📲 Instala Maestro Arrocero en tu móvil</span>
+    <span>Instala Maestro Arrocero en tu móvil</span>
     <button id="pwa-install">Instalar</button>
     <button id="pwa-close" aria-label="Cerrar">✕</button>`;
   banner.style.cssText = `

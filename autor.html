@@ -437,8 +437,8 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
 <nav>
   <a href="index.html" class="nav-back">← Volver</a>
-  <div class="nav-logo">🍚 Arroces de <span>Autor</span></div>
-  <button class="theme-toggle" onclick="toggleTheme()">🌙 Oscuro</button>
+  <div class="nav-logo">Arroces de <span>Autor</span></div>
+  <button class="theme-toggle" onclick="toggleTheme()">Oscuro</button>
 </nav>
 
 <div class="page">
@@ -451,7 +451,7 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
   <!-- Aviso modo pruebas -->
   <div class="dev-notice">
-    ⚗️ <span><strong>Modo pruebas local</strong> — introduce tu API key de Anthropic para generar recetas reales. No se guarda ni se envía a ningún servidor.</span>
+    <span><strong>Modo pruebas local</strong> — introduce tu API key de Anthropic para generar recetas reales. No se guarda ni se envía a ningún servidor.</span>
   </div>
 
   <!-- Formulario -->
@@ -459,20 +459,20 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
     <!-- API Key (solo pruebas) -->
     <div class="card">
-      <div class="card-label">🔑 API Key (pruebas locales)</div>
+      <div class="card-label">API Key (pruebas locales)</div>
       <input type="text" id="api-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
     </div>
 
     <!-- Ingredientes -->
     <div class="card">
-      <div class="card-label">🧅 ¿Qué tienes en casa?</div>
+      <div class="card-label">¿Qué tienes en casa?</div>
       <textarea id="ingredientes" rows="3" placeholder="Ej: gambas, pimiento rojo, caldo de pescado, azafrán, tomate..."></textarea>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:-.2rem">Sé específico: cuantos más detalles, mejor receta.</div>
     </div>
 
     <!-- Comensales -->
     <div class="card">
-      <div class="card-label">👥 Comensales</div>
+      <div class="card-label">Comensales</div>
       <div class="comensales-row">
         <button class="comensal-btn" onclick="changeComensales(-1)">−</button>
         <div class="comensal-count" id="comensales-display">4</div>
@@ -483,20 +483,17 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
     <!-- Estilo -->
     <div class="card">
-      <div class="card-label">🍲 Estilo de arroz</div>
+      <div class="card-label">Estilo de arroz</div>
       <div class="style-grid">
         <div class="style-btn active" data-style="meloso" onclick="selectStyle(this)">
-          <div class="sb-icon">🌊</div>
           <div class="sb-name">Meloso</div>
           <div class="sb-desc">cremoso, untuoso</div>
         </div>
         <div class="style-btn" data-style="seco" onclick="selectStyle(this)">
-          <div class="sb-icon">✨</div>
           <div class="sb-name">Seco</div>
           <div class="sb-desc">socarrat, grano suelto</div>
         </div>
         <div class="style-btn" data-style="caldoso" onclick="selectStyle(this)">
-          <div class="sb-icon">🥣</div>
           <div class="sb-name">Caldoso</div>
           <div class="sb-desc">casi una sopa</div>
         </div>
@@ -505,13 +502,13 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
     <!-- Cuéntame más -->
     <div class="card">
-      <div class="card-label">💬 Cuéntame más <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem">(opcional)</span></div>
+      <div class="card-label">Cuéntame más <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem">(opcional)</span></div>
       <textarea id="extra" rows="2" placeholder="Ej: me gustan los sabores potentes de mar, sin picante, es para una cena especial..."></textarea>
     </div>
 
     <!-- Botón -->
     <button class="btn btn-full" id="btn-generar" onclick="generarConcepto()" style="font-size:.95rem;padding:14px">
-      ✨ Crear mi receta
+      Crear mi receta
     </button>
 
   </div>
@@ -524,11 +521,11 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
   <!-- Concepto para confirmar -->
   <div class="concept-box" id="concept-box">
-    <div class="concept-eyebrow">💡 Propuesta de receta</div>
+    <div class="concept-eyebrow">Propuesta de receta</div>
     <div class="concept-text" id="concept-text"></div>
     <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem">¿Te convence esta dirección? Puedes ajustar o lanzar la receta completa.</div>
     <div class="concept-actions">
-      <button class="btn" onclick="generarRecetaCompleta()" style="flex:1">🔥 Generar receta completa</button>
+      <button class="btn" onclick="generarRecetaCompleta()" style="flex:1">Generar receta completa</button>
       <button class="btn btn-secondary btn-sm" onclick="resetear()">Cambiar</button>
     </div>
   </div>
@@ -588,14 +585,13 @@ input[type=text]:focus, textarea:focus { border-color: var(--rice); }
 
     <!-- Presentación / vestido -->
     <div class="tip-box" id="presentacion-box">
-      <div class="tip-icon">🎨</div>
       <div class="tip-title">Cómo vestirlo</div>
       <p id="presentacion-text"></p>
     </div>
 
     <!-- Nueva receta -->
     <div class="reset-row">
-      <button class="btn btn-secondary" onclick="resetear()">🔄 Nueva receta</button>
+      <button class="btn btn-secondary" onclick="resetear()">Nueva receta</button>
     </div>
 
   </div>
@@ -619,7 +615,7 @@ let recetaGenerada = null;
 function toggleTheme() {
   document.body.classList.toggle('dark');
   const btn = document.querySelector('.theme-toggle');
-  btn.textContent = document.body.classList.contains('dark') ? '☀️ Claro' : '🌙 Oscuro';
+  btn.textContent = document.body.classList.contains('dark') ? 'Claro' : 'Oscuro';
 }
 
 // ── Comensales ────────────────────────────────────────────
@@ -794,7 +790,7 @@ function mostrarReceta(r) {
         <div class="step-body">
           <h3>${p.titulo}</h3>
           <p>${p.descripcion}</p>
-          ${p.tiempo ? `<span class="step-timing">⏱ ${p.tiempo}</span>` : ''}
+          ${p.tiempo ? `<span class="step-timing">${p.tiempo}</span>` : ''}
         </div>
       </div>
     </div>
@@ -810,7 +806,7 @@ async function generarImagen(prompt) {
   if (CONFIG.localMode || !CONFIG.workerUrl) {
     setTimeout(() => {
       const ph = document.getElementById('image-placeholder');
-      ph.innerHTML = `<div style="font-size:3rem">🍚</div><div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.4rem">Imagen disponible con worker desplegado</div>`;
+      ph.innerHTML = `<div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.4rem">Imagen disponible con worker desplegado</div>`;
     }, 1200);
     return;
   }
@@ -833,7 +829,7 @@ async function generarImagen(prompt) {
     ph.remove();
   } catch {
     const ph = document.getElementById('image-placeholder');
-    ph.innerHTML = `<div style="font-size:2.5rem">🍚</div>`;
+    ph.innerHTML = ``;
   }
 }
 

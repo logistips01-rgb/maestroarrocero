@@ -505,9 +505,9 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
 
 <!-- NAVEGACIÓN SUPERIOR -->
 <nav>
-  <div class="nav-logo">🔥 Maestro <span>Brasas</span></div>
+  <div class="nav-logo">Maestro <span>Brasas</span></div>
   <button class="theme-toggle" onclick="Theme.toggle()">
-    <span class="tt-icon" id="theme-icon">🌙</span>
+    <span class="tt-icon" id="theme-icon"></span>
     <span id="theme-label">Oscuro</span>
   </button>
 </nav>
@@ -547,7 +547,6 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   <!-- Volver a Maestro Arrocero -->
   <a href="index.html" style="text-decoration:none;display:block;margin-top:1.5rem">
     <div style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r);">
-      <span style="font-size:1.5rem">🍳</span>
       <div>
         <div style="font-size:.83rem;font-weight:600">Volver a Maestro Arrocero</div>
         <div class="note">Recetas de arroz, calculadora de agua y más</div>
@@ -631,12 +630,12 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   <h2 class="section-title">Técnicas & <span>Aliños</span></h2>
 
   <div class="content-section">
-    <div class="subsection-label">🧄 Aliños y marinadas</div>
+    <div class="subsection-label">Aliños y marinadas</div>
     <div id="alinos-list"></div>
   </div>
 
   <div class="content-section">
-    <div class="subsection-label">🥩 Cortes de carne</div>
+    <div class="subsection-label">Cortes de carne</div>
     <div id="cortes-list"></div>
   </div>
 </div>
@@ -646,7 +645,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   <h2 class="section-title">Guías de <span>brasa</span></h2>
 
   <div class="content-section">
-    <div class="subsection-label">🔥 Carbón vs Leña</div>
+    <div class="subsection-label">Carbón vs Leña</div>
     <div class="guia-card">
       <h4>¿Cuál usar y cuándo?</h4>
       <div class="combust-row">
@@ -660,7 +659,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
           </ul>
         </div>
         <div class="combust-col">
-          <h5>🪵 Leña</h5>
+          <h5>Leña</h5>
           <ul>
             <li>Encina: la mejor para carne, aroma suave</li>
             <li>Roble: combustión lenta, sabor intenso</li>
@@ -674,9 +673,9 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   </div>
 
   <div class="content-section">
-    <div class="subsection-label">🌡️ Control de temperatura</div>
+    <div class="subsection-label">Control de temperatura</div>
     <div class="guia-card">
-      <h4>🖐 La prueba de la mano</h4>
+      <h4>La prueba de la mano</h4>
       <p>Coloca la mano a 10 cm de la parrilla y cuenta los segundos que aguantas:</p>
       <ul style="margin:.4rem 0 0 1rem">
         <li><strong>1–2 s</strong> → Muy alto (+260 °C) — sellar chuletones</li>
@@ -686,15 +685,15 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
       </ul>
     </div>
     <div class="guia-card">
-      <h4>📐 Zonas de calor (siempre dos)</h4>
+      <h4>Zonas de calor (siempre dos)</h4>
       <p>Organiza la parrilla con <strong>zona directa caliente</strong> (sellar y dorar) y <strong>zona indirecta fría</strong> (terminar sin quemar). Acumula todo el carbón en un lado y deja el otro libre.</p>
     </div>
   </div>
 
   <div class="content-section">
-    <div class="subsection-label">🥩 Puntos de cocción</div>
+    <div class="subsection-label">Puntos de cocción</div>
     <div class="guia-card">
-      <h4>🌡️ Temperatura interna (termómetro)</h4>
+      <h4>Temperatura interna (termómetro)</h4>
       <table class="temp-table">
         <thead>
           <tr><th>Punto</th><th>Aspecto</th><th>Temp.</th></tr>
@@ -711,7 +710,7 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
   </div>
 
   <div class="content-section">
-    <div class="subsection-label">✅ Consejos esenciales</div>
+    <div class="subsection-label">Consejos esenciales</div>
     <div class="guia-card">
       <h4>Antes de asar</h4>
       <ul>
@@ -722,11 +721,11 @@ input[type=range] { width: 100%; accent-color: var(--rice); margin: .2rem 0 .875
       </ul>
     </div>
     <div class="guia-card">
-      <h4>⏸ El reposo es obligatorio</h4>
+      <h4>El reposo es obligatorio</h4>
       <p>Después de sacar del fuego, reposa la carne sobre una tabla 5–15 min tapada con papel de aluminio sin apretar. Los jugos se redistribuyen y el resultado es mucho más tierno.</p>
     </div>
     <div class="guia-card">
-      <h4>🔪 Siempre en contra de la fibra</h4>
+      <h4>Siempre en contra de la fibra</h4>
       <p>Corta la carne siempre <strong>perpendicular a las fibras musculares</strong>. Clave en vacío, chuletón, tira de asado y costillas deshuesadas.</p>
     </div>
   </div>
@@ -774,7 +773,7 @@ const Theme = (() => {
   }
   function apply(t) {
     document.body.classList.toggle('dark', t === 'dark');
-    document.getElementById('theme-icon').textContent  = t === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-icon').textContent  = t === 'dark' ? '' : '';
     document.getElementById('theme-label').textContent = t === 'dark' ? 'Claro' : 'Oscuro';
   }
   function toggle() { const t = get() === 'dark' ? 'light' : 'dark'; localStorage.setItem(KEY, t); apply(t); }
@@ -789,7 +788,7 @@ const DATA = {
     {
       id: 'parrillada',
       name: 'Parrillada Completa Asado',
-      emoji: '🥩',
+      emoji: '',
       tag: 'Técnica destacada',
       rating: 4.9, time: '90 min', difficulty: 'Media',
       category: 'vacuno', sugerida: true,
@@ -816,7 +815,7 @@ const DATA = {
     {
       id: 'ribeye',
       name: 'Ribeye a la Brasa Directa',
-      emoji: '🥩',
+      emoji: '',
       tag: 'Clásico',
       rating: 4.8, time: '40 min', difficulty: 'Fácil',
       category: 'vacuno', sugerida: true,
@@ -841,7 +840,7 @@ const DATA = {
     {
       id: 'pollo-humo',
       name: 'Pollo Entero al Humo',
-      emoji: '🍗',
+      emoji: '',
       tag: 'Ahumado',
       rating: 4.7, time: '120 min', difficulty: 'Media',
       category: 'aves', sugerida: true,
@@ -869,7 +868,7 @@ const DATA = {
     {
       id: 'picanha',
       name: 'Picanha al Carbón',
-      emoji: '🔥',
+      emoji: '',
       tag: 'Brasileño',
       rating: 4.8, time: '35 min', difficulty: 'Fácil',
       category: 'vacuno', sugerida: false,
@@ -890,7 +889,7 @@ const DATA = {
     {
       id: 'chuleton',
       name: 'Chuletón de Vaca Vieja',
-      emoji: '🍖',
+      emoji: '',
       tag: 'Premium',
       rating: 4.9, time: '25 min', difficulty: 'Media',
       category: 'vacuno', sugerida: false,
@@ -911,7 +910,7 @@ const DATA = {
     {
       id: 'costillas-bbq',
       name: 'Costillas Baby Back BBQ',
-      emoji: '🍖',
+      emoji: '',
       tag: 'Lento y bajo',
       rating: 4.7, time: '180 min', difficulty: 'Media-alta',
       category: 'cerdo', sugerida: false,
@@ -939,7 +938,7 @@ const DATA = {
     {
       id: 'secreto-iberico',
       name: 'Secreto Ibérico a la Brasa',
-      emoji: '🐷',
+      emoji: '',
       tag: 'Ibérico',
       rating: 4.9, time: '15 min', difficulty: 'Fácil',
       category: 'cerdo', sugerida: false,
@@ -960,7 +959,7 @@ const DATA = {
     {
       id: 'cordero-brasas',
       name: 'Costillas de Cordero a las Brasas',
-      emoji: '🐑',
+      emoji: '',
       tag: 'Mediterráneo',
       rating: 4.8, time: '45 min', difficulty: 'Fácil',
       category: 'cordero', sugerida: false,
@@ -986,7 +985,7 @@ const DATA = {
     {
       id: 'alitas-ahumadas',
       name: 'Alitas de Pollo Ahumadas',
-      emoji: '🍗',
+      emoji: '',
       tag: 'Ahumado',
       rating: 4.5, time: '60 min', difficulty: 'Fácil',
       category: 'aves', sugerida: false,
@@ -1011,7 +1010,7 @@ const DATA = {
     {
       id: 'entrecot-lena',
       name: 'Entrecot a la Leña',
-      emoji: '🥩',
+      emoji: '',
       tag: 'Leña de encina',
       rating: 4.6, time: '20 min', difficulty: 'Media',
       category: 'vacuno', sugerida: false,
@@ -1033,7 +1032,7 @@ const DATA = {
     {
       id: 'pinchos-morunos',
       name: 'Pinchos Morunos',
-      emoji: '🍢',
+      emoji: '',
       tag: 'Brocheta',
       rating: 4.6, time: '30 min', difficulty: 'Fácil',
       category: 'cerdo', sugerida: false,
@@ -1059,7 +1058,7 @@ const DATA = {
     {
       id: 'churrasco',
       name: 'Churrasco Argentino',
-      emoji: '🇦🇷',
+      emoji: '',
       tag: 'Argentino',
       rating: 4.7, time: '50 min', difficulty: 'Media',
       category: 'vacuno', sugerida: true,
@@ -1086,7 +1085,7 @@ const DATA = {
     {
       id: 'chimichurri',
       name: 'Chimichurri Clásico',
-      emoji: '🌿',
+      emoji: '',
       desc: 'La salsa argentina por excelencia. Imprescindible para cualquier parrillada.',
       ingredientes: ['Perejil fresco picado fino: 1 taza', 'Ajo: 4 dientes bien picados', 'Orégano seco: 1 cucharadita', 'Pimentón dulce: 1 cucharadita', 'Cayena: ½ cucharadita (opcional)', 'Vinagre de vino tinto: 3 cucharadas', 'Aceite de oliva virgen extra: ½ taza', 'Sal gruesa: 1 cucharadita', 'Agua caliente: 2 cucharadas'],
       preparacion: 'Mezcla todos los ingredientes. Añade primero el agua caliente sobre el orégano para hidratarlo. Deja reposar al menos 1 hora. Aguanta 2 semanas en frío. No uses batidora — debe quedar con textura.',
@@ -1094,7 +1093,7 @@ const DATA = {
     {
       id: 'mojo-picon',
       name: 'Mojo Picón Canario',
-      emoji: '🌶️',
+      emoji: '',
       desc: 'Perfecto para carne a la brasa y papas arrugadas.',
       ingredientes: ['Guindillas rojas secas: 4 ud', 'Ajo: 4 dientes', 'Pimentón picante: 2 cucharaditas', 'Comino en grano: 1 cucharadita', 'Vinagre de vino: 3 cucharadas', 'Aceite de oliva virgen extra: ½ taza', 'Sal gruesa: 1 cucharadita', 'Pan duro: 1 rebanada (opcional, para espesar)'],
       preparacion: 'Remoja las guindillas en agua caliente 20 min. Escurre y quita las semillas si quieres menos picante. Tritura ajo, guindillas, pimentón y comino. Añade el pan si quieres más cuerpo. Incorpora el vinagre y el aceite en hilo fino.',
@@ -1102,7 +1101,7 @@ const DATA = {
     {
       id: 'aliño-hierbas',
       name: 'Aliño Mediterráneo de Hierbas',
-      emoji: '🧄',
+      emoji: '',
       desc: 'Ideal para pollo, cordero y verduras a la brasa.',
       ingredientes: ['Ajo: 5 dientes laminados', 'Romero fresco: 2 ramitas', 'Tomillo fresco: 3 ramitas', 'Orégano fresco: 1 ramita', 'Ralladura de 1 limón', 'Zumo de ½ limón', 'Aceite de oliva: ¾ taza', 'Sal gruesa: 1 cucharadita', 'Pimienta negra: ½ cucharadita'],
       preparacion: 'Mezcla en un bol. Ideal para marinar 4–12 horas en frío. Para aves mete la marinada también bajo la piel. Para vegetales, 30 min es suficiente.',
@@ -1110,7 +1109,7 @@ const DATA = {
     {
       id: 'dry-rub',
       name: 'Dry Rub BBQ Casero',
-      emoji: '🌶️',
+      emoji: '',
       desc: 'Mezcla seca para costillas, alitas y cerdo. Sin líquidos, máximo sabor.',
       ingredientes: ['Sal: 3 cucharadas', 'Azúcar moreno: 2 cucharadas', 'Pimentón dulce: 2 cucharadas', 'Pimentón ahumado: 1 cucharada', 'Ajo en polvo: 1 cucharada', 'Cebolla en polvo: 1 cucharada', 'Comino molido: 1 cucharadita', 'Pimienta negra: 1 cucharadita', 'Cayena: ½ cucharadita', 'Orégano seco: 1 cucharadita'],
       preparacion: 'Mezcla todo y guarda en bote hermético (dura meses). Aplica 2–3 cucharadas por kg de carne bien seca. Masajea para que penetre. Reposa mínimo 1 hora antes de asar.',
@@ -1118,7 +1117,7 @@ const DATA = {
     {
       id: 'soja-jengibre',
       name: 'Marinada Soja y Jengibre',
-      emoji: '🫚',
+      emoji: '',
       desc: 'Inspiración asiática para pollo, cerdo y costillas. El umami potencia todo.',
       ingredientes: ['Salsa de soja: 4 cucharadas', 'Miel: 2 cucharadas', 'Jengibre fresco rallado: 1 cucharada', 'Ajo: 3 dientes machacados', 'Aceite de sésamo: 1 cucharadita', 'Zumo de limón o naranja: 2 cucharadas', 'Sriracha (opcional): al gusto'],
       preparacion: 'Mezcla todo. Marina 2–8 horas. Deja escurrir bien antes de asar — el azúcar de la miel se quema rápido. Puedes hervir el resto de la marinada y usarla como glaseado al final.',
@@ -1126,28 +1125,28 @@ const DATA = {
   ],
 
   cortes: [
-    { name: 'Chuletón / Rib-eye',       emoji: '🥩', desc: '5–7 cm. Grasa intramuscular alta. Solo sal.',           dificultad: 'medio',   temp: '55–60 °C', recipeId: 'chuleton'       },
-    { name: 'T-Bone / Porterhouse',      emoji: '🍖', desc: 'Solomillo + entrecot con hueso. Técnica por zonas.',    dificultad: 'medio',   temp: '57–62 °C', recipeId: 'parrillada'     },
-    { name: 'Picanha (Tapa de cuadril)', emoji: '🔥', desc: 'Con capa de grasa. Protagonista del churrasco.',        dificultad: 'facil',   temp: '55–58 °C', recipeId: 'picanha'        },
-    { name: 'Entrecot (Ribeye sin hueso)',emoji: '🥩', desc: '2–3 cm. Versátil, rápido, muy jugoso.',                dificultad: 'facil',   temp: '55–63 °C', recipeId: 'ribeye'         },
-    { name: 'Vacío (Flank Steak)',       emoji: '🥩', desc: 'Fibra marcada. Cortar siempre en contra de la fibra.',  dificultad: 'medio',   temp: '57–62 °C', recipeId: 'churrasco'      },
-    { name: 'Costillas baby back',       emoji: '🍖', desc: 'Técnica 3-2-1. Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85–90 °C', recipeId: 'costillas-bbq'  },
-    { name: 'Tira de asado',             emoji: '🍖', desc: 'Costilla de res corte transversal. Asado argentino.',   dificultad: 'medio',   temp: '70–75 °C', recipeId: 'churrasco'      },
-    { name: 'Secreto Ibérico',           emoji: '🐷', desc: 'Entre paleta y costillar. Grasa excelente. 15 min.',    dificultad: 'facil',   temp: '65–68 °C', recipeId: 'secreto-iberico'},
-    { name: 'Pluma Ibérica',             emoji: '🐷', desc: 'Cuello del cerdo ibérico. Muy tierna. Fuego medio.',    dificultad: 'facil',   temp: '63–67 °C', recipeId: null             },
-    { name: 'Pechuga de pollo',          emoji: '🍗', desc: 'Aplana para grosor uniforme. Marinada obligatoria.',    dificultad: 'medio',   temp: '74–77 °C', recipeId: 'pollo-humo'     },
-    { name: 'Muslo / Contramuslo',       emoji: '🍗', desc: 'Más perdonador. Calor indirecto + directo final.',      dificultad: 'facil',   temp: '80–85 °C', recipeId: 'alitas-ahumadas'},
-    { name: 'Costillas de cordero',      emoji: '🐑', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5–6 min/cara.',dificultad: 'facil',   temp: '62–65 °C', recipeId: 'cordero-brasas' },
+    { name: 'Chuletón / Rib-eye',       emoji: '', desc: '5–7 cm. Grasa intramuscular alta. Solo sal.',           dificultad: 'medio',   temp: '55–60 °C', recipeId: 'chuleton'       },
+    { name: 'T-Bone / Porterhouse',      emoji: '', desc: 'Solomillo + entrecot con hueso. Técnica por zonas.',    dificultad: 'medio',   temp: '57–62 °C', recipeId: 'parrillada'     },
+    { name: 'Picanha (Tapa de cuadril)', emoji: '', desc: 'Con capa de grasa. Protagonista del churrasco.',        dificultad: 'facil',   temp: '55–58 °C', recipeId: 'picanha'        },
+    { name: 'Entrecot (Ribeye sin hueso)',emoji: '', desc: '2–3 cm. Versátil, rápido, muy jugoso.',                dificultad: 'facil',   temp: '55–63 °C', recipeId: 'ribeye'         },
+    { name: 'Vacío (Flank Steak)',       emoji: '', desc: 'Fibra marcada. Cortar siempre en contra de la fibra.',  dificultad: 'medio',   temp: '57–62 °C', recipeId: 'churrasco'      },
+    { name: 'Costillas baby back',       emoji: '', desc: 'Técnica 3-2-1. Cocción lenta. Carne se cae del hueso.', dificultad: 'dificil', temp: '85–90 °C', recipeId: 'costillas-bbq'  },
+    { name: 'Tira de asado',             emoji: '', desc: 'Costilla de res corte transversal. Asado argentino.',   dificultad: 'medio',   temp: '70–75 °C', recipeId: 'churrasco'      },
+    { name: 'Secreto Ibérico',           emoji: '', desc: 'Entre paleta y costillar. Grasa excelente. 15 min.',    dificultad: 'facil',   temp: '65–68 °C', recipeId: 'secreto-iberico'},
+    { name: 'Pluma Ibérica',             emoji: '', desc: 'Cuello del cerdo ibérico. Muy tierna. Fuego medio.',    dificultad: 'facil',   temp: '63–67 °C', recipeId: null             },
+    { name: 'Pechuga de pollo',          emoji: '', desc: 'Aplana para grosor uniforme. Marinada obligatoria.',    dificultad: 'medio',   temp: '74–77 °C', recipeId: 'pollo-humo'     },
+    { name: 'Muslo / Contramuslo',       emoji: '', desc: 'Más perdonador. Calor indirecto + directo final.',      dificultad: 'facil',   temp: '80–85 °C', recipeId: 'alitas-ahumadas'},
+    { name: 'Costillas de cordero',      emoji: '', desc: 'Pequeñas y tiernas. Marinada de hierbas. 5–6 min/cara.',dificultad: 'facil',   temp: '62–65 °C', recipeId: 'cordero-brasas' },
   ],
 
   categories: [
-    { id: 'todos',   label: 'Todos',    emoji: '🔥' },
-    { id: 'vacuno',  label: 'Vacuno',   emoji: '🥩' },
-    { id: 'cerdo',   label: 'Cerdo',    emoji: '🐷' },
-    { id: 'aves',    label: 'Aves',     emoji: '🍗' },
-    { id: 'cordero', label: 'Cordero',  emoji: '🐑' },
-    { id: 'alinos',  label: 'Aliños',   emoji: '🌿' },
-    { id: 'guias',   label: 'Guías',    emoji: '📖' },
+    { id: 'todos',   label: 'Todos',    emoji: '' },
+    { id: 'vacuno',  label: 'Vacuno',   emoji: '' },
+    { id: 'cerdo',   label: 'Cerdo',    emoji: '' },
+    { id: 'aves',    label: 'Aves',     emoji: '' },
+    { id: 'cordero', label: 'Cordero',  emoji: '' },
+    { id: 'alinos',  label: 'Aliños',   emoji: '' },
+    { id: 'guias',   label: 'Guías',    emoji: '' },
   ],
 };
 
@@ -1180,7 +1179,7 @@ const Brasas = (() => {
         const img = IMGS.categories[c.id];
         const inner = img
           ? `<img src="${img}" alt="${c.label}">`
-          : c.emoji;
+          : c.label.charAt(0);
         return `<div class="home-cat${i===0?' active':''}" onclick="Brasas.filterCat('${c.id}')">
           <div class="home-cat-circle">${inner}</div>
           <div class="home-cat-name">${c.label}</div>
@@ -1194,7 +1193,7 @@ const Brasas = (() => {
         const img = IMGS.recipes[r.id];
         const bg = img
           ? `<img src="${img}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.72)">`
-          : `<div class="home-sug-placeholder">${r.emoji}</div>`;
+          : `<div class="home-sug-placeholder">${r.name.charAt(0)}</div>`;
         return `<div class="home-sug-card" onclick="Brasas.openRecipe('${r.id}')">
           ${bg}
           <div class="home-sug-overlay">
@@ -1220,7 +1219,7 @@ const Brasas = (() => {
       const img = IMGS.recipes[r.id];
       const thumb = img
         ? `<img src="${img}" alt="${r.name}">`
-        : r.emoji;
+        : r.name.charAt(0);
       return `<div class="recipe-card" onclick="Brasas.openRecipe('${r.id}')">
         <div class="recipe-card-thumb">${thumb}</div>
         <div class="recipe-card-body">
@@ -1291,7 +1290,7 @@ const Brasas = (() => {
       ph.style.opacity = '.3';
       ph.style.background = 'linear-gradient(135deg, #4A2208, #1A0800)';
       ph.style.fontSize = '4.5rem';
-      ph.textContent = r.emoji;
+      ph.textContent = r.name.charAt(0);
     }
 
     switchTab('guia');
@@ -1326,10 +1325,10 @@ const Brasas = (() => {
           <div class="step-body">
             <h3>${s.title}</h3>
             <p>${s.text}</p>
-            ${s.time !== '—' ? `<span class="step-timing">⏱ ${s.time}</span>` : ''}
+            ${s.time !== '—' ? `<span class="step-timing">${s.time}</span>` : ''}
           </div>
         </div>
-        ${s.ing !== '—' ? `<div class="step-ingredients">🧂 ${s.ing}</div>` : ''}
+        ${s.ing !== '—' ? `<div class="step-ingredients">${s.ing}</div>` : ''}
       </div>`;
   }
 
@@ -1374,7 +1373,7 @@ const Brasas = (() => {
       `<div class="alino-card" onclick="Brasas.toggleAlino('${a.id}')">
         <div class="alino-header">
           <h4>${a.name}</h4>
-          <span class="alino-icon">${a.emoji}</span>
+          <span class="alino-icon">${a.name.charAt(0)}</span>
         </div>
         <div class="alino-desc">${a.desc}</div>
         <div class="alino-body" id="alino-${a.id}">
@@ -1403,7 +1402,7 @@ const Brasas = (() => {
         ? `<div style="font-size:.72rem;color:var(--rice);margin-top:3px;font-weight:500">Ver receta →</div>`
         : '';
       return `<div class="corte-card" ${clickable}>
-        <div class="corte-emoji">${c.emoji}</div>
+        <div class="corte-emoji">${c.name.charAt(0)}</div>
         <div class="corte-info">
           <h4>${c.name}</h4>
           <div class="note">${c.desc}</div>
@@ -1444,7 +1443,7 @@ if ('serviceWorker' in navigator) {
   const banner = document.createElement('div');
   banner.id = 'pwa-banner';
   banner.innerHTML = `
-    <span>📲 Instala Maestro Arrocero en tu móvil</span>
+    <span>Instala Maestro Arrocero en tu móvil</span>
     <button id="pwa-install">Instalar</button>
     <button id="pwa-close" aria-label="Cerrar">✕</button>`;
   banner.style.cssText = `
